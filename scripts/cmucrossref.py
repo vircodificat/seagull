@@ -66,9 +66,8 @@ def load_steno_dict(filename):
     with open(path, encoding="utf-8") as f:
         steno = json.load(f)
     for outline, word in steno.items():
-        # Normalise: strip steno formatting artifacts like {^} etc. is not needed;
-        # we match the raw translation string case-insensitively.
-        word_to_outlines[word.lower()].append(outline)
+
+        word_to_outlines[word].append(outline)
     return dict(word_to_outlines)
 
 
