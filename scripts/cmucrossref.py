@@ -23,7 +23,7 @@ from collections import defaultdict
 
 
 CMUDICT_PATH = "data/cmudict/cmudict"
-STENO_DICTS = ["main.json", "lapwing-base.json", "seagull_base.json"]
+STENO_DICTS = ["main.json", "lapwing-base.json", "stened.json", "seagull_base.json"]
 DATA_DIR = "data"
 BUILD_DIR = "build"
 OUTPUT_PATH = os.path.join(BUILD_DIR, "cmucrossref.json")
