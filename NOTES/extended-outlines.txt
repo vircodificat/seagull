@@ -1,0 +1,70 @@
+LEFTS
+
+    C    KR
+    Dis  STK
+    M    PH
+    V    SR
+    B    PW
+    D    TK
+    F    TP
+    X    KP
+    L    HR
+    Y    KWR
+    N    TPH
+    J    SKWR
+    G    TKPW
+
+MIDDLES
+
+    Aw   AU
+    Ow   OU
+    Oo   AO
+    Ea   EA
+    Oh   OE
+    Oy   OEU
+    Ay   AEU
+    Yoo  AOU
+    Eye  AOEU
+
+RIGHTS
+
+    V    F
+    N    PB
+    M    PL
+    Ck   BG
+    Sh   RB
+    Ch   FP
+    Tion GS
+    Lf   FL
+    Ng   PBG
+    Mp   FRP
+    Rv   FRB
+    Rch  FRPB
+    J    PBLG
+    St   FT
+    Th   T
+    Thr  RT
+    Less LS
+    Nt   LG
+    Dnt  LGD
+    Snt  LGZ
+
+
+
+Notes:
+
+    left Z could be STKPW
+    left C could be KR
+
+    right Cious could be RBS
+    right CkS = BGS is sometimes used for "ction" (eg, section, action)
+    right -F as S for this: We do this whenever we have words ending in -sp, -sk, -sn, -ses, -st, and -sed.
+    right FRPB for Nch Rch
+
+    Kaoffie (Cocoa btw) uses the following:
+
+        right *LG for -lk
+        right *S for -st -zt
+        right *Z for -sd
+        right *F for -v
+        right *BGS for -x
