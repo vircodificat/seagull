@@ -30,10 +30,17 @@ def main():
         added = 0
         for outline, word in source.items():
             # ----------------------------------------------------------------
+            # Skip anything with a digit
+            # ----------------------------------------------------------------
+            if any(ch.isdigit() for ch in outline):
+                continue
+
+            # ----------------------------------------------------------------
             # Outlines starting with "A/" are rewritten to "A*/".
             # ----------------------------------------------------------------
             if outline.startswith("A/"):
                 outline = "A*/" + outline[2:]
+
 
             if outline not in result:
                 result[outline] = word
