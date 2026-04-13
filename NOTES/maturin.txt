@@ -1,0 +1,9 @@
+The workflow is:
+
+    1. After changing Rust code: uv run maturin develop — recompiles and reinstalls the .so into the venv.
+    2. Running Python: uv run python main.py (or uv run python for a REPL)
+       the venv already has the built extension, so from seagull import Stroke, Outline, Key just works.
+
+  maturin develop is the equivalent of pip install -e . for a Rust extension.
+  It builds a debug-mode .so and symlinks it into the
+  venv so you don't have to reinstall after every rebuild.

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["maturin>=1.8,<2"]
+build-backend = "maturin"
+
+[project]
+name = "seagull"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "nltk>=3.9.4",
+]
+
+[tool.maturin]
+manifest-path = "seagull-py/Cargo.toml"
+python-source = "python"
+
+[dependency-groups]
+dev = [
+    "maturin>=1.13.1",
+    "patchelf>=0.17.2.4",
+]
