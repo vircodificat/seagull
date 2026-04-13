@@ -3,6 +3,9 @@
 data/seagull.json: build/seagull.json
 	cp build/seagull.json data/seagull.json
 
+sentence:
+	@uv run scripts/random_sentence.py
+
 all: \
 	build/cmucrossref.json \
 	build/base_vocab_analysis.json \
