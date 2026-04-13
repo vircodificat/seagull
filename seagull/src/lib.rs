@@ -335,6 +335,7 @@ impl Stroke {
     pub fn try_from_string(s: &str) -> Option<Self> {
         let mut left_side = true;
         let mut keys: Vec<Key> = vec![];
+        let mut last_bit: u32 = 0;
 
         for ch in s.chars() {
             if ch == '-' {
@@ -345,8 +346,12 @@ impl Stroke {
                 left_side = false;
             }
             let key = char_to_key(ch, !left_side)?;
+            let bit = key as u32;
+            if bit <= last_bit {
+                return None;
+            }
+            last_bit = bit;
             keys.push(key);
-
         }
         Some(Stroke::new(&keys))
     }
@@ -380,7 +385,8 @@ mod test {
     #[test]
     fn test3() {
         assert!(Outline::try_from_string("KAT").is_some());
-        assert!(Outline::try_from_string("BAT/TER").is_some());
+        assert!(Outline::try_from_string("KAT/ER").is_some());
+        assert!(Outline::try_from_string("BAT/TER").is_none()); // B is right-hand, can't precede A
     }
 
     #[test]
