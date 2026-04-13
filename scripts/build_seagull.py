@@ -17,6 +17,7 @@ EXTRA_DICTS = [
     "data/punctuation.json",
     "build/obvious_outlines.json",
     "build/reasonable_outlines.json",
+    "data/stened.json",
 ]
 
 
