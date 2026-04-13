@@ -199,7 +199,6 @@ impl Outline {
         }
     }
 
-
     pub fn len(&self) -> usize {
         self.strokes().len()
     }
@@ -307,6 +306,10 @@ impl Dictionary for JsonDictionary {
 #[derive(Clone, Eq, PartialEq, PartialOrd, Ord, Hash, Debug)]
 pub struct Command(pub usize, pub String);
 
+const INITIALS_MASK: u32 = (1 << 7) - 1;           // bits 0–6:  LeftS..LeftR
+const MIDDLES_MASK:  u32 = ((1 << 5) - 1) << 7;    // bits 7–11: MiddleA..MiddleU
+const FINALS_MASK:   u32 = ((1 << 10) - 1) << 12;  // bits 12–21: RightF..RightZ
+
 impl Stroke {
     pub fn new(keys: &[Key]) -> Self {
         let bits = keys.iter().fold(0u32, |acc, k| acc | (*k as u32));
@@ -316,6 +319,10 @@ impl Stroke {
     pub fn contains(self, key: Key) -> bool {
         self.0 & (key as u32) != 0
     }
+
+    pub fn initials(&self) -> Stroke { Stroke(self.0 & INITIALS_MASK) }
+    pub fn middles(&self)  -> Stroke { Stroke(self.0 & MIDDLES_MASK) }
+    pub fn finals(&self)   -> Stroke { Stroke(self.0 & FINALS_MASK) }
 
     pub fn keys(self) -> Vec<Key> {
         ALL_KEYS.iter().copied().filter(|&k| self.contains(k)).collect()
