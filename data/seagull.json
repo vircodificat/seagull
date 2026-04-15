@@ -202,6 +202,9 @@
   "WH-R": "whether",
   "WO*PB": "won't",
   "PHAPB": "man",
+  "HROF": "love",
+  "HROFS": "loves",
+  "HROFD": "loved",
   "KWRES": "yes",
   "TPHO": "no",
   "R-R": "{^~|\n^}",
@@ -6603,6 +6606,9 @@
   "HROUD/-R": "louder",
   "HROUPBG/-S": "lounges",
   "HROUPBG/-G": "lounging",
+  "HROF/-S": "loves",
+  "HROF/-D": "loved",
+  "HROF/-G": "loving",
   "HROE/-S": "lows",
   "HROE/-R": "lower",
   "HRUG/-S": "lugs",
@@ -9575,5 +9581,5 @@
   "-D": "{^ed}",
   "*S": "{^'s}",
   "*Z": "{^'s}",
-  "TKPWHR": "c94105076ad2f308887df90044255211"
+  "TKPWHR": "6115044191f917ae19205060ba20fc27"
 }
