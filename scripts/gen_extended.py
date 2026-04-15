@@ -1,4 +1,4 @@
-"""Generate NOTES/extended.txt — exhaustive lists of every valid
+"""Generate build/extended.txt — exhaustive lists of every valid
 initials, middles, and finals key combination.
 
   Initials : all 2^7 - 1 = 127  non-empty subsets of { S T K P W H R }

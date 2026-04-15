@@ -1,5 +1,7 @@
 #![allow(clippy::collapsible_if, clippy::new_without_default, unused_parens, clippy::needless_return, clippy::len_without_is_empty)]
 
+pub mod extended;
+
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -355,6 +357,16 @@ impl Stroke {
         }
         Some(Stroke::new(&keys))
     }
+
+    pub fn extended(&self) -> String {
+        let initial_index = self.0 & INITIALS_MASK;
+        let middle_index = (self.0 & MIDDLES_MASK) >> 7;
+        let finals_index = (self.0 & FINALS_MASK) >> 12;
+
+        extended::INITIALS[initial_index as usize].to_string() +
+            &extended::MIDDLES[middle_index as usize] +
+            &extended::FINALS[finals_index as usize]
+    }
 }
 
 #[cfg(test)]
@@ -396,6 +408,17 @@ mod test {
         let prefix_tree = prefix_tree_from_json_dictionary(dictionary);
 //        let outline = Outline::try_from_string("KAT").unwrap();
 //        assert_eq!(prefix_tree.lookup(outline), Some("cat".to_owned()));
+    }
+
+    #[test]
+    fn extended() {
+        let tests = &[
+            ("PWRARB", "BRASh"),
+        ];
+        for (stroke, ex_stroke) in tests {
+            let stroke = Stroke::try_from_string(stroke).unwrap();
+            assert_eq!(stroke.extended(), *ex_stroke);
+        }
     }
 }
 
