@@ -207,6 +207,10 @@
   "HROFD": "loved",
   "SO": "so",
   "PHUFP": "much",
+  "WAPBT": "want",
+  "WAPBTS": "wants",
+  "WAPBTD": "wanted",
+  "WAOEUF": "wife",
   "KWRES": "yes",
   "TPHO": "no",
   "R-R": "{^~|\n^}",
@@ -9428,6 +9432,9 @@
   "WAUBG/-G": "walking",
   "WAUL/-S": "walls",
   "WAUL/-D": "walled",
+  "WAPBT/-S": "wants",
+  "WAPBT/-D": "wanted",
+  "WAPBT/-G": "wanting",
   "WAR/-S": "wars",
   "WARD/-S": "wards",
   "WAEUR/-S": "wares",
@@ -9583,5 +9590,5 @@
   "-D": "{^ed}",
   "*S": "{^'s}",
   "*Z": "{^'s}",
-  "TKPWHR": "6ee80008b4ebd71fa4548012aeedec55"
+  "TKPWHR": "4c19fa63de408c047053fcc7735f2794"
 }

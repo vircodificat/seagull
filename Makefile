@@ -8,6 +8,7 @@ sentence:
 
 all: \
 	build/cmucrossref.json \
+	build/cmucrossref_onesyl.json \
 	build/base_vocab_analysis.json \
 	data/base_vocab.json \
 	build/irregular_vocab.json \
@@ -18,6 +19,9 @@ all: \
 
 build/cmucrossref.json: scripts/cmucrossref.py
 	uv run python scripts/cmucrossref.py
+
+build/cmucrossref_onesyl.json: scripts/onesyl.py build/cmucrossref.json
+	uv run python scripts/onesyl.py
 
 build/base_vocab_analysis.json: scripts/base_vocab_analysis.py
 	uv run python scripts/base_vocab_analysis.py

@@ -69,9 +69,11 @@ def merge_dict(result: dict[str, str], path: str) -> None:
         if outline.startswith("A/"):
             outline = "A*/" + outline[2:]
 
-        outline_orig = outline
-        # convert to a Plover "standard" outline
-        outline = str(seagull.Outline.from_extended(outline))
+        outline_str = outline
+        outline = seagull.Outline.from_extended(outline)
+        if outline is None:
+            raise ValueError(f"Invalid extended outline: {outline_str}")
+        outline = str(outline)
 
         if outline not in result:
             result[outline] = word
