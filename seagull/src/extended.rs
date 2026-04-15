@@ -9,9 +9,9 @@ pub static INITIALS: [&'static str; 128] = [
     "SD",
     "P",
     "SP",
-    "TP",
-    "STP",
-    "KP",
+    "F",
+    "SF",
+    "X",
     "SKP",
     "DP",
     "SDP",
@@ -35,18 +35,18 @@ pub static INITIALS: [&'static str; 128] = [
     "SH",
     "TH",
     "STH",
-    "KH",
+    "Ch",
     "SKH",
     "DH",
     "SDH",
-    "PH",
-    "SPH",
-    "TPH",
-    "STPH",
-    "KPH",
-    "SKPH",
-    "DPH",
-    "SDPH",
+    "M",
+    "SM",
+    "N",
+    "SN",
+    "KM",
+    "SKM",
+    "DM",
+    "SDM",
     "WH",
     "SWH",
     "TWH",
@@ -73,8 +73,8 @@ pub static INITIALS: [&'static str; 128] = [
     "SDR",
     "PR",
     "SPR",
-    "TPR",
-    "STPR",
+    "FR",
+    "SFR",
     "KPR",
     "SKPR",
     "DPR",
@@ -105,8 +105,8 @@ pub static INITIALS: [&'static str; 128] = [
     "SDL",
     "PL",
     "SPL",
-    "TPL",
-    "STPL",
+    "FL",
+    "SFL",
     "KPL",
     "SKPL",
     "DPL",
@@ -129,23 +129,39 @@ pub static INITIALS: [&'static str; 128] = [
     "SGL",
 ];
 
-pub static MIDDLES: [&'static str; 16] = [
-    "",
-    "A",
-    "O",
-    "Oo",
-    "E",
-    "Ay",
-    "Oh",
-    "Ee",
-    "U",
-    "Aw",
-    "OU",
-    "Yoo",
-    "I",
-    "Ay",
-    "Oy",
-    "Eye",
+pub static MIDDLES: [&'static str; 32] = [
+    "",     //  0: (none)
+    "A",    //  1: A
+    "O",    //  2: O
+    "Oo",   //  3: AO
+    "*",    //  4: *
+    "A*",   //  5: A*
+    "O*",   //  6: O*
+    "Oo*",  //  7: AO*
+    "E",    //  8: E
+    "Ay",   //  9: AE
+    "Oh",   // 10: OE
+    "Ee",   // 11: AOE
+    "E*",   // 12: *E
+    "Ay*",  // 13: A*E
+    "Oh*",  // 14: O*E
+    "Ee*",  // 15: AO*E
+    "U",    // 16: U
+    "Aw",   // 17: AU
+    "OU",   // 18: OU
+    "Yoo",  // 19: AOU
+    "U*",   // 20: *U
+    "Aw*",  // 21: A*U
+    "OU*",  // 22: O*U
+    "Yoo*", // 23: AO*U
+    "I",    // 24: EU
+    "Ay",   // 25: AEU
+    "Oy",   // 26: OEU
+    "Eye",  // 27: AOEU
+    "I*",   // 28: *EU
+    "Ay*",  // 29: A*EU
+    "Oy*",  // 30: O*EU
+    "Eye*", // 31: AO*EU
 ];
 
 pub static FINALS: [&'static str; 1024] = [
@@ -154,14 +170,14 @@ pub static FINALS: [&'static str; 1024] = [
     "R",
     "FR",
     "P",
-    "FP",
+    "Ch",
     "RP",
     "FRP",
     "B",
     "FB",
     "Sh",
     "FRB",
-    "PB",
+    "N",
     "FPB",
     "RPB",
     "FRPB",
@@ -169,8 +185,8 @@ pub static FINALS: [&'static str; 1024] = [
     "FL",
     "RL",
     "FRL",
-    "PL",
-    "FPL",
+    "M",
+    "Ism",
     "RPL",
     "FRPL",
     "BL",
@@ -189,11 +205,11 @@ pub static FINALS: [&'static str; 1024] = [
     "FPG",
     "RPG",
     "FRPG",
-    "BG",
-    "FBG",
-    "RBG",
+    "Ck",
+    "FCk",
+    "Rk",
     "FRBG",
-    "PBG",
+    "NG",
     "FPBG",
     "RPBG",
     "FRPBG",
@@ -233,7 +249,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FLT",
     "RLT",
     "FRLT",
-    "PLT",
+    "Ment",
     "FPLT",
     "RPLT",
     "FRPLT",
@@ -253,7 +269,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FPGT",
     "RPGT",
     "FRPGT",
-    "BGT",
+    "CkT",
     "FBGT",
     "RBGT",
     "FRBGT",
@@ -289,7 +305,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FBS",
     "RBS",
     "FRBS",
-    "PBS",
+    "NS",
     "FPBS",
     "RPBS",
     "FRPBS",
@@ -309,15 +325,15 @@ pub static FINALS: [&'static str; 1024] = [
     "FPBLS",
     "RPBLS",
     "FRPBLS",
-    "GS",
+    "Tion",
     "FGS",
-    "RGS",
+    "RTion",
     "FRGS",
     "PGS",
     "FPGS",
     "RPGS",
     "FRPGS",
-    "BGS",
+    "Ction",
     "FBGS",
     "RBGS",
     "FRBGS",
@@ -417,7 +433,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FBD",
     "RBD",
     "FRBD",
-    "PBD",
+    "ND",
     "FPBD",
     "RPBD",
     "FRPBD",
@@ -929,7 +945,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FBDZ",
     "RBDZ",
     "FRBDZ",
-    "PBDZ",
+    "NDZ",
     "FPBDZ",
     "RPBDZ",
     "FRPBDZ",

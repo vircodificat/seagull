@@ -525,7 +525,8 @@ const KEY_SIDES: &[(Key, KeySide)] = &[
 ];
 
 const KEY_CODES: &[(Key, u64)] = &[
-    (Key::LeftS, 0x000000002080),
+    (Key::LeftS, 0x000000004080), // S1
+    (Key::LeftS, 0x000000002080), // S2
     (Key::LeftT, 0x000000001080),
     (Key::LeftK, 0x000000000880),
     (Key::LeftP, 0x000000000480),
@@ -554,7 +555,7 @@ const KEY_CODES: &[(Key, u64)] = &[
     (Key::RightZ, 0x010000000080),
 ];
 
-fn read_stroke(port: &mut dyn SerialPort) -> Stroke {
+pub fn read_stroke(port: &mut dyn SerialPort) -> Stroke {
     let mut buf = [0; 6];
     let mut total_amount = 0;
 
