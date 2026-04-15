@@ -29,7 +29,7 @@
   "K*PB": "can't",
   "": "didn't",
   "KWRES": "[Use YE for 'yes']",
-  "A-BL": "able",
+  "ABL": "able",
   "APL": "am",
   "APB": "an",
   "APBD": "and",
@@ -202,6 +202,7 @@
   "PWABG/WARD": "backward",
   "WH-R": "whether",
   "WO*PB": "won't",
+  "PHAPB": "man",
   "R-R": "{^~|\n^}",
   "TK-LS": "{^}",
   "SP": "{^}",
@@ -3638,7 +3639,7 @@
   "AB/TKUBGT/-D": "abducted",
   "AB/HOR/-S": "abhors",
   "ABLT/-S": "abilities",
-  "A-BL/-R": "abler",
+  "ABL/-R": "abler",
   "AB/SKOPBD/-S": "absconds",
   "AB/SORB/-S": "absorbs",
   "AB/SORB/-D": "absorbed",
@@ -9573,5 +9574,5 @@
   "-D": "{^ed}",
   "*S": "{^'s}",
   "*Z": "{^'s}",
-  "TKPWHR": "{PLOVER:RECONNECT}e51737ed288ac83cd3c442f771dce7b2"
+  "TKPWHR": "a26e72b0fd6d36c009eeaa6c093978dd"
 }

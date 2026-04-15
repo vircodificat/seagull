@@ -205,6 +205,14 @@ impl Outline {
         self.strokes().len()
     }
 
+    pub fn try_from_extended(s: String) -> Option<Self> {
+        let parts: Vec<&str> = s.split('/').collect();
+        let strokes: Option<Vec<Stroke>> = parts.iter()
+            .map(|part| Stroke::try_from_extended(part.to_string()))
+            .collect();
+        Outline::try_from(strokes?.as_slice())
+    }
+
     pub fn try_from_string(s: &str) -> Option<Outline> {
         let strokes: Vec<&str> = s.split('/').collect();
         let first = strokes.get(0)?;
@@ -356,6 +364,27 @@ impl Stroke {
             keys.push(key);
         }
         Some(Stroke::new(&keys))
+    }
+
+    pub fn try_from_extended(s: String) -> Option<Self> {
+        // Standard steno strings take priority (e.g. "S" = LeftS, "-F" = RightF).
+        if let Some(stroke) = Self::try_from_string(&s) {
+            return Some(stroke);
+        }
+        // Extended phonetic lookup (e.g. "BRASh", "D" = TK cluster).
+        for (i_idx, &initial) in extended::INITIALS.iter().enumerate() {
+            let Some(rest) = s.strip_prefix(initial) else { continue };
+            for (m_idx, &middle) in extended::MIDDLES.iter().enumerate() {
+                let Some(final_str) = rest.strip_prefix(middle) else { continue };
+                if let Some(f_idx) = extended::FINALS.iter().position(|&f| f == final_str) {
+                    let bits = (i_idx as u32)
+                        | ((m_idx as u32) << 7)
+                        | ((f_idx as u32) << 12);
+                    return Some(Stroke(bits));
+                }
+            }
+        }
+        None
     }
 
     pub fn extended(&self) -> String {

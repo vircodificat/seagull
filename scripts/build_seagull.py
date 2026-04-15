@@ -9,6 +9,7 @@ regular inflected forms.  POST_INFLECTION_DICTS are merged last.
 Output: build/seagull.json
 """
 
+import seagull
 import json
 import os
 import hashlib
@@ -67,6 +68,14 @@ def merge_dict(result: dict[str, str], path: str) -> None:
         # Outlines starting with "A/" are rewritten to "A*/".
         if outline.startswith("A/"):
             outline = "A*/" + outline[2:]
+
+        outline_orig = outline
+        # convert to a Plover "standard" outline
+        outline = str(seagull.Outline.from_extended(outline))
+
+        if outline_orig == 'MAN':
+            breakpoint()
+
         if outline not in result:
             result[outline] = word
             added += 1
@@ -112,7 +121,9 @@ def apply_inflection_rules(
 
 
 def main():
-    result: dict[str, str] = json.load(open(BASE_PATH, encoding="utf-8"))
+    result: dict[str, str] = {}
+
+    merge_dict(result, BASE_PATH)
     print(f"{BASE_PATH}: {len(result)} entries")
 
     for path in PRE_INFLECTION_DICTS:
@@ -128,7 +139,7 @@ def main():
         merge_dict(result, path)
 
     md5_hash = hashlib.md5(str(result).encode()).hexdigest()
-    result['TKPWHR'] = '{PLOVER:RECONNECT}' + md5_hash
+    result['TKPWHR'] = md5_hash
 
     os.makedirs("build", exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:

@@ -166,6 +166,15 @@ impl Stroke {
     fn initials(&self) -> Stroke { Stroke(self.0.initials()) }
     fn middles(&self)  -> Stroke { Stroke(self.0.middles()) }
     fn finals(&self)   -> Stroke { Stroke(self.0.finals()) }
+
+    fn extended(&self) -> String {
+        self.0.extended()
+    }
+
+    #[staticmethod]
+    fn from_extended(s: &str) -> Option<Self> {
+        seagull::Stroke::try_from_extended(s.to_string()).map(Stroke)
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -200,6 +209,15 @@ impl Outline {
     /// Return the individual strokes that make up this outline.
     fn strokes(&self) -> Vec<Stroke> {
         self.0.strokes().iter().copied().map(Stroke).collect()
+    }
+
+    fn extended(&self) -> String {
+        self.0.strokes().iter().map(|s| s.extended()).collect::<Vec<_>>().join("/")
+    }
+
+    #[staticmethod]
+    fn from_extended(s: &str) -> Option<Self> {
+        seagull::Outline::try_from_extended(s.to_string()).map(Outline)
     }
 }
 
