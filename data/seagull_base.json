@@ -193,6 +193,8 @@
     "TPHO*ER": "another",
     "TPHE": "{any^}",
     "TPH-FR": "never",
+    "-FR": "ever",
+    "EUFR": "every",
     "TPAOU": "few",
     "TPAER": "father",
     "TPUPB/TPHEU": "funny",
@@ -200,17 +202,5 @@
     "TP-PL": "{.}",
     "PWABG/WARD": "backward",
     "WH-R": "whether",
-    "WO*PB": "won't",
-    "*UPBD": "{under^}",
-    "KW-BG": "{,}",
-    "-RS": "{^ers}",
-    "-R": "{^er}",
-    "-S": "{^s}",
-    "-Z": "{^s}",
-    "-RG": "{^ering}",
-    "-G": "{^ing}",
-    "HREU": "{^ly}",
-    "-D": "{^ed}",
-    "*S": "{^'s}",
-    "*Z": "{^'s}"
+    "WO*PB": "won't"
 }

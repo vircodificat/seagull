@@ -11,6 +11,7 @@ Output: build/seagull.json
 
 import json
 import os
+import hashlib
 from collections import defaultdict
 
 BASE_PATH          = "data/seagull_base.json"
@@ -28,6 +29,7 @@ PRE_INFLECTION_DICTS = [
 
 # Dictionaries merged after inflection rules are applied.
 POST_INFLECTION_DICTS = [
+    "data/seagull_misc.json",
 #    "data/stened.json",
 ]
 
@@ -124,6 +126,9 @@ def main():
 
     for path in POST_INFLECTION_DICTS:
         merge_dict(result, path)
+
+    md5_hash = hashlib.md5(str(result).encode()).hexdigest()
+    result['TKPWHR'] = '{PLOVER:RECONNECT}' + md5_hash
 
     os.makedirs("build", exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
