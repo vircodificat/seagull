@@ -1,0 +1,272 @@
+INITIALS
+========
+
+T    - The "T" sound (top, attorney, iterate, total).
+S    - The "S" sound (say, singular, scenario, substance).
+R    - The "R" sound (render, salary, arouse, reason).
+HR   - The "L" sound (like, loiter, velocity, legislation).
+K    - The hard "C/K" sound (cool, cooperate, cardiac, comply).
+PH   - The "M" sound (malevolence, mediate, monetary, modus).
+TPH  - The "N" sound (nominate, nastiness, neurology, narrow).
+KWR  - The "Y" sound or silent onset (satiation, uvula, bouillon, yet).
+TK   - The "D" sound (desperate, discovery, decade, defendant).
+P    - The "P" sound (paranoid, permissive, punctuate, preclude).
+TP   - The "F" sound (perfidy, modifier, fetus, fifty).
+PW   - The "B" sound (bombing, backside, bookkeeper, burden).
+H    - The "H" sound (highway, habeas, hydrologist, homicide).
+SR   - The "V" sound (surveillance, advisor, revert, invective).
+SKWR - The "J" sound (joyride, analogize, majestic, elegy).
+W    - The "W" sound (wonderland, weathered, warranto, warden).
+TR   - The "TR" blend (terrific, traffic, transceiver, trial).
+PR   - The "PR" blend (prosecutor, pressure, project, promiscuity).
+TKPW - The hard "G" sound (gate, guitar, instigation, legal).
+SH   - The "SH" sound (shaman, negotiate, legislatrix, sheriff).
+ST   - The "ST" blend (status, stumble, Constitution, statute).
+KR   - The "CR/KR" blend (creation, criminal, credulous, cryptic).
+TH   - The "TH" sound (theoretical, thought, thermodynamic, threshold).
+KHR  - The "CL" blend (collector, cleanser, clergyman, collapse).
+TKPWR - The "GR" blend (grubbiest, graduate, gorilla, grandiose).
+KW   - The "QU" sound (quadratic, quadruped, qualify, question).
+PHR  - The "PL" blend (template, multiply, accomplish, explain).
+PWHR - The "BL" blend (obliterate, terribly, amicably, blunder).
+TKR  - The "DR" blend (drudge, dramatize, drinking, direction).
+PWR  - The "BR" blend (Brooklyn, brunette, cerebral, brochure).
+SP   - The "SP" blend (spuds, spontaneous, inspector, spiral).
+TPR  - The "FR" blend (frustration, fractionally, frumpy, front).
+SK   - The "SC/SK" blend (skeptical, scope, scurvy, schoolboy).
+TPHR - The "FL" blend (floodlight, flaunt, flank, flashiness).
+SHR  - The "SL" blend (slushiness, slim, slender, sleepiness).
+KP   - The "X" sound (examine, exercise, excitement, extradite).
+STR  - The "STR" blend (structure, demonstrate, strobe, strategy).
+SPH  - The "SM" blend (smattering, smokiness, semantic, smuggle).
+SKR  - The "SCR" blend (scrabble, scroll, transcript, scrutiny).
+TW   - The "TW" blend (twerp, twenty, between, twin).
+THR  - The "THR" blend (thriftiness, threshold, philanthropy).
+SKW  - The "SQU" blend (squirm, squalor, squadron, squeeze).
+TKHR - The "DL" blend (deliberately, allegedly, delicious).
+SPR  - The "SPR" blend (spring, spray, sprinkle, sprawl).
+SPHR - The "SPL" blend (splendid, splinter, splendor, split).
+TKPWHR - The "GL" blend (glaucoma, glorification, globule, glare).
+
+
+MIDDLES
+=======
+
+A    - The short "A" vowel sound (trap, cat, apparatus, karate).
+O    - The short "O" vowel sound (lot, hot, oppressive, botanist).
+AO   - The long "OO" vowel sound (fool, room, tattoo, bookshelf).
+E    - The neutral/unstressed vowel, schwa (later, presence, regard).
+AE   - The long "A" vowel sound — spelled as "ea/ai/ay" (freeway, female, blockade).
+OE   - The long "O" vowel sound (rotation, apropos, footnote, phonetic).
+AOE  - The long "EE" vowel sound (renal, theoretically, spleen, mortgagee).
+U    - The short "U" vowel sound (fund, buzz, turbulence, sustenance).
+AU   - The "AW" vowel sound (sought, nausea, audition, awkward).
+OU   - The "OW" diphthong (thousand, burrow, flout, downward).
+AOU  - The long "YOO/U" sound (nuisance, student, barbecue, lure).
+EU   - The short "I" vowel sound (allergic, dynasty, anxiety, malady).
+AEU  - The "AY" diphthong (daze, carriage, plain, acre).
+OEU  - The "OY" diphthong (anoint, loitered, flamboyance, noisy).
+AOEU - The long "I" diphthong (riser, dietary, fire, liner).
+
+
+FINALS
+======
+
+-R    - The "R" sound, especially at syllable end (exemplar, molecular, enter).
+-PB   - The "N" sound (tenement, conjectural, confiscatory, neon).
+-S    - The "S" or "Z" sound (policewomen, marketplace, lyricist, sawdust).
+-L    - The "L" sound (veal, marginal, cerebral, equilateral).
+-T    - The "T" sound (hyperventilate, decorator, create, chromatic).
+-BG   - The "NK" or hard "C" sound (riverbank, anachronism, philharmonic).
+-PL   - The "M" sound (item, remembrance, pandemic, resumption).
+-D    - The "D" sound or "-ed" past tense (graduate, esplanade, palisade).
+-F    - The "F" or "V" sound (offering, intensification, definitive).
+-PBS  - The "-NSS/-NCE" ending (monstrosity, orderliness, surveillance).
+-GS   - The "-SHUN" ending (rationality, rotation, illustration, federation).
+-P    - The "P" sound (scripta, skyscrapers, preposition, elope).
+-Z    - The "Z" sound (businesswomen, raze, alphabetize, deputize).
+-G    - The "-ING" suffix (maddening, progressive, agricultural, designate).
+-PBT  - The "-NT" ending (peasant, triumphant, warrant, sycophant).
+-B    - The "B" sound (chubbiest, lubricant, gubernatorial, shrubby).
+-BGS  - The "-CTION/-X" ending (detraction, dissection, apex, exploration).
+-RS   - The "-RS" plural or "-ER" + S (occupiers, squatters, fathers-in-law).
+-PBD  - The "-ND" ending (superintendent, flattened, plundering, conditioned).
+-RB   - The "-SH" sound (quash, measuring, whoosh, bullish).
+-PBLG - The "-AGE/-ION/-GE" ending (religion, dosage, ecological, pigeon).
+-PBG  - The "-NK/-ING" ending (astringent, quadrangular, trunk, juncture).
+-BL   - The "-BLE" ending (tangibly, reconcilable, treatable, excusable).
+-RT   - The "-RT" ending (support, fortress, partnership, charitable).
+-BGT  - The "-CT/-KT" ending (correct, Richter, cricket, contradict).
+-RD   - The "-RD" ending (dastard, burdens, extraordinary, sturdily).
+-PLT  - The "-MENT" ending (argument, department, investment, embodiment).
+-FP   - The "-CH" sound (statute, outreach, latch, stench, workbench).
+-RBG  - The "-RK" sound (park, workload, benchmark, housework).
+-LG   - The "-ING/-OLOGY" ending (rattling, terminology, pathology, sampling).
+-RPL  - The "-RM/-ERMINE" ending (determine, formula, thermostat, armadillo).
+-FR   - The "-VER/-IVER" ending (herbivorous, waver, whoever, calligrapher).
+-LT   - The "-LT/-LTH" ending (appellate, commonwealth, alternate, colt).
+-FPLT - Punctuation strokes — periods, abbreviations, initials.
+-PT   - The "-PT" ending (descriptor, Department, attempt, bankruptcy).
+-FPL  - The "-ISM" ending (vulgarism, anachronism, communism, patriotism).
+-FT   - The "-FT/-TH" ending (productivity, thrifty, draftiness, festivity).
+-RL   - The "-RL/-RAL" ending (burly, actuarial, senatorial, swirl).
+-PBDZ - The "-NDS" ending (tends, friends, reprimands, campgrounds).
+-RG   - The "-ING/-RG" ending (centering, organizing, burglary, thundering).
+-RBL  - The "-CIAL/-TIAL" ending (commercial, negotiable, differential).
+-GT   - The "-GHT/-IGHT" sound (haughtier, eight, lightweight, slaughter).
+-TS   - The "-TS" ending (United States, subcontracts, peritonitis).
+-FS   - The "-VES/-FS" ending (triumphs, testifies, initiatives, prerogatives).
+-FRB  - The "-SERV/-ERVE" ending (service, conservative, harvest, swerve).
+-BLT  - The "-BILITY" ending (movability, portability, foreseeability).
+-FL   - The "-FUL/-IVIL" ending (pitiful, civilian, beautiful, plentiful).
+-RPBLG - The "-RCH/-URGE/-ARGE" ending (torch, energy, discharge, emergency).
+-RBS  - The "-SHUS/-IOUS" ending (capricious, delicious, voracious, sumptuous).
+-PD   - The "-PT/-UMPED" ending (triumphed, trumped, stumped, whomped).
+-PS   - The "-PS" ending (apocalypse, triumphs, hipsters, collapse).
+-RPBS - The "-RANCE/-NESS" ending (endurance, wilderness, tolerance, assurance).
+-FRPBLG - The "-NSTL/-INCH/-UNCH" ending (substantial, lynch, trench, adventure).
+-RP   - The "-RP/-ARP" ending (torpid, chirp, corpsman, serpentine).
+-RDZ  - The "-RDS" ending (lords, washboards, railroads, accords).
+-PBGS - The "-TION/-INK" ending (attention, dysfunction, mansion, pharynx).
+-BS   - The "-BS/-BST" ending (obstacle, subsidy, substitute, obsolescence).
+-LGS  - The "-LOGIST/-LSION" ending (proctologist, biologist, compulsion).
+-FPB  - The "-VEN/-IVEN" ending (roughened, kitchen, Beethoven, proven).
+-PLD  - The "-MMED/-MED" ending (Muhammad, Amendment, damnedest).
+-PLS  - The "-MS/-MZ" ending (algorithms, rhythms, seamstress, teamsters).
+-BGD  - The "-KD/-KED" ending (winked, bilked, yanked, secondarily).
+-BT   - The "-JECT/-BT" ending (subject, prohibited, habitat, attributable).
+-PBL  - The "-NAL/-NEL" ending (hormonal, irresponsibly, intestinal, funnel).
+-FD   - The "-VED/-FED" ending (involved, resolved, evidence, scarfed).
+-RPLT - The "-MENT/-RANT" ending (Vermont, torment, bewilderment, interment).
+-RPBT - The "-RENT/-RANT" ending (internet, parent, concurrent, coherent).
+-BLS  - The "-BLES" ending (assembles, tumbles, valuables, grumbles).
+-PLTS - The "-MENTS" ending (governments, accompaniments, compartments).
+-PBZ  - The "-NS/-NZ" ending (mens rea, forensic, Philippines, Homo sapiens).
+-RGS  - The "-TION/-SHUN" ending (eversion, abortion, distortion, authorization).
+-LDZ  - The "-LDS" ending (marigolds, blindfolds, windshields, footholds).
+-BLD  - The "-BLD/-BLED" ending (when he believed, scrambled, crumbled).
+-FPBS - The "-IVENESS" ending (possessiveness, abrasiveness, exclusiveness).
+-PBGT - The "-NGTH/-INKT" ending (wavelength, strength, sphincter, distinct).
+-RLD  - The "-RLED/-RLD" ending (worldliness, shareholder, Gerald, World).
+-FBG  - The "-FIC/-FECT" sound (defector, typographic, specific, holographic).
+-RBGT - The "-CTED/-RKED" ending (characteristics, black market, narcotic).
+-PBLGS - The "-AGES/-IONS" ending (lozenges, challenges, divulges, plunges).
+-BZ   - The "-S/-Z" suffix on "say" phrases (would you say, when I say, they say).
+-PGS  - The "-TION/-PTION" ending (cooperation, conception, transcription).
+-FLT  - The "-FELT" ending (I felt, he felt, she felt, Twelfth Amendment).
+-RBD  - The "-SHUD/-SURED" ending (you should, whether he should, pleasured).
+-TD   - The "-TED/-ITED" ending (United, multifaceted, contracted, caffeinated).
+-FPBT - The "-VENT/-VENTH" ending (preventative, eventuality, Eleventh Amendment).
+-PTD  - The "-TED/-PTED" ending (wanted, expected, where she wanted).
+-FPS  - The "-CHES" ending (drenches, inches, punches, branches, arches).
+-RBGZ - The "-KS/-X" suffix in steno-specific phrases (circumstances).
+-RBGD - The "-CTED/-KTED" ending (recollected, irreconcilable difference).
+-RPLD - The "-RMED/-MBERED" ending (remembered, what she remembered).
+-PG   - The "-PING/-PING" ending (stomping, limping, pumping, dumping).
+-RPT  - The "-RPT/-ERATE" ending (participant, operate, repeat, excerpt).
+-FRT  - The "-FORT/-FERT" ending (comfort, perfect, state of the art).
+-FPD  - The "-CHED/-RCHED" ending (perched, branched, clenched, scorched).
+-FG   - The "-VING/-FING" ending (observing, engulfing, qualifying, serving).
+-FRPL - The "-MPLE/-ORM" ending (dimple, rumple, reform, performance).
+-FRS  - The "-CERS/-VERS" ending (drivers, officers, parole officers, Air Force).
+-FB   - The "have been" phrase suffix (I have been, should have been).
+-RTS  - The "-RTS/-RETZ" ending (sportsmanship, quartz, computers, outskirts).
+-RPBL - The "-ONAL/-ERNAL" ending (personal, internal, maternal, journal).
+-PTS  - The "-PTS/-EPTS" ending (she wants, departments, attempts).
+-BLG  - The "-BLING" ending (bumbling, gambling, rambling, assembling).
+-FPG  - The "-CHING" ending (hunching, clenching, munching, marching).
+-RBT  - The "-SHNT/-CIENT" ending (borscht, sufficient, efficient, proficient).
+-FPBD - The "-ND/-FIND" ending (can you find, defendable, offend, lavender).
+-PBLGD - The "-NGED/-GED" ending (hinged, expunged, challenged, arranged).
+-RLS  - The "-LLS/-ARLES" ending (recalls, Charles, careless, drugs or alcohol).
+-FRPT - The "-MPT/-EMPT" ending (temptation, preemptive, symptom, prompt).
+-FRPB - The "-ENTIAL/-ERNOON" ending (differential, everyone, good afternoon).
+-PBTD - The "United" word family (United States, United Kingdom, United Nations).
+-FLS  - The "-EELS/-EELS" ending (she feels, he feels, themselves).
+-FBL  - The "-VABLE/-FABLE" ending (lovable, receivable, conceivable, livable).
+-RPBG - The "-ING/-RNING" ending (earning, warning, arrangers, arraign).
+-LTS  - The "-LIGHTS/-ALTZ" ending (green lights, waltz, stoplights, schmaltz).
+-RZ   - The "-RS/-ZE" ending (Breathalyzer, exercise, authorize, series).
+-LZ   - The "-LS/-LZ" ending (Salisbury, Wales, Brussels, realize).
+-RPLS - The "-MBERS" ending (remembers, armistice, Mr. or Mrs.).
+-RLT  - The "-LT/-LTS" ending (recall the, irrelevant, proximate result).
+-PLGS - The "-MPTION/-TION" ending (resumption, assumption, exemption, consumption).
+-PBTS - The "-NTS" ending (presidents, defendants, sergeants, accidents).
+-RPGS - The "-TION/-PTION" ending (absorption, corporation, participation).
+-RBLS - The "-CIALS/-TIALS" ending (commercials, financials, potentials, credentials).
+-FBT  - The "have been the" phrase suffix.
+-PBLGT - The "-JECT/-GENT" ending (intelligent, subject, negligent, projective).
+-FRPBS - The "-FERENCE/-ANCE" ending (preference, conference, performance, reverence).
+-RPBD - The "-UND/-AROUND" ending (under, turnaround, warden, Miranda).
+-FGS  - The "-GATION/-TION" ending (investigation, innovation, information).
+-RGT  - The "-GHT/-GUMENT" ending (sergeant, forgotten, target, argument).
+-BD   - The "-BD/-BED" ending (barbed, abdomen, climbed, bombed).
+-RPS  - The "-RPS/-ORPUS" ending (corpse, habeas corpus, harpsichord).
+-FRBL - The "-ERABLE/-ARVEL" ending (recoverable, preferable, comfortable, marvel).
+-BLTS - The "-BILITIES" ending (responsibilities, disabilities, possibilities).
+-FRPLT - The "-MENT/-ERNMENT" ending (government, deferment, averment).
+-FTS  - The "-FTS/-DANTS" ending (defendants, governments, draftsmanship).
+-FBLD - The "have believed" phrase suffix.
+-FRD  - The "-FERRED/-FORD" ending (conferred, transferred, afford, murder).
+-FRPGS - The "-MPTION" ending (presumption, assumption, consumption, exemption).
+-PLZ  - The "-MZ/-MS" ending (Holmes, Adams, James, Williams).
+-TZ   - The "-TZ" ending (kibbutz, schizophrenic, Switzerland, blitzkrieg).
+-FRPBLGTS - Answer prefix strokes ("{^\n\n^}A ..." pattern).
+-BTS  - The "-BTS/-BIOTICS" ending (antibiotics, Roberts, whereabouts, diabetes).
+-RPBLS - The "spell your name / your Honor please" phrase family.
+-FBGT - The "-FECT/-FFX" ending (defect, effect, affect, convict).
+-FPT  - The "just want / approach" phrase family.
+-BGDZ - The "-ECONDS/-KENDS" ending (seconds, milliseconds, weekends).
+-FBGS - The "-FECTION/-CIDENT" ending (defection, affection, day of the accident).
+-RBLT - The "-BILITY" ending (negotiability, variability, severability, vulnerability).
+-PBLS - The "someone/anyone else" phrase family; also "-NLS/-NALS" ending.
+-FRL  - The "-FERRAL/-ERAL" ending (referral, several, deferral, overrule).
+-RPBGS - The "-NYX/-RNING" ending (pharynx, larynx, Miranda warnings, earnings).
+-FBLT - The "-VABILITY" ending (believability, survivability, provability).
+-PLG  - The "-MING" ending (filming, Wyoming, overwhelming, examining).
+-FZ   - The "-VES/-AST" ending (Maldives, Jeeves, Graves, eavesdrop).
+-FRPLD - The "-RMED/-MEMBERED" ending (deformed, reformed, performed, would have remembered).
+-FRG  - The "-THING/-RING" ending (everything, manufacturing, transferring).
+-FRPBT - The "-ERENT/-ERENCE" ending (differential, irreverent, deferent, reverent).
+-FRGS - The "-TION/-ESTION" ending (perfection, conversation, rephrase the question).
+-FRBGS - The "-CCIDENT/-ACTION" ending (after the accident, affirmative action).
+-PBLT - The "-BILITY/-LITY" ending (capability, responsibility, penalty).
+-RPLTS - The "-MENTS/-MENT" ending (apartments, governments, if the Court please).
+-LTD  - The "AIDS-related / health" phrase family; "-LTD/-LTED" ending.
+-FRZ  - The "-ERS/-VERS" ending (hors d'oeuvres, divers).
+-RPLGS - The "-RMISSION/-LLUTION" ending (permission, air pollution, determination).
+-FRPLG - The "-RMING" ending (deforming, transforming, performing, conforming).
+-FRPLGS - The "-RMATION/-ORMATION" ending (reformation, conformation, deformation).
+-FRPLS - The "-RFORMS" ending (reforms, performs, transforms, deforms).
+-RLG  - The "-RLING" ending (starling, sterling, darling, Arlington).
+-TDZ  - The "-TDS/-DAYS" ending (Saturdays, sexually transmitted disease, methods).
+-GTD  - The "-SIGHTED" ending (farsighted, nearsighted, {^sighted}).
+-FRBG - The "-RACK/-WORK" phrase family (crack cocaine, overwork, possession of crack).
+-GDZ  - The "-GROUNDS" ending (backgrounds, on the grounds).
+-FRBGT - The "let the record further reflect/indicate" phrase.
+-RBLGT - The "let the record also reflect/indicate" phrase.
+-LGT  - The "-LIGHT" ending (moonlight, sunlight, skylight, daylight).
+-FRLD - The "have recalled / overruled" phrase family.
+-GTS  - The "-GHTS/-GTS" ending (flashlights, tailgates, headlights).
+-FGT  - The "-GATE/-IGATE" ending (investigation, investigate, investigator).
+-RPBLGT - The "-RGENT/-RGENCY" ending (urgent, urgency).
+-BGZ  - The lowercase letter suffix strokes ({^r}, {^b}, {^m}, etc.).
+-RBGDZ - The "irreconcilable differences" phrase.
+-BGTS - The "-KTS/-ECTS" ending (detectives, bank accounts, pandects).
+-FRTS - The "fair to say / Bill of Rights" phrase family.
+-FPBLG - The "-VAGE/-AVAGE" ending (savage, ravage, savagery, cleavage).
+-RPBTS - The "-RENTS" ending (grandparents, parents).
+-PBSZ  - The "-NSIS/-ESES" ending (genesis, sentences).
+-RPBLGS - The "-RGIES/-URGERIES" ending (surgeries, emergencies, energies).
+-PBGS  - The "-TION/-INK" ending (attention, dysfunction, mansion, pharynx).
+-RPBGSZ - The "directing your attention" phrase.
+-RPLG  - The "-RMING" ending (Prince Charming, Birmingham).
+-BLGS  - The "-BLINGS" ending (rumblings, habilitation).
+-PGT   - The "opening statement" phrase.
+-PGTS  - The "opening statements" phrase.
+-SD    - The "-SD/-SIDE" ending (outside, serviced).
+-PBLGTS - The "-JECTS/-IGENTSIA" ending (subjection, intelligentsia).
+-FSD   - The "-VSD/-VICED" ending (serviced).
+-BTD   - The "objected" phrase suffix.
+
+
