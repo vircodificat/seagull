@@ -1,1192 +1,1192 @@
 pub static INITIALS: [&'static str; 128] = [
-    "",
-    "S",
-    "T",
-    "ST",
-    "K",
-    "SK",
-    "D",
-    "SD",
-    "P",
-    "SP",
-    "F",
-    "SF",
-    "X",
-    "SKP",
-    "DP",
-    "SDP",
-    "W",
-    "SW",
-    "TW",
-    "STW",
-    "KW",
-    "SKW",
-    "DW",
-    "SDW",
-    "B",
-    "SB",
-    "TB",
-    "STB",
-    "KB",
-    "SKB",
-    "G",
-    "SG",
-    "H",
-    "SH",
-    "TH",
-    "STH",
-    "Ch",
-    "SKH",
-    "DH",
-    "SDH",
-    "M",
-    "SM",
-    "N",
-    "SN",
-    "KM",
-    "SKM",
-    "DM",
-    "SDM",
-    "WH",
-    "SWH",
-    "TWH",
-    "STWH",
-    "KWH",
-    "SKWH",
-    "DWH",
-    "SDWH",
-    "BH",
-    "SBH",
-    "TBH",
-    "STBH",
-    "KBH",
-    "SKBH",
-    "GH",
-    "SGH",
-    "R",
-    "V",
-    "TR",
-    "STR",
-    "KR",
-    "SKR",
-    "DR",
-    "SDR",
-    "PR",
-    "SPR",
-    "FR",
-    "SFR",
-    "KPR",
-    "SKPR",
-    "DPR",
-    "SDPR",
-    "WR",
-    "SWR",
-    "TWR",
-    "STWR",
-    "Y",
-    "J",
-    "DWR",
-    "SDWR",
-    "BR",
-    "SBR",
-    "TBR",
-    "STBR",
-    "KBR",
-    "SKBR",
-    "GR",
-    "SGR",
-    "L",
-    "SL",
-    "TL",
-    "STL",
-    "KL",
-    "SKL",
-    "DL",
-    "SDL",
-    "PL",
-    "SPL",
-    "FL",
-    "SFL",
-    "KPL",
-    "SKPL",
-    "DPL",
-    "SDPL",
-    "WL",
-    "SWL",
-    "TWL",
-    "STWL",
-    "KWL",
-    "SKWL",
-    "DWL",
-    "SDWL",
-    "BL",
-    "SBL",
-    "TBL",
-    "STBL",
-    "KBL",
-    "SKBL",
-    "GL",
-    "SGL",
+    "",      // (none)
+    "S",     // S
+    "T",     // T
+    "ST",    // ST
+    "K",     // K
+    "SK",    // SK
+    "D",     // TK
+    "SD",    // STK
+    "P",     // P
+    "SP",    // SP
+    "F",     // TP
+    "SF",    // STP
+    "X",     // KP
+    "SKP",   // SKP
+    "DP",    // TKP
+    "SDP",   // STKP
+    "W",     // W
+    "SW",    // SW
+    "TW",    // TW
+    "STW",   // STW
+    "KW",    // KW
+    "SKW",   // SKW
+    "DW",    // TKW
+    "SDW",   // STKW
+    "B",     // PW
+    "SB",    // SPW
+    "TB",    // TPW
+    "STB",   // STPW
+    "KB",    // KPW
+    "SKB",   // SKPW
+    "G",     // TKPW
+    "SG",    // STKPW
+    "H",     // H
+    "SH",    // SH
+    "TH",    // TH
+    "STH",   // STH
+    "Ch",    // KH
+    "SKH",   // SKH
+    "DH",    // TKH
+    "SDH",   // STKH
+    "M",     // PH
+    "SM",    // SPH
+    "N",     // TPH
+    "SN",    // STPH
+    "KM",    // KPH
+    "SKM",   // SKPH
+    "DM",    // TKPH
+    "SDM",   // STKPH
+    "WH",    // WH
+    "SWH",   // SWH
+    "TWH",   // TWH
+    "STWH",  // STWH
+    "KWH",   // KWH
+    "SKWH",  // SKWH
+    "DWH",   // TKWH
+    "SDWH",  // STKWH
+    "BH",    // PWH
+    "SBH",   // SPWH
+    "TBH",   // TPWH
+    "STBH",  // STPWH
+    "KBH",   // KPWH
+    "SKBH",  // SKPWH
+    "GH",    // TKPWH
+    "SGH",   // STKPWH
+    "R",     // R
+    "V",     // SR
+    "TR",    // TR
+    "STR",   // STR
+    "KR",    // KR
+    "SKR",   // SKR
+    "DR",    // TKR
+    "SDR",   // STKR
+    "PR",    // PR
+    "SPR",   // SPR
+    "FR",    // TPR
+    "SFR",   // STPR
+    "KPR",   // KPR
+    "SKPR",  // SKPR
+    "DPR",   // TKPR
+    "SDPR",  // STKPR
+    "WR",    // WR
+    "SWR",   // SWR
+    "TWR",   // TWR
+    "STWR",  // STWR
+    "Y",     // KWR
+    "J",     // SKWR
+    "DWR",   // TKWR
+    "SDWR",  // STKWR
+    "BR",    // PWR
+    "SBR",   // SPWR
+    "TBR",   // TPWR
+    "STBR",  // STPWR
+    "KBR",   // KPWR
+    "SKBR",  // SKPWR
+    "GR",    // TKPWR
+    "SGR",   // STKPWR
+    "L",     // HR
+    "SL",    // SHR
+    "TL",    // THR
+    "STL",   // STHR
+    "KL",    // KHR
+    "SKL",   // SKHR
+    "DL",    // TKHR
+    "SDL",   // STKHR
+    "PL",    // PHR
+    "SPL",   // SPHR
+    "FL",    // TPHR
+    "SFL",   // STPHR
+    "KPL",   // KPHR
+    "SKPL",  // SKPHR
+    "DPL",   // TKPHR
+    "SDPL",  // STKPHR
+    "WL",    // WHR
+    "SWL",   // SWHR
+    "TWL",   // TWHR
+    "STWL",  // STWHR
+    "KWL",   // KWHR
+    "SKWL",  // SKWHR
+    "DWL",   // TKWHR
+    "SDWL",  // STKWHR
+    "BL",    // PWHR
+    "SBL",   // SPWHR
+    "TBL",   // TPWHR
+    "STBL",  // STPWHR
+    "KBL",   // KPWHR
+    "SKBL",  // SKPWHR
+    "GL",    // TKPWHR
+    "SGL",   // STKPWHR
 ];
 
 pub static MIDDLES: [&'static str; 32] = [
-    "",     //  0: (none)
-    "A",    //  1: A
-    "O",    //  2: O
-    "Oo",   //  3: AO
-    "*",    //  4: *
-    "A*",   //  5: A*
-    "O*",   //  6: O*
-    "Oo*",  //  7: AO*
-    "E",    //  8: E
-    "Ay",   //  9: AE
-    "Oh",   // 10: OE
-    "Ee",   // 11: AOE
-    "E*",   // 12: *E
-    "Ay*",  // 13: A*E
-    "Oh*",  // 14: O*E
-    "Ee*",  // 15: AO*E
-    "U",    // 16: U
-    "Aw",   // 17: AU
-    "OU",   // 18: OU
-    "Yoo",  // 19: AOU
-    "U*",   // 20: *U
-    "Aw*",  // 21: A*U
-    "OU*",  // 22: O*U
-    "Yoo*", // 23: AO*U
-    "I",    // 24: EU
-    "Ay",   // 25: AEU
-    "Oy",   // 26: OEU
-    "Eye",  // 27: AOEU
-    "I*",   // 28: *EU
-    "Ay*",  // 29: A*EU
-    "Oy*",  // 30: O*EU
-    "Eye*", // 31: AO*EU
+    "",      // (none)
+    "A",     // A
+    "O",     // O
+    "Oo",    // AO
+    "*",     // *
+    "A*",    // A*
+    "O*",    // O*
+    "Oo*",   // AO*
+    "E",     // E
+    "Ay",    // AE
+    "Oh",    // OE
+    "Ee",    // AOE
+    "E*",    // *E
+    "Ay*",   // A*E
+    "Oh*",   // O*E
+    "Ee*",   // AO*E
+    "U",     // U
+    "Aw",    // AU
+    "OU",    // OU
+    "Yoo",   // AOU
+    "U*",    // *U
+    "Aw*",   // A*U
+    "OU*",   // O*U
+    "Yoo*",  // AO*U
+    "I",     // EU
+    "Ay",    // AEU
+    "Oy",    // OEU
+    "Eye",   // AOEU
+    "I*",    // *EU
+    "Ay*",   // A*EU
+    "Oy*",   // O*EU
+    "Eye*",  // AO*EU
 ];
 
 pub static FINALS: [&'static str; 1024] = [
-    "",
-    "F",
-    "R",
-    "FR",
-    "P",
-    "Ch",
-    "RP",
-    "FRP",
-    "B",
-    "FB",
-    "Sh",
-    "FRB",
-    "N",
-    "FPB",
-    "RPB",
-    "FRPB",
-    "L",
-    "FL",
-    "RL",
-    "FRL",
-    "M",
-    "Ism",
-    "RPL",
-    "FRPL",
-    "BL",
-    "FBL",
-    "RBL",
-    "FRBL",
-    "PBL",
-    "FPBL",
-    "RPBL",
-    "FRPBL",
-    "G",
-    "FG",
-    "RG",
-    "FRG",
-    "PG",
-    "FPG",
-    "RPG",
-    "FRPG",
-    "Ck",
-    "FCk",
-    "Rk",
-    "FRBG",
-    "NG",
-    "FPBG",
-    "RPBG",
-    "FRPBG",
-    "LG",
-    "FLG",
-    "RLG",
-    "FRLG",
-    "PLG",
-    "FPLG",
-    "RPLG",
-    "FRPLG",
-    "BLG",
-    "FBLG",
-    "RBLG",
-    "FRBLG",
-    "PBLG",
-    "FPBLG",
-    "RPBLG",
-    "FRPBLG",
-    "T",
-    "FT",
-    "RT",
-    "FRT",
-    "PT",
-    "FPT",
-    "RPT",
-    "FRPT",
-    "BT",
-    "FBT",
-    "RBT",
-    "FRBT",
-    "PBT",
-    "FPBT",
-    "RPBT",
-    "FRPBT",
-    "LT",
-    "FLT",
-    "RLT",
-    "FRLT",
-    "Ment",
-    "FPLT",
-    "RPLT",
-    "FRPLT",
-    "BLT",
-    "FBLT",
-    "RBLT",
-    "FRBLT",
-    "PBLT",
-    "FPBLT",
-    "RPBLT",
-    "FRPBLT",
-    "GT",
-    "FGT",
-    "RGT",
-    "FRGT",
-    "PGT",
-    "FPGT",
-    "RPGT",
-    "FRPGT",
-    "CkT",
-    "FBGT",
-    "RBGT",
-    "FRBGT",
-    "PBGT",
-    "FPBGT",
-    "RPBGT",
-    "FRPBGT",
-    "LGT",
-    "FLGT",
-    "RLGT",
-    "FRLGT",
-    "PLGT",
-    "FPLGT",
-    "RPLGT",
-    "FRPLGT",
-    "BLGT",
-    "FBLGT",
-    "RBLGT",
-    "FRBLGT",
-    "PBLGT",
-    "FPBLGT",
-    "RPBLGT",
-    "FRPBLGT",
-    "S",
-    "FS",
-    "RS",
-    "FRS",
-    "PS",
-    "FPS",
-    "RPS",
-    "FRPS",
-    "BS",
-    "FBS",
-    "RBS",
-    "FRBS",
-    "NS",
-    "FPBS",
-    "RPBS",
-    "FRPBS",
-    "LS",
-    "FLS",
-    "RLS",
-    "FRLS",
-    "PLS",
-    "FPLS",
-    "RPLS",
-    "FRPLS",
-    "BLS",
-    "FBLS",
-    "RBLS",
-    "FRBLS",
-    "PBLS",
-    "FPBLS",
-    "RPBLS",
-    "FRPBLS",
-    "Tion",
-    "FGS",
-    "RTion",
-    "FRGS",
-    "PGS",
-    "FPGS",
-    "RPGS",
-    "FRPGS",
-    "Ction",
-    "FBGS",
-    "RBGS",
-    "FRBGS",
-    "PBGS",
-    "FPBGS",
-    "RPBGS",
-    "FRPBGS",
-    "LGS",
-    "FLGS",
-    "RLGS",
-    "FRLGS",
-    "PLGS",
-    "FPLGS",
-    "RPLGS",
-    "FRPLGS",
-    "BLGS",
-    "FBLGS",
-    "RBLGS",
-    "FRBLGS",
-    "PBLGS",
-    "FPBLGS",
-    "RPBLGS",
-    "FRPBLGS",
-    "TS",
-    "FTS",
-    "RTS",
-    "FRTS",
-    "PTS",
-    "FPTS",
-    "RPTS",
-    "FRPTS",
-    "BTS",
-    "FBTS",
-    "RBTS",
-    "FRBTS",
-    "PBTS",
-    "FPBTS",
-    "RPBTS",
-    "FRPBTS",
-    "LTS",
-    "FLTS",
-    "RLTS",
-    "FRLTS",
-    "PLTS",
-    "FPLTS",
-    "RPLTS",
-    "FRPLTS",
-    "BLTS",
-    "FBLTS",
-    "RBLTS",
-    "FRBLTS",
-    "PBLTS",
-    "FPBLTS",
-    "RPBLTS",
-    "FRPBLTS",
-    "GTS",
-    "FGTS",
-    "RGTS",
-    "FRGTS",
-    "PGTS",
-    "FPGTS",
-    "RPGTS",
-    "FRPGTS",
-    "BGTS",
-    "FBGTS",
-    "RBGTS",
-    "FRBGTS",
-    "PBGTS",
-    "FPBGTS",
-    "RPBGTS",
-    "FRPBGTS",
-    "LGTS",
-    "FLGTS",
-    "RLGTS",
-    "FRLGTS",
-    "PLGTS",
-    "FPLGTS",
-    "RPLGTS",
-    "FRPLGTS",
-    "BLGTS",
-    "FBLGTS",
-    "RBLGTS",
-    "FRBLGTS",
-    "PBLGTS",
-    "FPBLGTS",
-    "RPBLGTS",
-    "FRPBLGTS",
-    "D",
-    "FD",
-    "RD",
-    "FRD",
-    "PD",
-    "FPD",
-    "RPD",
-    "FRPD",
-    "BD",
-    "FBD",
-    "RBD",
-    "FRBD",
-    "ND",
-    "FPBD",
-    "RPBD",
-    "FRPBD",
-    "LD",
-    "FLD",
-    "RLD",
-    "FRLD",
-    "PLD",
-    "FPLD",
-    "RPLD",
-    "FRPLD",
-    "BLD",
-    "FBLD",
-    "RBLD",
-    "FRBLD",
-    "PBLD",
-    "FPBLD",
-    "RPBLD",
-    "FRPBLD",
-    "GD",
-    "FGD",
-    "RGD",
-    "FRGD",
-    "PGD",
-    "FPGD",
-    "RPGD",
-    "FRPGD",
-    "BGD",
-    "FBGD",
-    "RBGD",
-    "FRBGD",
-    "PBGD",
-    "FPBGD",
-    "RPBGD",
-    "FRPBGD",
-    "LGD",
-    "FLGD",
-    "RLGD",
-    "FRLGD",
-    "PLGD",
-    "FPLGD",
-    "RPLGD",
-    "FRPLGD",
-    "BLGD",
-    "FBLGD",
-    "RBLGD",
-    "FRBLGD",
-    "PBLGD",
-    "FPBLGD",
-    "RPBLGD",
-    "FRPBLGD",
-    "TD",
-    "FTD",
-    "RTD",
-    "FRTD",
-    "PTD",
-    "FPTD",
-    "RPTD",
-    "FRPTD",
-    "BTD",
-    "FBTD",
-    "RBTD",
-    "FRBTD",
-    "PBTD",
-    "FPBTD",
-    "RPBTD",
-    "FRPBTD",
-    "LTD",
-    "FLTD",
-    "RLTD",
-    "FRLTD",
-    "PLTD",
-    "FPLTD",
-    "RPLTD",
-    "FRPLTD",
-    "BLTD",
-    "FBLTD",
-    "RBLTD",
-    "FRBLTD",
-    "PBLTD",
-    "FPBLTD",
-    "RPBLTD",
-    "FRPBLTD",
-    "GTD",
-    "FGTD",
-    "RGTD",
-    "FRGTD",
-    "PGTD",
-    "FPGTD",
-    "RPGTD",
-    "FRPGTD",
-    "BGTD",
-    "FBGTD",
-    "RBGTD",
-    "FRBGTD",
-    "PBGTD",
-    "FPBGTD",
-    "RPBGTD",
-    "FRPBGTD",
-    "LGTD",
-    "FLGTD",
-    "RLGTD",
-    "FRLGTD",
-    "PLGTD",
-    "FPLGTD",
-    "RPLGTD",
-    "FRPLGTD",
-    "BLGTD",
-    "FBLGTD",
-    "RBLGTD",
-    "FRBLGTD",
-    "PBLGTD",
-    "FPBLGTD",
-    "RPBLGTD",
-    "FRPBLGTD",
-    "SD",
-    "FSD",
-    "RSD",
-    "FRSD",
-    "PSD",
-    "FPSD",
-    "RPSD",
-    "FRPSD",
-    "BSD",
-    "FBSD",
-    "RBSD",
-    "FRBSD",
-    "PBSD",
-    "FPBSD",
-    "RPBSD",
-    "FRPBSD",
-    "LSD",
-    "FLSD",
-    "RLSD",
-    "FRLSD",
-    "PLSD",
-    "FPLSD",
-    "RPLSD",
-    "FRPLSD",
-    "BLSD",
-    "FBLSD",
-    "RBLSD",
-    "FRBLSD",
-    "PBLSD",
-    "FPBLSD",
-    "RPBLSD",
-    "FRPBLSD",
-    "GSD",
-    "FGSD",
-    "RGSD",
-    "FRGSD",
-    "PGSD",
-    "FPGSD",
-    "RPGSD",
-    "FRPGSD",
-    "BGSD",
-    "FBGSD",
-    "RBGSD",
-    "FRBGSD",
-    "PBGSD",
-    "FPBGSD",
-    "RPBGSD",
-    "FRPBGSD",
-    "LGSD",
-    "FLGSD",
-    "RLGSD",
-    "FRLGSD",
-    "PLGSD",
-    "FPLGSD",
-    "RPLGSD",
-    "FRPLGSD",
-    "BLGSD",
-    "FBLGSD",
-    "RBLGSD",
-    "FRBLGSD",
-    "PBLGSD",
-    "FPBLGSD",
-    "RPBLGSD",
-    "FRPBLGSD",
-    "TSD",
-    "FTSD",
-    "RTSD",
-    "FRTSD",
-    "PTSD",
-    "FPTSD",
-    "RPTSD",
-    "FRPTSD",
-    "BTSD",
-    "FBTSD",
-    "RBTSD",
-    "FRBTSD",
-    "PBTSD",
-    "FPBTSD",
-    "RPBTSD",
-    "FRPBTSD",
-    "LTSD",
-    "FLTSD",
-    "RLTSD",
-    "FRLTSD",
-    "PLTSD",
-    "FPLTSD",
-    "RPLTSD",
-    "FRPLTSD",
-    "BLTSD",
-    "FBLTSD",
-    "RBLTSD",
-    "FRBLTSD",
-    "PBLTSD",
-    "FPBLTSD",
-    "RPBLTSD",
-    "FRPBLTSD",
-    "GTSD",
-    "FGTSD",
-    "RGTSD",
-    "FRGTSD",
-    "PGTSD",
-    "FPGTSD",
-    "RPGTSD",
-    "FRPGTSD",
-    "BGTSD",
-    "FBGTSD",
-    "RBGTSD",
-    "FRBGTSD",
-    "PBGTSD",
-    "FPBGTSD",
-    "RPBGTSD",
-    "FRPBGTSD",
-    "LGTSD",
-    "FLGTSD",
-    "RLGTSD",
-    "FRLGTSD",
-    "PLGTSD",
-    "FPLGTSD",
-    "RPLGTSD",
-    "FRPLGTSD",
-    "BLGTSD",
-    "FBLGTSD",
-    "RBLGTSD",
-    "FRBLGTSD",
-    "PBLGTSD",
-    "FPBLGTSD",
-    "RPBLGTSD",
-    "FRPBLGTSD",
-    "Z",
-    "FZ",
-    "RZ",
-    "FRZ",
-    "PZ",
-    "FPZ",
-    "RPZ",
-    "FRPZ",
-    "BZ",
-    "FBZ",
-    "RBZ",
-    "FRBZ",
-    "PBZ",
-    "FPBZ",
-    "RPBZ",
-    "FRPBZ",
-    "LZ",
-    "FLZ",
-    "RLZ",
-    "FRLZ",
-    "PLZ",
-    "FPLZ",
-    "RPLZ",
-    "FRPLZ",
-    "BLZ",
-    "FBLZ",
-    "RBLZ",
-    "FRBLZ",
-    "PBLZ",
-    "FPBLZ",
-    "RPBLZ",
-    "FRPBLZ",
-    "GZ",
-    "FGZ",
-    "RGZ",
-    "FRGZ",
-    "PGZ",
-    "FPGZ",
-    "RPGZ",
-    "FRPGZ",
-    "BGZ",
-    "FBGZ",
-    "RBGZ",
-    "FRBGZ",
-    "PBGZ",
-    "FPBGZ",
-    "RPBGZ",
-    "FRPBGZ",
-    "LGZ",
-    "FLGZ",
-    "RLGZ",
-    "FRLGZ",
-    "PLGZ",
-    "FPLGZ",
-    "RPLGZ",
-    "FRPLGZ",
-    "BLGZ",
-    "FBLGZ",
-    "RBLGZ",
-    "FRBLGZ",
-    "PBLGZ",
-    "FPBLGZ",
-    "RPBLGZ",
-    "FRPBLGZ",
-    "TZ",
-    "FTZ",
-    "RTZ",
-    "FRTZ",
-    "PTZ",
-    "FPTZ",
-    "RPTZ",
-    "FRPTZ",
-    "BTZ",
-    "FBTZ",
-    "RBTZ",
-    "FRBTZ",
-    "PBTZ",
-    "FPBTZ",
-    "RPBTZ",
-    "FRPBTZ",
-    "LTZ",
-    "FLTZ",
-    "RLTZ",
-    "FRLTZ",
-    "PLTZ",
-    "FPLTZ",
-    "RPLTZ",
-    "FRPLTZ",
-    "BLTZ",
-    "FBLTZ",
-    "RBLTZ",
-    "FRBLTZ",
-    "PBLTZ",
-    "FPBLTZ",
-    "RPBLTZ",
-    "FRPBLTZ",
-    "GTZ",
-    "FGTZ",
-    "RGTZ",
-    "FRGTZ",
-    "PGTZ",
-    "FPGTZ",
-    "RPGTZ",
-    "FRPGTZ",
-    "BGTZ",
-    "FBGTZ",
-    "RBGTZ",
-    "FRBGTZ",
-    "PBGTZ",
-    "FPBGTZ",
-    "RPBGTZ",
-    "FRPBGTZ",
-    "LGTZ",
-    "FLGTZ",
-    "RLGTZ",
-    "FRLGTZ",
-    "PLGTZ",
-    "FPLGTZ",
-    "RPLGTZ",
-    "FRPLGTZ",
-    "BLGTZ",
-    "FBLGTZ",
-    "RBLGTZ",
-    "FRBLGTZ",
-    "PBLGTZ",
-    "FPBLGTZ",
-    "RPBLGTZ",
-    "FRPBLGTZ",
-    "SZ",
-    "FSZ",
-    "RSZ",
-    "FRSZ",
-    "PSZ",
-    "FPSZ",
-    "RPSZ",
-    "FRPSZ",
-    "BSZ",
-    "FBSZ",
-    "RBSZ",
-    "FRBSZ",
-    "PBSZ",
-    "FPBSZ",
-    "RPBSZ",
-    "FRPBSZ",
-    "LSZ",
-    "FLSZ",
-    "RLSZ",
-    "FRLSZ",
-    "PLSZ",
-    "FPLSZ",
-    "RPLSZ",
-    "FRPLSZ",
-    "BLSZ",
-    "FBLSZ",
-    "RBLSZ",
-    "FRBLSZ",
-    "PBLSZ",
-    "FPBLSZ",
-    "RPBLSZ",
-    "FRPBLSZ",
-    "GSZ",
-    "FGSZ",
-    "RGSZ",
-    "FRGSZ",
-    "PGSZ",
-    "FPGSZ",
-    "RPGSZ",
-    "FRPGSZ",
-    "BGSZ",
-    "FBGSZ",
-    "RBGSZ",
-    "FRBGSZ",
-    "PBGSZ",
-    "FPBGSZ",
-    "RPBGSZ",
-    "FRPBGSZ",
-    "LGSZ",
-    "FLGSZ",
-    "RLGSZ",
-    "FRLGSZ",
-    "PLGSZ",
-    "FPLGSZ",
-    "RPLGSZ",
-    "FRPLGSZ",
-    "BLGSZ",
-    "FBLGSZ",
-    "RBLGSZ",
-    "FRBLGSZ",
-    "PBLGSZ",
-    "FPBLGSZ",
-    "RPBLGSZ",
-    "FRPBLGSZ",
-    "TSZ",
-    "FTSZ",
-    "RTSZ",
-    "FRTSZ",
-    "PTSZ",
-    "FPTSZ",
-    "RPTSZ",
-    "FRPTSZ",
-    "BTSZ",
-    "FBTSZ",
-    "RBTSZ",
-    "FRBTSZ",
-    "PBTSZ",
-    "FPBTSZ",
-    "RPBTSZ",
-    "FRPBTSZ",
-    "LTSZ",
-    "FLTSZ",
-    "RLTSZ",
-    "FRLTSZ",
-    "PLTSZ",
-    "FPLTSZ",
-    "RPLTSZ",
-    "FRPLTSZ",
-    "BLTSZ",
-    "FBLTSZ",
-    "RBLTSZ",
-    "FRBLTSZ",
-    "PBLTSZ",
-    "FPBLTSZ",
-    "RPBLTSZ",
-    "FRPBLTSZ",
-    "GTSZ",
-    "FGTSZ",
-    "RGTSZ",
-    "FRGTSZ",
-    "PGTSZ",
-    "FPGTSZ",
-    "RPGTSZ",
-    "FRPGTSZ",
-    "BGTSZ",
-    "FBGTSZ",
-    "RBGTSZ",
-    "FRBGTSZ",
-    "PBGTSZ",
-    "FPBGTSZ",
-    "RPBGTSZ",
-    "FRPBGTSZ",
-    "LGTSZ",
-    "FLGTSZ",
-    "RLGTSZ",
-    "FRLGTSZ",
-    "PLGTSZ",
-    "FPLGTSZ",
-    "RPLGTSZ",
-    "FRPLGTSZ",
-    "BLGTSZ",
-    "FBLGTSZ",
-    "RBLGTSZ",
-    "FRBLGTSZ",
-    "PBLGTSZ",
-    "FPBLGTSZ",
-    "RPBLGTSZ",
-    "FRPBLGTSZ",
-    "DZ",
-    "FDZ",
-    "RDZ",
-    "FRDZ",
-    "PDZ",
-    "FPDZ",
-    "RPDZ",
-    "FRPDZ",
-    "BDZ",
-    "FBDZ",
-    "RBDZ",
-    "FRBDZ",
-    "NDZ",
-    "FPBDZ",
-    "RPBDZ",
-    "FRPBDZ",
-    "LDZ",
-    "FLDZ",
-    "RLDZ",
-    "FRLDZ",
-    "PLDZ",
-    "FPLDZ",
-    "RPLDZ",
-    "FRPLDZ",
-    "BLDZ",
-    "FBLDZ",
-    "RBLDZ",
-    "FRBLDZ",
-    "PBLDZ",
-    "FPBLDZ",
-    "RPBLDZ",
-    "FRPBLDZ",
-    "GDZ",
-    "FGDZ",
-    "RGDZ",
-    "FRGDZ",
-    "PGDZ",
-    "FPGDZ",
-    "RPGDZ",
-    "FRPGDZ",
-    "BGDZ",
-    "FBGDZ",
-    "RBGDZ",
-    "FRBGDZ",
-    "PBGDZ",
-    "FPBGDZ",
-    "RPBGDZ",
-    "FRPBGDZ",
-    "LGDZ",
-    "FLGDZ",
-    "RLGDZ",
-    "FRLGDZ",
-    "PLGDZ",
-    "FPLGDZ",
-    "RPLGDZ",
-    "FRPLGDZ",
-    "BLGDZ",
-    "FBLGDZ",
-    "RBLGDZ",
-    "FRBLGDZ",
-    "PBLGDZ",
-    "FPBLGDZ",
-    "RPBLGDZ",
-    "FRPBLGDZ",
-    "TDZ",
-    "FTDZ",
-    "RTDZ",
-    "FRTDZ",
-    "PTDZ",
-    "FPTDZ",
-    "RPTDZ",
-    "FRPTDZ",
-    "BTDZ",
-    "FBTDZ",
-    "RBTDZ",
-    "FRBTDZ",
-    "PBTDZ",
-    "FPBTDZ",
-    "RPBTDZ",
-    "FRPBTDZ",
-    "LTDZ",
-    "FLTDZ",
-    "RLTDZ",
-    "FRLTDZ",
-    "PLTDZ",
-    "FPLTDZ",
-    "RPLTDZ",
-    "FRPLTDZ",
-    "BLTDZ",
-    "FBLTDZ",
-    "RBLTDZ",
-    "FRBLTDZ",
-    "PBLTDZ",
-    "FPBLTDZ",
-    "RPBLTDZ",
-    "FRPBLTDZ",
-    "GTDZ",
-    "FGTDZ",
-    "RGTDZ",
-    "FRGTDZ",
-    "PGTDZ",
-    "FPGTDZ",
-    "RPGTDZ",
-    "FRPGTDZ",
-    "BGTDZ",
-    "FBGTDZ",
-    "RBGTDZ",
-    "FRBGTDZ",
-    "PBGTDZ",
-    "FPBGTDZ",
-    "RPBGTDZ",
-    "FRPBGTDZ",
-    "LGTDZ",
-    "FLGTDZ",
-    "RLGTDZ",
-    "FRLGTDZ",
-    "PLGTDZ",
-    "FPLGTDZ",
-    "RPLGTDZ",
-    "FRPLGTDZ",
-    "BLGTDZ",
-    "FBLGTDZ",
-    "RBLGTDZ",
-    "FRBLGTDZ",
-    "PBLGTDZ",
-    "FPBLGTDZ",
-    "RPBLGTDZ",
-    "FRPBLGTDZ",
-    "SDZ",
-    "FSDZ",
-    "RSDZ",
-    "FRSDZ",
-    "PSDZ",
-    "FPSDZ",
-    "RPSDZ",
-    "FRPSDZ",
-    "BSDZ",
-    "FBSDZ",
-    "RBSDZ",
-    "FRBSDZ",
-    "PBSDZ",
-    "FPBSDZ",
-    "RPBSDZ",
-    "FRPBSDZ",
-    "LSDZ",
-    "FLSDZ",
-    "RLSDZ",
-    "FRLSDZ",
-    "PLSDZ",
-    "FPLSDZ",
-    "RPLSDZ",
-    "FRPLSDZ",
-    "BLSDZ",
-    "FBLSDZ",
-    "RBLSDZ",
-    "FRBLSDZ",
-    "PBLSDZ",
-    "FPBLSDZ",
-    "RPBLSDZ",
-    "FRPBLSDZ",
-    "GSDZ",
-    "FGSDZ",
-    "RGSDZ",
-    "FRGSDZ",
-    "PGSDZ",
-    "FPGSDZ",
-    "RPGSDZ",
-    "FRPGSDZ",
-    "BGSDZ",
-    "FBGSDZ",
-    "RBGSDZ",
-    "FRBGSDZ",
-    "PBGSDZ",
-    "FPBGSDZ",
-    "RPBGSDZ",
-    "FRPBGSDZ",
-    "LGSDZ",
-    "FLGSDZ",
-    "RLGSDZ",
-    "FRLGSDZ",
-    "PLGSDZ",
-    "FPLGSDZ",
-    "RPLGSDZ",
-    "FRPLGSDZ",
-    "BLGSDZ",
-    "FBLGSDZ",
-    "RBLGSDZ",
-    "FRBLGSDZ",
-    "PBLGSDZ",
-    "FPBLGSDZ",
-    "RPBLGSDZ",
-    "FRPBLGSDZ",
-    "TSDZ",
-    "FTSDZ",
-    "RTSDZ",
-    "FRTSDZ",
-    "PTSDZ",
-    "FPTSDZ",
-    "RPTSDZ",
-    "FRPTSDZ",
-    "BTSDZ",
-    "FBTSDZ",
-    "RBTSDZ",
-    "FRBTSDZ",
-    "PBTSDZ",
-    "FPBTSDZ",
-    "RPBTSDZ",
-    "FRPBTSDZ",
-    "LTSDZ",
-    "FLTSDZ",
-    "RLTSDZ",
-    "FRLTSDZ",
-    "PLTSDZ",
-    "FPLTSDZ",
-    "RPLTSDZ",
-    "FRPLTSDZ",
-    "BLTSDZ",
-    "FBLTSDZ",
-    "RBLTSDZ",
-    "FRBLTSDZ",
-    "PBLTSDZ",
-    "FPBLTSDZ",
-    "RPBLTSDZ",
-    "FRPBLTSDZ",
-    "GTSDZ",
-    "FGTSDZ",
-    "RGTSDZ",
-    "FRGTSDZ",
-    "PGTSDZ",
-    "FPGTSDZ",
-    "RPGTSDZ",
-    "FRPGTSDZ",
-    "BGTSDZ",
-    "FBGTSDZ",
-    "RBGTSDZ",
-    "FRBGTSDZ",
-    "PBGTSDZ",
-    "FPBGTSDZ",
-    "RPBGTSDZ",
-    "FRPBGTSDZ",
-    "LGTSDZ",
-    "FLGTSDZ",
-    "RLGTSDZ",
-    "FRLGTSDZ",
-    "PLGTSDZ",
-    "FPLGTSDZ",
-    "RPLGTSDZ",
-    "FRPLGTSDZ",
-    "BLGTSDZ",
-    "FBLGTSDZ",
-    "RBLGTSDZ",
-    "FRBLGTSDZ",
-    "PBLGTSDZ",
-    "FPBLGTSDZ",
-    "RPBLGTSDZ",
-    "FRPBLGTSDZ",
+    "",            // (none)
+    "F",           // F
+    "R",           // R
+    "FR",          // FR
+    "P",           // P
+    "Ch",          // FP
+    "RP",          // RP
+    "FRP",         // FRP
+    "B",           // B
+    "FB",          // FB
+    "Sh",          // RB
+    "FRB",         // FRB
+    "N",           // PB
+    "FPB",         // FPB
+    "RPB",         // RPB
+    "FRPB",        // FRPB
+    "L",           // L
+    "FL",          // FL
+    "RL",          // RL
+    "FRL",         // FRL
+    "M",           // PL
+    "Ism",         // FPL
+    "RPL",         // RPL
+    "FRPL",        // FRPL
+    "BL",          // BL
+    "FBL",         // FBL
+    "RBL",         // RBL
+    "FRBL",        // FRBL
+    "PBL",         // PBL
+    "FPBL",        // FPBL
+    "RPBL",        // RPBL
+    "FRPBL",       // FRPBL
+    "G",           // G
+    "FG",          // FG
+    "RG",          // RG
+    "FRG",         // FRG
+    "PG",          // PG
+    "FPG",         // FPG
+    "RPG",         // RPG
+    "FRPG",        // FRPG
+    "Ck",          // BG
+    "FCk",         // FBG
+    "Rk",          // RBG
+    "FRBG",        // FRBG
+    "NG",          // PBG
+    "FPBG",        // FPBG
+    "RPBG",        // RPBG
+    "FRPBG",       // FRPBG
+    "LG",          // LG
+    "FLG",         // FLG
+    "RLG",         // RLG
+    "FRLG",        // FRLG
+    "PLG",         // PLG
+    "FPLG",        // FPLG
+    "RPLG",        // RPLG
+    "FRPLG",       // FRPLG
+    "BLG",         // BLG
+    "FBLG",        // FBLG
+    "RBLG",        // RBLG
+    "FRBLG",       // FRBLG
+    "PBLG",        // PBLG
+    "FPBLG",       // FPBLG
+    "RPBLG",       // RPBLG
+    "FRPBLG",      // FRPBLG
+    "T",           // T
+    "FT",          // FT
+    "RT",          // RT
+    "FRT",         // FRT
+    "PT",          // PT
+    "FPT",         // FPT
+    "RPT",         // RPT
+    "FRPT",        // FRPT
+    "BT",          // BT
+    "FBT",         // FBT
+    "RBT",         // RBT
+    "FRBT",        // FRBT
+    "NT",          // PBT
+    "FPBT",        // FPBT
+    "RPBT",        // RPBT
+    "FRPBT",       // FRPBT
+    "LT",          // LT
+    "FLT",         // FLT
+    "RLT",         // RLT
+    "FRLT",        // FRLT
+    "Ment",        // PLT
+    "FPLT",        // FPLT
+    "RPLT",        // RPLT
+    "FRPLT",       // FRPLT
+    "BLT",         // BLT
+    "FBLT",        // FBLT
+    "RBLT",        // RBLT
+    "FRBLT",       // FRBLT
+    "PBLT",        // PBLT
+    "FPBLT",       // FPBLT
+    "RPBLT",       // RPBLT
+    "FRPBLT",      // FRPBLT
+    "GT",          // GT
+    "FGT",         // FGT
+    "RGT",         // RGT
+    "FRGT",        // FRGT
+    "PGT",         // PGT
+    "FPGT",        // FPGT
+    "RPGT",        // RPGT
+    "FRPGT",       // FRPGT
+    "CkT",         // BGT
+    "FBGT",        // FBGT
+    "RBGT",        // RBGT
+    "FRBGT",       // FRBGT
+    "PBGT",        // PBGT
+    "FPBGT",       // FPBGT
+    "RPBGT",       // RPBGT
+    "FRPBGT",      // FRPBGT
+    "LGT",         // LGT
+    "FLGT",        // FLGT
+    "RLGT",        // RLGT
+    "FRLGT",       // FRLGT
+    "PLGT",        // PLGT
+    "FPLGT",       // FPLGT
+    "RPLGT",       // RPLGT
+    "FRPLGT",      // FRPLGT
+    "BLGT",        // BLGT
+    "FBLGT",       // FBLGT
+    "RBLGT",       // RBLGT
+    "FRBLGT",      // FRBLGT
+    "PBLGT",       // PBLGT
+    "FPBLGT",      // FPBLGT
+    "RPBLGT",      // RPBLGT
+    "FRPBLGT",     // FRPBLGT
+    "S",           // S
+    "FS",          // FS
+    "RS",          // RS
+    "FRS",         // FRS
+    "PS",          // PS
+    "FPS",         // FPS
+    "RPS",         // RPS
+    "FRPS",        // FRPS
+    "BS",          // BS
+    "FBS",         // FBS
+    "RBS",         // RBS
+    "FRBS",        // FRBS
+    "NS",          // PBS
+    "FPBS",        // FPBS
+    "RPBS",        // RPBS
+    "FRPBS",       // FRPBS
+    "LS",          // LS
+    "FLS",         // FLS
+    "RLS",         // RLS
+    "FRLS",        // FRLS
+    "PLS",         // PLS
+    "FPLS",        // FPLS
+    "RPLS",        // RPLS
+    "FRPLS",       // FRPLS
+    "BLS",         // BLS
+    "FBLS",        // FBLS
+    "RBLS",        // RBLS
+    "FRBLS",       // FRBLS
+    "PBLS",        // PBLS
+    "FPBLS",       // FPBLS
+    "RPBLS",       // RPBLS
+    "FRPBLS",      // FRPBLS
+    "Tion",        // GS
+    "FGS",         // FGS
+    "RTion",       // RGS
+    "FRGS",        // FRGS
+    "PGS",         // PGS
+    "FPGS",        // FPGS
+    "RPGS",        // RPGS
+    "FRPGS",       // FRPGS
+    "Ction",       // BGS
+    "FBGS",        // FBGS
+    "RBGS",        // RBGS
+    "FRBGS",       // FRBGS
+    "PBGS",        // PBGS
+    "FPBGS",       // FPBGS
+    "RPBGS",       // RPBGS
+    "FRPBGS",      // FRPBGS
+    "LGS",         // LGS
+    "FLGS",        // FLGS
+    "RLGS",        // RLGS
+    "FRLGS",       // FRLGS
+    "PLGS",        // PLGS
+    "FPLGS",       // FPLGS
+    "RPLGS",       // RPLGS
+    "FRPLGS",      // FRPLGS
+    "BLGS",        // BLGS
+    "FBLGS",       // FBLGS
+    "RBLGS",       // RBLGS
+    "FRBLGS",      // FRBLGS
+    "PBLGS",       // PBLGS
+    "FPBLGS",      // FPBLGS
+    "RPBLGS",      // RPBLGS
+    "FRPBLGS",     // FRPBLGS
+    "TS",          // TS
+    "FTS",         // FTS
+    "RTS",         // RTS
+    "FRTS",        // FRTS
+    "PTS",         // PTS
+    "FPTS",        // FPTS
+    "RPTS",        // RPTS
+    "FRPTS",       // FRPTS
+    "BTS",         // BTS
+    "FBTS",        // FBTS
+    "RBTS",        // RBTS
+    "FRBTS",       // FRBTS
+    "NTS",         // PBTS
+    "FPBTS",       // FPBTS
+    "RPBTS",       // RPBTS
+    "FRPBTS",      // FRPBTS
+    "LTS",         // LTS
+    "FLTS",        // FLTS
+    "RLTS",        // RLTS
+    "FRLTS",       // FRLTS
+    "PLTS",        // PLTS
+    "FPLTS",       // FPLTS
+    "RPLTS",       // RPLTS
+    "FRPLTS",      // FRPLTS
+    "BLTS",        // BLTS
+    "FBLTS",       // FBLTS
+    "RBLTS",       // RBLTS
+    "FRBLTS",      // FRBLTS
+    "PBLTS",       // PBLTS
+    "FPBLTS",      // FPBLTS
+    "RPBLTS",      // RPBLTS
+    "FRPBLTS",     // FRPBLTS
+    "GTS",         // GTS
+    "FGTS",        // FGTS
+    "RGTS",        // RGTS
+    "FRGTS",       // FRGTS
+    "PGTS",        // PGTS
+    "FPGTS",       // FPGTS
+    "RPGTS",       // RPGTS
+    "FRPGTS",      // FRPGTS
+    "BGTS",        // BGTS
+    "FBGTS",       // FBGTS
+    "RBGTS",       // RBGTS
+    "FRBGTS",      // FRBGTS
+    "PBGTS",       // PBGTS
+    "FPBGTS",      // FPBGTS
+    "RPBGTS",      // RPBGTS
+    "FRPBGTS",     // FRPBGTS
+    "LGTS",        // LGTS
+    "FLGTS",       // FLGTS
+    "RLGTS",       // RLGTS
+    "FRLGTS",      // FRLGTS
+    "PLGTS",       // PLGTS
+    "FPLGTS",      // FPLGTS
+    "RPLGTS",      // RPLGTS
+    "FRPLGTS",     // FRPLGTS
+    "BLGTS",       // BLGTS
+    "FBLGTS",      // FBLGTS
+    "RBLGTS",      // RBLGTS
+    "FRBLGTS",     // FRBLGTS
+    "PBLGTS",      // PBLGTS
+    "FPBLGTS",     // FPBLGTS
+    "RPBLGTS",     // RPBLGTS
+    "FRPBLGTS",    // FRPBLGTS
+    "D",           // D
+    "FD",          // FD
+    "RD",          // RD
+    "FRD",         // FRD
+    "PD",          // PD
+    "FPD",         // FPD
+    "RPD",         // RPD
+    "FRPD",        // FRPD
+    "BD",          // BD
+    "FBD",         // FBD
+    "RBD",         // RBD
+    "FRBD",        // FRBD
+    "ND",          // PBD
+    "FPBD",        // FPBD
+    "RPBD",        // RPBD
+    "FRPBD",       // FRPBD
+    "LD",          // LD
+    "FLD",         // FLD
+    "RLD",         // RLD
+    "FRLD",        // FRLD
+    "PLD",         // PLD
+    "FPLD",        // FPLD
+    "RPLD",        // RPLD
+    "FRPLD",       // FRPLD
+    "BLD",         // BLD
+    "FBLD",        // FBLD
+    "RBLD",        // RBLD
+    "FRBLD",       // FRBLD
+    "PBLD",        // PBLD
+    "FPBLD",       // FPBLD
+    "RPBLD",       // RPBLD
+    "FRPBLD",      // FRPBLD
+    "GD",          // GD
+    "FGD",         // FGD
+    "RGD",         // RGD
+    "FRGD",        // FRGD
+    "PGD",         // PGD
+    "FPGD",        // FPGD
+    "RPGD",        // RPGD
+    "FRPGD",       // FRPGD
+    "BGD",         // BGD
+    "FBGD",        // FBGD
+    "RBGD",        // RBGD
+    "FRBGD",       // FRBGD
+    "PBGD",        // PBGD
+    "FPBGD",       // FPBGD
+    "RPBGD",       // RPBGD
+    "FRPBGD",      // FRPBGD
+    "LGD",         // LGD
+    "FLGD",        // FLGD
+    "RLGD",        // RLGD
+    "FRLGD",       // FRLGD
+    "PLGD",        // PLGD
+    "FPLGD",       // FPLGD
+    "RPLGD",       // RPLGD
+    "FRPLGD",      // FRPLGD
+    "BLGD",        // BLGD
+    "FBLGD",       // FBLGD
+    "RBLGD",       // RBLGD
+    "FRBLGD",      // FRBLGD
+    "PBLGD",       // PBLGD
+    "FPBLGD",      // FPBLGD
+    "RPBLGD",      // RPBLGD
+    "FRPBLGD",     // FRPBLGD
+    "TD",          // TD
+    "FTD",         // FTD
+    "RTD",         // RTD
+    "FRTD",        // FRTD
+    "PTD",         // PTD
+    "FPTD",        // FPTD
+    "RPTD",        // RPTD
+    "FRPTD",       // FRPTD
+    "BTD",         // BTD
+    "FBTD",        // FBTD
+    "RBTD",        // RBTD
+    "FRBTD",       // FRBTD
+    "NTD",         // PBTD
+    "FPBTD",       // FPBTD
+    "RPBTD",       // RPBTD
+    "FRPBTD",      // FRPBTD
+    "LTD",         // LTD
+    "FLTD",        // FLTD
+    "RLTD",        // RLTD
+    "FRLTD",       // FRLTD
+    "PLTD",        // PLTD
+    "FPLTD",       // FPLTD
+    "RPLTD",       // RPLTD
+    "FRPLTD",      // FRPLTD
+    "BLTD",        // BLTD
+    "FBLTD",       // FBLTD
+    "RBLTD",       // RBLTD
+    "FRBLTD",      // FRBLTD
+    "PBLTD",       // PBLTD
+    "FPBLTD",      // FPBLTD
+    "RPBLTD",      // RPBLTD
+    "FRPBLTD",     // FRPBLTD
+    "GTD",         // GTD
+    "FGTD",        // FGTD
+    "RGTD",        // RGTD
+    "FRGTD",       // FRGTD
+    "PGTD",        // PGTD
+    "FPGTD",       // FPGTD
+    "RPGTD",       // RPGTD
+    "FRPGTD",      // FRPGTD
+    "BGTD",        // BGTD
+    "FBGTD",       // FBGTD
+    "RBGTD",       // RBGTD
+    "FRBGTD",      // FRBGTD
+    "PBGTD",       // PBGTD
+    "FPBGTD",      // FPBGTD
+    "RPBGTD",      // RPBGTD
+    "FRPBGTD",     // FRPBGTD
+    "LGTD",        // LGTD
+    "FLGTD",       // FLGTD
+    "RLGTD",       // RLGTD
+    "FRLGTD",      // FRLGTD
+    "PLGTD",       // PLGTD
+    "FPLGTD",      // FPLGTD
+    "RPLGTD",      // RPLGTD
+    "FRPLGTD",     // FRPLGTD
+    "BLGTD",       // BLGTD
+    "FBLGTD",      // FBLGTD
+    "RBLGTD",      // RBLGTD
+    "FRBLGTD",     // FRBLGTD
+    "PBLGTD",      // PBLGTD
+    "FPBLGTD",     // FPBLGTD
+    "RPBLGTD",     // RPBLGTD
+    "FRPBLGTD",    // FRPBLGTD
+    "SD",          // SD
+    "FSD",         // FSD
+    "RSD",         // RSD
+    "FRSD",        // FRSD
+    "PSD",         // PSD
+    "FPSD",        // FPSD
+    "RPSD",        // RPSD
+    "FRPSD",       // FRPSD
+    "BSD",         // BSD
+    "FBSD",        // FBSD
+    "RBSD",        // RBSD
+    "FRBSD",       // FRBSD
+    "PBSD",        // PBSD
+    "FPBSD",       // FPBSD
+    "RPBSD",       // RPBSD
+    "FRPBSD",      // FRPBSD
+    "LSD",         // LSD
+    "FLSD",        // FLSD
+    "RLSD",        // RLSD
+    "FRLSD",       // FRLSD
+    "PLSD",        // PLSD
+    "FPLSD",       // FPLSD
+    "RPLSD",       // RPLSD
+    "FRPLSD",      // FRPLSD
+    "BLSD",        // BLSD
+    "FBLSD",       // FBLSD
+    "RBLSD",       // RBLSD
+    "FRBLSD",      // FRBLSD
+    "PBLSD",       // PBLSD
+    "FPBLSD",      // FPBLSD
+    "RPBLSD",      // RPBLSD
+    "FRPBLSD",     // FRPBLSD
+    "GSD",         // GSD
+    "FGSD",        // FGSD
+    "RGSD",        // RGSD
+    "FRGSD",       // FRGSD
+    "PGSD",        // PGSD
+    "FPGSD",       // FPGSD
+    "RPGSD",       // RPGSD
+    "FRPGSD",      // FRPGSD
+    "BGSD",        // BGSD
+    "FBGSD",       // FBGSD
+    "RBGSD",       // RBGSD
+    "FRBGSD",      // FRBGSD
+    "PBGSD",       // PBGSD
+    "FPBGSD",      // FPBGSD
+    "RPBGSD",      // RPBGSD
+    "FRPBGSD",     // FRPBGSD
+    "LGSD",        // LGSD
+    "FLGSD",       // FLGSD
+    "RLGSD",       // RLGSD
+    "FRLGSD",      // FRLGSD
+    "PLGSD",       // PLGSD
+    "FPLGSD",      // FPLGSD
+    "RPLGSD",      // RPLGSD
+    "FRPLGSD",     // FRPLGSD
+    "BLGSD",       // BLGSD
+    "FBLGSD",      // FBLGSD
+    "RBLGSD",      // RBLGSD
+    "FRBLGSD",     // FRBLGSD
+    "PBLGSD",      // PBLGSD
+    "FPBLGSD",     // FPBLGSD
+    "RPBLGSD",     // RPBLGSD
+    "FRPBLGSD",    // FRPBLGSD
+    "TSD",         // TSD
+    "FTSD",        // FTSD
+    "RTSD",        // RTSD
+    "FRTSD",       // FRTSD
+    "PTSD",        // PTSD
+    "FPTSD",       // FPTSD
+    "RPTSD",       // RPTSD
+    "FRPTSD",      // FRPTSD
+    "BTSD",        // BTSD
+    "FBTSD",       // FBTSD
+    "RBTSD",       // RBTSD
+    "FRBTSD",      // FRBTSD
+    "PBTSD",       // PBTSD
+    "FPBTSD",      // FPBTSD
+    "RPBTSD",      // RPBTSD
+    "FRPBTSD",     // FRPBTSD
+    "LTSD",        // LTSD
+    "FLTSD",       // FLTSD
+    "RLTSD",       // RLTSD
+    "FRLTSD",      // FRLTSD
+    "PLTSD",       // PLTSD
+    "FPLTSD",      // FPLTSD
+    "RPLTSD",      // RPLTSD
+    "FRPLTSD",     // FRPLTSD
+    "BLTSD",       // BLTSD
+    "FBLTSD",      // FBLTSD
+    "RBLTSD",      // RBLTSD
+    "FRBLTSD",     // FRBLTSD
+    "PBLTSD",      // PBLTSD
+    "FPBLTSD",     // FPBLTSD
+    "RPBLTSD",     // RPBLTSD
+    "FRPBLTSD",    // FRPBLTSD
+    "GTSD",        // GTSD
+    "FGTSD",       // FGTSD
+    "RGTSD",       // RGTSD
+    "FRGTSD",      // FRGTSD
+    "PGTSD",       // PGTSD
+    "FPGTSD",      // FPGTSD
+    "RPGTSD",      // RPGTSD
+    "FRPGTSD",     // FRPGTSD
+    "BGTSD",       // BGTSD
+    "FBGTSD",      // FBGTSD
+    "RBGTSD",      // RBGTSD
+    "FRBGTSD",     // FRBGTSD
+    "PBGTSD",      // PBGTSD
+    "FPBGTSD",     // FPBGTSD
+    "RPBGTSD",     // RPBGTSD
+    "FRPBGTSD",    // FRPBGTSD
+    "LGTSD",       // LGTSD
+    "FLGTSD",      // FLGTSD
+    "RLGTSD",      // RLGTSD
+    "FRLGTSD",     // FRLGTSD
+    "PLGTSD",      // PLGTSD
+    "FPLGTSD",     // FPLGTSD
+    "RPLGTSD",     // RPLGTSD
+    "FRPLGTSD",    // FRPLGTSD
+    "BLGTSD",      // BLGTSD
+    "FBLGTSD",     // FBLGTSD
+    "RBLGTSD",     // RBLGTSD
+    "FRBLGTSD",    // FRBLGTSD
+    "PBLGTSD",     // PBLGTSD
+    "FPBLGTSD",    // FPBLGTSD
+    "RPBLGTSD",    // RPBLGTSD
+    "FRPBLGTSD",   // FRPBLGTSD
+    "Z",           // Z
+    "FZ",          // FZ
+    "RZ",          // RZ
+    "FRZ",         // FRZ
+    "PZ",          // PZ
+    "FPZ",         // FPZ
+    "RPZ",         // RPZ
+    "FRPZ",        // FRPZ
+    "BZ",          // BZ
+    "FBZ",         // FBZ
+    "RBZ",         // RBZ
+    "FRBZ",        // FRBZ
+    "PBZ",         // PBZ
+    "FPBZ",        // FPBZ
+    "RPBZ",        // RPBZ
+    "FRPBZ",       // FRPBZ
+    "LZ",          // LZ
+    "FLZ",         // FLZ
+    "RLZ",         // RLZ
+    "FRLZ",        // FRLZ
+    "PLZ",         // PLZ
+    "FPLZ",        // FPLZ
+    "RPLZ",        // RPLZ
+    "FRPLZ",       // FRPLZ
+    "BLZ",         // BLZ
+    "FBLZ",        // FBLZ
+    "RBLZ",        // RBLZ
+    "FRBLZ",       // FRBLZ
+    "PBLZ",        // PBLZ
+    "FPBLZ",       // FPBLZ
+    "RPBLZ",       // RPBLZ
+    "FRPBLZ",      // FRPBLZ
+    "GZ",          // GZ
+    "FGZ",         // FGZ
+    "RGZ",         // RGZ
+    "FRGZ",        // FRGZ
+    "PGZ",         // PGZ
+    "FPGZ",        // FPGZ
+    "RPGZ",        // RPGZ
+    "FRPGZ",       // FRPGZ
+    "BGZ",         // BGZ
+    "FBGZ",        // FBGZ
+    "RBGZ",        // RBGZ
+    "FRBGZ",       // FRBGZ
+    "PBGZ",        // PBGZ
+    "FPBGZ",       // FPBGZ
+    "RPBGZ",       // RPBGZ
+    "FRPBGZ",      // FRPBGZ
+    "LGZ",         // LGZ
+    "FLGZ",        // FLGZ
+    "RLGZ",        // RLGZ
+    "FRLGZ",       // FRLGZ
+    "PLGZ",        // PLGZ
+    "FPLGZ",       // FPLGZ
+    "RPLGZ",       // RPLGZ
+    "FRPLGZ",      // FRPLGZ
+    "BLGZ",        // BLGZ
+    "FBLGZ",       // FBLGZ
+    "RBLGZ",       // RBLGZ
+    "FRBLGZ",      // FRBLGZ
+    "PBLGZ",       // PBLGZ
+    "FPBLGZ",      // FPBLGZ
+    "RPBLGZ",      // RPBLGZ
+    "FRPBLGZ",     // FRPBLGZ
+    "TZ",          // TZ
+    "FTZ",         // FTZ
+    "RTZ",         // RTZ
+    "FRTZ",        // FRTZ
+    "PTZ",         // PTZ
+    "FPTZ",        // FPTZ
+    "RPTZ",        // RPTZ
+    "FRPTZ",       // FRPTZ
+    "BTZ",         // BTZ
+    "FBTZ",        // FBTZ
+    "RBTZ",        // RBTZ
+    "FRBTZ",       // FRBTZ
+    "PBTZ",        // PBTZ
+    "FPBTZ",       // FPBTZ
+    "RPBTZ",       // RPBTZ
+    "FRPBTZ",      // FRPBTZ
+    "LTZ",         // LTZ
+    "FLTZ",        // FLTZ
+    "RLTZ",        // RLTZ
+    "FRLTZ",       // FRLTZ
+    "PLTZ",        // PLTZ
+    "FPLTZ",       // FPLTZ
+    "RPLTZ",       // RPLTZ
+    "FRPLTZ",      // FRPLTZ
+    "BLTZ",        // BLTZ
+    "FBLTZ",       // FBLTZ
+    "RBLTZ",       // RBLTZ
+    "FRBLTZ",      // FRBLTZ
+    "PBLTZ",       // PBLTZ
+    "FPBLTZ",      // FPBLTZ
+    "RPBLTZ",      // RPBLTZ
+    "FRPBLTZ",     // FRPBLTZ
+    "GTZ",         // GTZ
+    "FGTZ",        // FGTZ
+    "RGTZ",        // RGTZ
+    "FRGTZ",       // FRGTZ
+    "PGTZ",        // PGTZ
+    "FPGTZ",       // FPGTZ
+    "RPGTZ",       // RPGTZ
+    "FRPGTZ",      // FRPGTZ
+    "BGTZ",        // BGTZ
+    "FBGTZ",       // FBGTZ
+    "RBGTZ",       // RBGTZ
+    "FRBGTZ",      // FRBGTZ
+    "PBGTZ",       // PBGTZ
+    "FPBGTZ",      // FPBGTZ
+    "RPBGTZ",      // RPBGTZ
+    "FRPBGTZ",     // FRPBGTZ
+    "LGTZ",        // LGTZ
+    "FLGTZ",       // FLGTZ
+    "RLGTZ",       // RLGTZ
+    "FRLGTZ",      // FRLGTZ
+    "PLGTZ",       // PLGTZ
+    "FPLGTZ",      // FPLGTZ
+    "RPLGTZ",      // RPLGTZ
+    "FRPLGTZ",     // FRPLGTZ
+    "BLGTZ",       // BLGTZ
+    "FBLGTZ",      // FBLGTZ
+    "RBLGTZ",      // RBLGTZ
+    "FRBLGTZ",     // FRBLGTZ
+    "PBLGTZ",      // PBLGTZ
+    "FPBLGTZ",     // FPBLGTZ
+    "RPBLGTZ",     // RPBLGTZ
+    "FRPBLGTZ",    // FRPBLGTZ
+    "SZ",          // SZ
+    "FSZ",         // FSZ
+    "RSZ",         // RSZ
+    "FRSZ",        // FRSZ
+    "PSZ",         // PSZ
+    "FPSZ",        // FPSZ
+    "RPSZ",        // RPSZ
+    "FRPSZ",       // FRPSZ
+    "BSZ",         // BSZ
+    "FBSZ",        // FBSZ
+    "RBSZ",        // RBSZ
+    "FRBSZ",       // FRBSZ
+    "PBSZ",        // PBSZ
+    "FPBSZ",       // FPBSZ
+    "RPBSZ",       // RPBSZ
+    "FRPBSZ",      // FRPBSZ
+    "LSZ",         // LSZ
+    "FLSZ",        // FLSZ
+    "RLSZ",        // RLSZ
+    "FRLSZ",       // FRLSZ
+    "PLSZ",        // PLSZ
+    "FPLSZ",       // FPLSZ
+    "RPLSZ",       // RPLSZ
+    "FRPLSZ",      // FRPLSZ
+    "BLSZ",        // BLSZ
+    "FBLSZ",       // FBLSZ
+    "RBLSZ",       // RBLSZ
+    "FRBLSZ",      // FRBLSZ
+    "PBLSZ",       // PBLSZ
+    "FPBLSZ",      // FPBLSZ
+    "RPBLSZ",      // RPBLSZ
+    "FRPBLSZ",     // FRPBLSZ
+    "GSZ",         // GSZ
+    "FGSZ",        // FGSZ
+    "RGSZ",        // RGSZ
+    "FRGSZ",       // FRGSZ
+    "PGSZ",        // PGSZ
+    "FPGSZ",       // FPGSZ
+    "RPGSZ",       // RPGSZ
+    "FRPGSZ",      // FRPGSZ
+    "BGSZ",        // BGSZ
+    "FBGSZ",       // FBGSZ
+    "RBGSZ",       // RBGSZ
+    "FRBGSZ",      // FRBGSZ
+    "PBGSZ",       // PBGSZ
+    "FPBGSZ",      // FPBGSZ
+    "RPBGSZ",      // RPBGSZ
+    "FRPBGSZ",     // FRPBGSZ
+    "LGSZ",        // LGSZ
+    "FLGSZ",       // FLGSZ
+    "RLGSZ",       // RLGSZ
+    "FRLGSZ",      // FRLGSZ
+    "PLGSZ",       // PLGSZ
+    "FPLGSZ",      // FPLGSZ
+    "RPLGSZ",      // RPLGSZ
+    "FRPLGSZ",     // FRPLGSZ
+    "BLGSZ",       // BLGSZ
+    "FBLGSZ",      // FBLGSZ
+    "RBLGSZ",      // RBLGSZ
+    "FRBLGSZ",     // FRBLGSZ
+    "PBLGSZ",      // PBLGSZ
+    "FPBLGSZ",     // FPBLGSZ
+    "RPBLGSZ",     // RPBLGSZ
+    "FRPBLGSZ",    // FRPBLGSZ
+    "TSZ",         // TSZ
+    "FTSZ",        // FTSZ
+    "RTSZ",        // RTSZ
+    "FRTSZ",       // FRTSZ
+    "PTSZ",        // PTSZ
+    "FPTSZ",       // FPTSZ
+    "RPTSZ",       // RPTSZ
+    "FRPTSZ",      // FRPTSZ
+    "BTSZ",        // BTSZ
+    "FBTSZ",       // FBTSZ
+    "RBTSZ",       // RBTSZ
+    "FRBTSZ",      // FRBTSZ
+    "PBTSZ",       // PBTSZ
+    "FPBTSZ",      // FPBTSZ
+    "RPBTSZ",      // RPBTSZ
+    "FRPBTSZ",     // FRPBTSZ
+    "LTSZ",        // LTSZ
+    "FLTSZ",       // FLTSZ
+    "RLTSZ",       // RLTSZ
+    "FRLTSZ",      // FRLTSZ
+    "PLTSZ",       // PLTSZ
+    "FPLTSZ",      // FPLTSZ
+    "RPLTSZ",      // RPLTSZ
+    "FRPLTSZ",     // FRPLTSZ
+    "BLTSZ",       // BLTSZ
+    "FBLTSZ",      // FBLTSZ
+    "RBLTSZ",      // RBLTSZ
+    "FRBLTSZ",     // FRBLTSZ
+    "PBLTSZ",      // PBLTSZ
+    "FPBLTSZ",     // FPBLTSZ
+    "RPBLTSZ",     // RPBLTSZ
+    "FRPBLTSZ",    // FRPBLTSZ
+    "GTSZ",        // GTSZ
+    "FGTSZ",       // FGTSZ
+    "RGTSZ",       // RGTSZ
+    "FRGTSZ",      // FRGTSZ
+    "PGTSZ",       // PGTSZ
+    "FPGTSZ",      // FPGTSZ
+    "RPGTSZ",      // RPGTSZ
+    "FRPGTSZ",     // FRPGTSZ
+    "BGTSZ",       // BGTSZ
+    "FBGTSZ",      // FBGTSZ
+    "RBGTSZ",      // RBGTSZ
+    "FRBGTSZ",     // FRBGTSZ
+    "PBGTSZ",      // PBGTSZ
+    "FPBGTSZ",     // FPBGTSZ
+    "RPBGTSZ",     // RPBGTSZ
+    "FRPBGTSZ",    // FRPBGTSZ
+    "LGTSZ",       // LGTSZ
+    "FLGTSZ",      // FLGTSZ
+    "RLGTSZ",      // RLGTSZ
+    "FRLGTSZ",     // FRLGTSZ
+    "PLGTSZ",      // PLGTSZ
+    "FPLGTSZ",     // FPLGTSZ
+    "RPLGTSZ",     // RPLGTSZ
+    "FRPLGTSZ",    // FRPLGTSZ
+    "BLGTSZ",      // BLGTSZ
+    "FBLGTSZ",     // FBLGTSZ
+    "RBLGTSZ",     // RBLGTSZ
+    "FRBLGTSZ",    // FRBLGTSZ
+    "PBLGTSZ",     // PBLGTSZ
+    "FPBLGTSZ",    // FPBLGTSZ
+    "RPBLGTSZ",    // RPBLGTSZ
+    "FRPBLGTSZ",   // FRPBLGTSZ
+    "DZ",          // DZ
+    "FDZ",         // FDZ
+    "RDZ",         // RDZ
+    "FRDZ",        // FRDZ
+    "PDZ",         // PDZ
+    "FPDZ",        // FPDZ
+    "RPDZ",        // RPDZ
+    "FRPDZ",       // FRPDZ
+    "BDZ",         // BDZ
+    "FBDZ",        // FBDZ
+    "RBDZ",        // RBDZ
+    "FRBDZ",       // FRBDZ
+    "NDZ",         // PBDZ
+    "FPBDZ",       // FPBDZ
+    "RPBDZ",       // RPBDZ
+    "FRPBDZ",      // FRPBDZ
+    "LDZ",         // LDZ
+    "FLDZ",        // FLDZ
+    "RLDZ",        // RLDZ
+    "FRLDZ",       // FRLDZ
+    "PLDZ",        // PLDZ
+    "FPLDZ",       // FPLDZ
+    "RPLDZ",       // RPLDZ
+    "FRPLDZ",      // FRPLDZ
+    "BLDZ",        // BLDZ
+    "FBLDZ",       // FBLDZ
+    "RBLDZ",       // RBLDZ
+    "FRBLDZ",      // FRBLDZ
+    "PBLDZ",       // PBLDZ
+    "FPBLDZ",      // FPBLDZ
+    "RPBLDZ",      // RPBLDZ
+    "FRPBLDZ",     // FRPBLDZ
+    "GDZ",         // GDZ
+    "FGDZ",        // FGDZ
+    "RGDZ",        // RGDZ
+    "FRGDZ",       // FRGDZ
+    "PGDZ",        // PGDZ
+    "FPGDZ",       // FPGDZ
+    "RPGDZ",       // RPGDZ
+    "FRPGDZ",      // FRPGDZ
+    "BGDZ",        // BGDZ
+    "FBGDZ",       // FBGDZ
+    "RBGDZ",       // RBGDZ
+    "FRBGDZ",      // FRBGDZ
+    "PBGDZ",       // PBGDZ
+    "FPBGDZ",      // FPBGDZ
+    "RPBGDZ",      // RPBGDZ
+    "FRPBGDZ",     // FRPBGDZ
+    "LGDZ",        // LGDZ
+    "FLGDZ",       // FLGDZ
+    "RLGDZ",       // RLGDZ
+    "FRLGDZ",      // FRLGDZ
+    "PLGDZ",       // PLGDZ
+    "FPLGDZ",      // FPLGDZ
+    "RPLGDZ",      // RPLGDZ
+    "FRPLGDZ",     // FRPLGDZ
+    "BLGDZ",       // BLGDZ
+    "FBLGDZ",      // FBLGDZ
+    "RBLGDZ",      // RBLGDZ
+    "FRBLGDZ",     // FRBLGDZ
+    "PBLGDZ",      // PBLGDZ
+    "FPBLGDZ",     // FPBLGDZ
+    "RPBLGDZ",     // RPBLGDZ
+    "FRPBLGDZ",    // FRPBLGDZ
+    "TDZ",         // TDZ
+    "FTDZ",        // FTDZ
+    "RTDZ",        // RTDZ
+    "FRTDZ",       // FRTDZ
+    "PTDZ",        // PTDZ
+    "FPTDZ",       // FPTDZ
+    "RPTDZ",       // RPTDZ
+    "FRPTDZ",      // FRPTDZ
+    "BTDZ",        // BTDZ
+    "FBTDZ",       // FBTDZ
+    "RBTDZ",       // RBTDZ
+    "FRBTDZ",      // FRBTDZ
+    "PBTDZ",       // PBTDZ
+    "FPBTDZ",      // FPBTDZ
+    "RPBTDZ",      // RPBTDZ
+    "FRPBTDZ",     // FRPBTDZ
+    "LTDZ",        // LTDZ
+    "FLTDZ",       // FLTDZ
+    "RLTDZ",       // RLTDZ
+    "FRLTDZ",      // FRLTDZ
+    "PLTDZ",       // PLTDZ
+    "FPLTDZ",      // FPLTDZ
+    "RPLTDZ",      // RPLTDZ
+    "FRPLTDZ",     // FRPLTDZ
+    "BLTDZ",       // BLTDZ
+    "FBLTDZ",      // FBLTDZ
+    "RBLTDZ",      // RBLTDZ
+    "FRBLTDZ",     // FRBLTDZ
+    "PBLTDZ",      // PBLTDZ
+    "FPBLTDZ",     // FPBLTDZ
+    "RPBLTDZ",     // RPBLTDZ
+    "FRPBLTDZ",    // FRPBLTDZ
+    "GTDZ",        // GTDZ
+    "FGTDZ",       // FGTDZ
+    "RGTDZ",       // RGTDZ
+    "FRGTDZ",      // FRGTDZ
+    "PGTDZ",       // PGTDZ
+    "FPGTDZ",      // FPGTDZ
+    "RPGTDZ",      // RPGTDZ
+    "FRPGTDZ",     // FRPGTDZ
+    "BGTDZ",       // BGTDZ
+    "FBGTDZ",      // FBGTDZ
+    "RBGTDZ",      // RBGTDZ
+    "FRBGTDZ",     // FRBGTDZ
+    "PBGTDZ",      // PBGTDZ
+    "FPBGTDZ",     // FPBGTDZ
+    "RPBGTDZ",     // RPBGTDZ
+    "FRPBGTDZ",    // FRPBGTDZ
+    "LGTDZ",       // LGTDZ
+    "FLGTDZ",      // FLGTDZ
+    "RLGTDZ",      // RLGTDZ
+    "FRLGTDZ",     // FRLGTDZ
+    "PLGTDZ",      // PLGTDZ
+    "FPLGTDZ",     // FPLGTDZ
+    "RPLGTDZ",     // RPLGTDZ
+    "FRPLGTDZ",    // FRPLGTDZ
+    "BLGTDZ",      // BLGTDZ
+    "FBLGTDZ",     // FBLGTDZ
+    "RBLGTDZ",     // RBLGTDZ
+    "FRBLGTDZ",    // FRBLGTDZ
+    "PBLGTDZ",     // PBLGTDZ
+    "FPBLGTDZ",    // FPBLGTDZ
+    "RPBLGTDZ",    // RPBLGTDZ
+    "FRPBLGTDZ",   // FRPBLGTDZ
+    "SDZ",         // SDZ
+    "FSDZ",        // FSDZ
+    "RSDZ",        // RSDZ
+    "FRSDZ",       // FRSDZ
+    "PSDZ",        // PSDZ
+    "FPSDZ",       // FPSDZ
+    "RPSDZ",       // RPSDZ
+    "FRPSDZ",      // FRPSDZ
+    "BSDZ",        // BSDZ
+    "FBSDZ",       // FBSDZ
+    "RBSDZ",       // RBSDZ
+    "FRBSDZ",      // FRBSDZ
+    "PBSDZ",       // PBSDZ
+    "FPBSDZ",      // FPBSDZ
+    "RPBSDZ",      // RPBSDZ
+    "FRPBSDZ",     // FRPBSDZ
+    "LSDZ",        // LSDZ
+    "FLSDZ",       // FLSDZ
+    "RLSDZ",       // RLSDZ
+    "FRLSDZ",      // FRLSDZ
+    "PLSDZ",       // PLSDZ
+    "FPLSDZ",      // FPLSDZ
+    "RPLSDZ",      // RPLSDZ
+    "FRPLSDZ",     // FRPLSDZ
+    "BLSDZ",       // BLSDZ
+    "FBLSDZ",      // FBLSDZ
+    "RBLSDZ",      // RBLSDZ
+    "FRBLSDZ",     // FRBLSDZ
+    "PBLSDZ",      // PBLSDZ
+    "FPBLSDZ",     // FPBLSDZ
+    "RPBLSDZ",     // RPBLSDZ
+    "FRPBLSDZ",    // FRPBLSDZ
+    "GSDZ",        // GSDZ
+    "FGSDZ",       // FGSDZ
+    "RGSDZ",       // RGSDZ
+    "FRGSDZ",      // FRGSDZ
+    "PGSDZ",       // PGSDZ
+    "FPGSDZ",      // FPGSDZ
+    "RPGSDZ",      // RPGSDZ
+    "FRPGSDZ",     // FRPGSDZ
+    "BGSDZ",       // BGSDZ
+    "FBGSDZ",      // FBGSDZ
+    "RBGSDZ",      // RBGSDZ
+    "FRBGSDZ",     // FRBGSDZ
+    "PBGSDZ",      // PBGSDZ
+    "FPBGSDZ",     // FPBGSDZ
+    "RPBGSDZ",     // RPBGSDZ
+    "FRPBGSDZ",    // FRPBGSDZ
+    "LGSDZ",       // LGSDZ
+    "FLGSDZ",      // FLGSDZ
+    "RLGSDZ",      // RLGSDZ
+    "FRLGSDZ",     // FRLGSDZ
+    "PLGSDZ",      // PLGSDZ
+    "FPLGSDZ",     // FPLGSDZ
+    "RPLGSDZ",     // RPLGSDZ
+    "FRPLGSDZ",    // FRPLGSDZ
+    "BLGSDZ",      // BLGSDZ
+    "FBLGSDZ",     // FBLGSDZ
+    "RBLGSDZ",     // RBLGSDZ
+    "FRBLGSDZ",    // FRBLGSDZ
+    "PBLGSDZ",     // PBLGSDZ
+    "FPBLGSDZ",    // FPBLGSDZ
+    "RPBLGSDZ",    // RPBLGSDZ
+    "FRPBLGSDZ",   // FRPBLGSDZ
+    "TSDZ",        // TSDZ
+    "FTSDZ",       // FTSDZ
+    "RTSDZ",       // RTSDZ
+    "FRTSDZ",      // FRTSDZ
+    "PTSDZ",       // PTSDZ
+    "FPTSDZ",      // FPTSDZ
+    "RPTSDZ",      // RPTSDZ
+    "FRPTSDZ",     // FRPTSDZ
+    "BTSDZ",       // BTSDZ
+    "FBTSDZ",      // FBTSDZ
+    "RBTSDZ",      // RBTSDZ
+    "FRBTSDZ",     // FRBTSDZ
+    "PBTSDZ",      // PBTSDZ
+    "FPBTSDZ",     // FPBTSDZ
+    "RPBTSDZ",     // RPBTSDZ
+    "FRPBTSDZ",    // FRPBTSDZ
+    "LTSDZ",       // LTSDZ
+    "FLTSDZ",      // FLTSDZ
+    "RLTSDZ",      // RLTSDZ
+    "FRLTSDZ",     // FRLTSDZ
+    "PLTSDZ",      // PLTSDZ
+    "FPLTSDZ",     // FPLTSDZ
+    "RPLTSDZ",     // RPLTSDZ
+    "FRPLTSDZ",    // FRPLTSDZ
+    "BLTSDZ",      // BLTSDZ
+    "FBLTSDZ",     // FBLTSDZ
+    "RBLTSDZ",     // RBLTSDZ
+    "FRBLTSDZ",    // FRBLTSDZ
+    "PBLTSDZ",     // PBLTSDZ
+    "FPBLTSDZ",    // FPBLTSDZ
+    "RPBLTSDZ",    // RPBLTSDZ
+    "FRPBLTSDZ",   // FRPBLTSDZ
+    "GTSDZ",       // GTSDZ
+    "FGTSDZ",      // FGTSDZ
+    "RGTSDZ",      // RGTSDZ
+    "FRGTSDZ",     // FRGTSDZ
+    "PGTSDZ",      // PGTSDZ
+    "FPGTSDZ",     // FPGTSDZ
+    "RPGTSDZ",     // RPGTSDZ
+    "FRPGTSDZ",    // FRPGTSDZ
+    "BGTSDZ",      // BGTSDZ
+    "FBGTSDZ",     // FBGTSDZ
+    "RBGTSDZ",     // RBGTSDZ
+    "FRBGTSDZ",    // FRBGTSDZ
+    "PBGTSDZ",     // PBGTSDZ
+    "FPBGTSDZ",    // FPBGTSDZ
+    "RPBGTSDZ",    // RPBGTSDZ
+    "FRPBGTSDZ",   // FRPBGTSDZ
+    "LGTSDZ",      // LGTSDZ
+    "FLGTSDZ",     // FLGTSDZ
+    "RLGTSDZ",     // RLGTSDZ
+    "FRLGTSDZ",    // FRLGTSDZ
+    "PLGTSDZ",     // PLGTSDZ
+    "FPLGTSDZ",    // FPLGTSDZ
+    "RPLGTSDZ",    // RPLGTSDZ
+    "FRPLGTSDZ",   // FRPLGTSDZ
+    "BLGTSDZ",     // BLGTSDZ
+    "FBLGTSDZ",    // FBLGTSDZ
+    "RBLGTSDZ",    // RBLGTSDZ
+    "FRBLGTSDZ",   // FRBLGTSDZ
+    "PBLGTSDZ",    // PBLGTSDZ
+    "FPBLGTSDZ",   // FPBLGTSDZ
+    "RPBLGTSDZ",   // RPBLGTSDZ
+    "FRPBLGTSDZ",  // FRPBLGTSDZ
 ];
