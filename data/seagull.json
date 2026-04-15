@@ -28,7 +28,6 @@
   "R*PB": "aren't",
   "K*PB": "can't",
   "": "didn't",
-  "KWRES": "[Use YE for 'yes']",
   "ABL": "able",
   "APL": "am",
   "APB": "an",
@@ -203,6 +202,8 @@
   "WH-R": "whether",
   "WO*PB": "won't",
   "PHAPB": "man",
+  "KWRES": "yes",
+  "TPHO": "no",
   "R-R": "{^~|\n^}",
   "TK-LS": "{^}",
   "SP": "{^}",
@@ -9574,5 +9575,5 @@
   "-D": "{^ed}",
   "*S": "{^'s}",
   "*Z": "{^'s}",
-  "TKPWHR": "a26e72b0fd6d36c009eeaa6c093978dd"
+  "TKPWHR": "c94105076ad2f308887df90044255211"
 }

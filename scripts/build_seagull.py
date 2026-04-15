@@ -73,9 +73,6 @@ def merge_dict(result: dict[str, str], path: str) -> None:
         # convert to a Plover "standard" outline
         outline = str(seagull.Outline.from_extended(outline))
 
-        if outline_orig == 'MAN':
-            breakpoint()
-
         if outline not in result:
             result[outline] = word
             added += 1

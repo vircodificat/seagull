@@ -28,7 +28,6 @@
     "R*PB": "aren't",
     "K*PB": "can't",
     "": "didn't",
-    "KWRES": "[Use YE for 'yes']",
     "A": "a",
     "A-BL": "able",
     "APL": "am",
@@ -203,5 +202,7 @@
     "PWABG/WARD": "backward",
     "WH-R": "whether",
     "WO*PB": "won't",
-    "MAN": "man"
+    "MAN": "man",
+    "YES": "yes",
+    "NO": "no"
 }
