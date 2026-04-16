@@ -1,16 +1,29 @@
 use std::time::Duration;
-use seagull::read_stroke;
+use clap::Parser;
 
-const DEVICE: &'static str = "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02";
+mod keytest;
+mod game;
+
+const DEVICE: &str = "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02";
+
+#[derive(Parser)]
+struct Args {
+    /// Run in key-test mode: print each stroke to stdout
+    #[arg(short, long)]
+    test: bool,
+}
 
 fn main() {
-    let mut port = serialport::new(DEVICE, 9600)
+    let args = Args::parse();
+
+    let port = serialport::new(DEVICE, 9600)
         .timeout(Duration::from_millis(10))
         .open()
         .expect(&format!("Failed to open {DEVICE}"));
 
-    loop {
-        let stroke = read_stroke(&mut *port);
-        println!("{}", stroke.extended());
+    if args.test {
+        keytest::run(port);
+    } else {
+        game::run(port);
     }
 }

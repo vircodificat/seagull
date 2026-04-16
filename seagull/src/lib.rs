@@ -140,6 +140,14 @@ impl Machine {
         }
     }
 
+    pub fn from_file<P: AsRef<std::path::Path>>(path: P) -> Self {
+        let dictionary = Box::new(JsonDictionary::load_from_file(path).unwrap());
+        Self {
+            undo: Vec::new(),
+            dictionary,
+        }
+    }
+
     fn current_outline(&self, stroke: Stroke) -> Outline {
        if self.undo.is_empty() {
             Outline::from(stroke)
