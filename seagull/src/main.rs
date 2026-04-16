@@ -1,5 +1,5 @@
 use clap::Parser;
-use seagull::device::serial::SerialDevice;
+use seagull::device::{serial::SerialDevice, virt::VirtualDevice};
 
 mod keytest;
 mod game;
@@ -16,8 +16,10 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let device = Box::new(SerialDevice::new(DEVICE)
-        .expect(&format!("Failed to open {DEVICE}")));
+//    let device = Box::new(SerialDevice::new(DEVICE)
+//        .expect(&format!("Failed to open {DEVICE}")));
+
+    let device = Box::new(VirtualDevice::new());
 
     if args.test {
         keytest::run(device);

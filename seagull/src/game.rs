@@ -74,7 +74,8 @@ pub fn run(mut device: Box<dyn Device>) {
         return;
     }
 
-    let sentence = pick_sentence(&sentences).to_string();
+    //let sentence = pick_sentence(&sentences).to_string();
+    let sentence = "I love you";
     let _words = tokenize(&sentence); // available for future word-matching logic
 
     let (tx, rx) = mpsc::channel::<GameEvent>();
