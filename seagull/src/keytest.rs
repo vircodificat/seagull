@@ -1,8 +1,8 @@
-use seagull::read_stroke;
+use seagull::device::Device;
 
-pub fn run(mut port: Box<dyn serialport::SerialPort>) {
+pub fn run(mut device: Box<dyn Device>) {
     loop {
-        let stroke = read_stroke(&mut *port);
+        let stroke = device.read_stroke();
         println!("{}", stroke.extended());
     }
 }

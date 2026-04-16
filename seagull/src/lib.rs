@@ -1,5 +1,6 @@
 #![allow(clippy::collapsible_if, clippy::new_without_default, unused_parens, clippy::needless_return, clippy::len_without_is_empty)]
 
+pub mod device;
 pub mod extended;
 
 use std::cell::RefCell;
@@ -164,7 +165,6 @@ impl Machine {
     }
 
     fn apply_lookup(&mut self, stroke: Stroke) -> Command {
-//        let outline = self.current_outline();
         let outline = Outline::from(stroke);
         if let Some(word) = self.dictionary.lookup(outline) {
             Command(0, word.to_owned())
@@ -560,71 +560,3 @@ const KEY_SIDES: &[(Key, KeySide)] = &[
     (Key::RightD, KeySide::Right),
     (Key::RightZ, KeySide::Right),
 ];
-
-const KEY_CODES: &[(Key, u64)] = &[
-    (Key::LeftS, 0x000000004080), // S1
-    (Key::LeftS, 0x000000002080), // S2
-    (Key::LeftT, 0x000000001080),
-    (Key::LeftK, 0x000000000880),
-    (Key::LeftP, 0x000000000480),
-    (Key::LeftW, 0x000000000280),
-    (Key::LeftH, 0x000000000180),
-    (Key::LeftR, 0x000000400080),
-
-    (Key::MiddleA, 0x000000200080),
-    (Key::MiddleO, 0x000000100080),
-    (Key::MiddleStar, 0x000000080080),
-    (Key::MiddleStar, 0x000020000080),
-    (Key::MiddleStar, 0x000000040080),
-    (Key::MiddleStar, 0x000010000080),
-    (Key::MiddleE, 0x000008000080),
-    (Key::MiddleU, 0x000004000080),
-
-    (Key::RightF, 0x000002000080),
-    (Key::RightR, 0x000001000080),
-    (Key::RightP, 0x004000000080),
-    (Key::RightB, 0x002000000080),
-    (Key::RightL, 0x001000000080),
-    (Key::RightG, 0x000800000080),
-    (Key::RightT, 0x000400000080),
-    (Key::RightS, 0x000200000080),
-    (Key::RightD, 0x000100000080),
-    (Key::RightZ, 0x010000000080),
-];
-
-pub fn read_stroke(port: &mut dyn SerialPort) -> Stroke {
-    let mut buf = [0; 6];
-    let mut total_amount = 0;
-
-    loop {
-        let buf_slice = &mut buf[total_amount..6];
-        match port.read(buf_slice) {
-            Ok(amount) => {
-                total_amount += amount;
-            },
-            Err(_e) => {
-            }
-        }
-
-        if total_amount == 6 {
-            break;
-        }
-    }
-
-    let value: u64 =
-        (buf[0] as u64) |
-        (buf[1] as u64) << 8 |
-        (buf[2] as u64) << 16 |
-        (buf[3] as u64) << 24 |
-        (buf[4] as u64) << 32 |
-        (buf[5] as u64) << 40;
-
-    let mut keys = vec![];
-    for (key, key_value) in KEY_CODES {
-        if value & key_value == *key_value {
-            keys.push(*key);
-        }
-    }
-
-    Stroke::new(keys.as_slice())
-}

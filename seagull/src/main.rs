@@ -1,5 +1,5 @@
-use std::time::Duration;
 use clap::Parser;
+use seagull::device::serial::SerialDevice;
 
 mod keytest;
 mod game;
@@ -16,14 +16,12 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let port = serialport::new(DEVICE, 9600)
-        .timeout(Duration::from_millis(10))
-        .open()
-        .expect(&format!("Failed to open {DEVICE}"));
+    let device = Box::new(SerialDevice::new(DEVICE)
+        .expect(&format!("Failed to open {DEVICE}")));
 
     if args.test {
-        keytest::run(port);
+        keytest::run(device);
     } else {
-        game::run(port);
+        game::run(device);
     }
 }

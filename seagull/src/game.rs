@@ -5,7 +5,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crossterm::{cursor, execute, terminal};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
-use seagull::{read_stroke, Machine, Stroke};
+use seagull::device::Device;
+use seagull::{Machine, Stroke};
 
 struct State {
     machine: Machine,
@@ -65,7 +66,7 @@ fn pick_sentence(sentences: &[String]) -> &str {
     &sentences[seed % sentences.len()]
 }
 
-pub fn run(port: Box<dyn serialport::SerialPort>) {
+pub fn run(mut device: Box<dyn Device>) {
     let mut state = State::new();
     let sentences = load_sentences();
     if sentences.is_empty() {
@@ -81,9 +82,8 @@ pub fn run(port: Box<dyn serialport::SerialPort>) {
     // Thread: read strokes from the steno machine
     let tx_serial = tx.clone();
     thread::spawn(move || {
-        let mut port = port;
         loop {
-            let stroke = read_stroke(&mut *port);
+            let stroke = device.read_stroke();
             if tx_serial.send(GameEvent::Stroke(stroke)).is_err() {
                 break;
             }
