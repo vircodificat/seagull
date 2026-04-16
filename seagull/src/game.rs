@@ -1,13 +1,39 @@
+use std::collections::HashMap;
 use std::io::{stdout, Write};
 use std::sync::mpsc;
 use std::thread;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crossterm::{cursor, execute, terminal};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::style::Stylize;
 use seagull::device::{Device, Keycode};
 use seagull::{Dictionary, JsonDictionary, Outline, Stroke};
+
+const SLOW_THRESHOLD: Duration = Duration::from_secs(2);
+
+struct Stats {
+    total_correct_words: usize,
+    total_time: Duration,
+    mistakes: HashMap<String, usize>, // target word → wrong-attempt count
+    slow_words: Vec<String>,          // target words where typing took > SLOW_THRESHOLD
+}
+
+impl Stats {
+    fn new() -> Self {
+        Stats {
+            total_correct_words: 0,
+            total_time: Duration::ZERO,
+            mistakes: HashMap::new(),
+            slow_words: vec![],
+        }
+    }
+
+    fn wpm(&self) -> f64 {
+        let minutes = self.total_time.as_secs_f64() / 60.0;
+        if minutes == 0.0 { 0.0 } else { self.total_correct_words as f64 / minutes }
+    }
+}
 
 struct State {
     debug: bool,
@@ -19,6 +45,9 @@ struct State {
     strokes: Vec<Stroke>,   // strokes building the current (uncommitted) word
     hint: Option<String>,
     is_running: bool,
+    sentence_start: Option<Instant>, // when the first stroke of this sentence arrived
+    word_start: Option<Instant>,     // when the current word's first stroke arrived
+    stats: Stats,
 }
 
 impl State {
@@ -35,6 +64,9 @@ impl State {
             strokes: vec![],
             hint: None,
             is_running: true,
+            sentence_start: None,
+            word_start: None,
+            stats: Stats::new(),
         };
         state.load_new_sentence();
         state
@@ -62,6 +94,56 @@ impl State {
             .take_while(|(entered, target)| entered == target)
             .count();
         self.sentence.get(correct_count).cloned()
+    }
+
+    /// Accumulate stats for the just-completed sentence, then load the next one.
+    fn complete_sentence(&mut self) {
+        if let Some(start) = self.sentence_start.take() {
+            self.stats.total_time += start.elapsed();
+            self.stats.total_correct_words += self.sentence.len();
+        }
+        self.word_start = None;
+        self.load_new_sentence();
+    }
+
+    /// Running WPM including the current in-progress sentence.
+    fn current_wpm(&self) -> f64 {
+        let current_correct = self.words.iter()
+            .zip(&self.sentence)
+            .filter(|(a, b)| a == b)
+            .count();
+        let current_time = self.sentence_start.map(|s| s.elapsed()).unwrap_or(Duration::ZERO);
+        let total_words = self.stats.total_correct_words + current_correct;
+        let total_time  = self.stats.total_time + current_time;
+        let minutes = total_time.as_secs_f64() / 60.0;
+        if minutes == 0.0 { 0.0 } else { total_words as f64 / minutes }
+    }
+
+    fn print_stats(&self) {
+        println!("\n--- Session Statistics ---");
+        println!("WPM: {:.1}", self.stats.wpm());
+
+        if !self.stats.mistakes.is_empty() {
+            println!("\nWords with mistakes:");
+            let mut m: Vec<_> = self.stats.mistakes.iter().collect();
+            m.sort_by(|a, b| b.1.cmp(a.1));
+            for (word, count) in m {
+                println!("  \"{}\": {} time(s)", word, count);
+            }
+        }
+
+        if !self.stats.slow_words.is_empty() {
+            println!("\nSlow words (> {}s):", SLOW_THRESHOLD.as_secs());
+            let mut counts: HashMap<&str, usize> = HashMap::new();
+            for w in &self.stats.slow_words {
+                *counts.entry(w.as_str()).or_insert(0) += 1;
+            }
+            let mut sorted: Vec<_> = counts.iter().collect();
+            sorted.sort_by(|a, b| b.1.cmp(a.1));
+            for (word, count) in sorted {
+                println!("  \"{}\": {} time(s)", word, count);
+            }
+        }
     }
 
 }
@@ -153,6 +235,7 @@ pub fn run(mut device: Box<dyn Device>) {
 
     terminal::disable_raw_mode().expect("Failed to disable raw mode");
     execute!(stdout(), cursor::MoveToNextLine(1)).ok();
+    state.print_stats();
 }
 
 fn capitalize(s: &str) -> String {
@@ -198,26 +281,51 @@ impl State {
             if self.strokes.is_empty() {
                 self.words.pop();
                 self.word_outlines.pop();
+                // Restart word timer: user is now re-typing the undone word.
+                self.word_start = Some(Instant::now());
             } else {
                 self.strokes.clear();
             }
             return;
         }
 
+        // Start sentence / word timers on the first real typing stroke.
+        if self.sentence_start.is_none() {
+            self.sentence_start = Some(Instant::now());
+            self.word_start     = Some(Instant::now());
+        }
+
         if self.strokes.is_empty() {
             if let Some(outline) = self.word_outlines.last() {
                 let new_outline = outline.join(stroke);
                 if !outline.is_empty() && let Some(word) = self.dictionary.lookup(new_outline.clone()) {
+                    let committed = word.trim().to_lowercase();
+                    let position  = self.words.len() - 1; // replacing last word
+                    let target    = self.sentence.get(position).cloned().unwrap_or_default();
+                    let old_word  = self.words[position].clone();
+
+                    if old_word != target && committed == target {
+                        // Extension corrected a previously wrong word: undo that mistake.
+                        if let Some(count) = self.stats.mistakes.get_mut(&target) {
+                            *count = count.saturating_sub(1);
+                            if *count == 0 { self.stats.mistakes.remove(&target); }
+                        }
+                    } else if old_word == target && committed != target {
+                        // Was correct, extension made it wrong: new mistake.
+                        *self.stats.mistakes.entry(target).or_insert(0) += 1;
+                    }
+                    // old wrong + new still wrong: original mistake stands, no extra.
+                    // old correct + new still correct: nothing to do.
+
+                    self.word_start = Some(Instant::now());
+
                     self.words.pop();
                     self.word_outlines.pop();
-
-                    self.words.push(word.to_string());
+                    self.words.push(committed);
                     self.word_outlines.push(new_outline);
 
                     let correct = self.words == self.sentence;
-                    if correct {
-                        self.load_new_sentence();
-                    }
+                    if correct { self.complete_sentence(); }
 
                     return;
                 }
@@ -227,20 +335,33 @@ impl State {
         self.strokes.push(stroke);
         let outline = Outline::from(self.strokes.as_slice());
         if let Some(word) = self.dictionary.lookup(outline.clone()) {
-            self.words.push(word.trim().to_lowercase());
+            let committed = word.trim().to_lowercase();
+            let position  = self.words.len(); // before push
+            let target    = self.sentence.get(position).cloned().unwrap_or_default();
+
+            if committed != target {
+                *self.stats.mistakes.entry(target.clone()).or_insert(0) += 1;
+            }
+            if let Some(ws) = self.word_start.replace(Instant::now()) {
+                if ws.elapsed() > SLOW_THRESHOLD {
+                    self.stats.slow_words.push(target);
+                }
+            }
+
+            self.words.push(committed);
             self.word_outlines.push(outline);
             self.strokes.clear();
         }
 
         let correct = self.words == self.sentence;
-        if correct {
-            self.load_new_sentence();
-        }
+        if correct { self.complete_sentence(); }
     }
 
     fn render(&self) {
         let mut out = stdout();
         execute!(out, terminal::Clear(terminal::ClearType::All), cursor::MoveTo(0, 0)).ok();
+
+        print!("WPM: {:.1}\r\n\r\n", self.current_wpm());
 
         if self.debug {
             print!("sentence:      {:?}\r\n", self.sentence);
