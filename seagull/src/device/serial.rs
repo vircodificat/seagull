@@ -3,7 +3,7 @@ use std::time::Duration;
 use serialport::SerialPort;
 
 use crate::{Key, Stroke};
-use crate::device::Device;
+use crate::device::{Device, Keycode};
 
 pub struct SerialDevice(Box<dyn SerialPort>);
 
@@ -21,7 +21,7 @@ impl SerialDevice {
 }
 
 impl Device for SerialDevice {
-    fn read_stroke(&mut self) -> Stroke {
+    fn read_stroke(&mut self) -> Keycode {
         let mut buf = [0; 6];
         let mut total_amount = 0;
 
@@ -55,7 +55,18 @@ impl Device for SerialDevice {
             }
         }
 
-        Stroke::new(keys.as_slice())
+        const LEFT_CONTROL_KEY:  u64 = 0x20;
+        const RIGHT_CONTROL_KEY: u64 = 0x10;
+
+        let is_control =
+            (value & LEFT_CONTROL_KEY != 0)
+            || (value & RIGHT_CONTROL_KEY != 0);
+
+        let stroke = Stroke::new(keys.as_slice());
+        Keycode {
+            stroke,
+            is_control,
+        }
     }
 }
 

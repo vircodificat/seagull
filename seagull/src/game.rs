@@ -6,36 +6,65 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crossterm::{cursor, execute, terminal};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::style::Stylize;
-use seagull::device::Device;
+use seagull::device::{Device, Keycode};
 use seagull::{Dictionary, JsonDictionary, Outline, Stroke};
 
 struct State {
     debug: bool,
     dictionary: JsonDictionary,
+    sentences: Vec<String>,
     sentence: Vec<String>,  // target words
     words: Vec<String>,     // committed words so far
     word_outlines: Vec<Outline>,
     strokes: Vec<Stroke>,   // strokes building the current (uncommitted) word
+    is_running: bool,
 }
 
 impl State {
-    fn new(sentence: Vec<String>) -> Self {
-        // CARGO_MANIFEST_DIR is the seagull/ package dir; data/ lives one level up.
+    fn new(sentences: Vec<String>) -> Self {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../data/seagull.json");
         let dictionary = JsonDictionary::load_from_file(path).unwrap();
-        State {
+        let mut state = State {
             debug: true,
             dictionary,
-            sentence,
+            sentences,
+            sentence: vec![],
             words: vec![],
             word_outlines: vec![],
             strokes: vec![],
-        }
+            is_running: true,
+        };
+        state.load_new_sentence();
+        state
     }
+
+    fn load_new_sentence(&mut self) {
+        let seed = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .subsec_nanos() as usize;
+        let sentence = &self.sentences[seed % self.sentences.len()];
+        self.sentence = tokenize(&sentence);
+        self.words.clear();
+        self.word_outlines.clear();
+        self.strokes.clear();
+    }
+
+    fn current_target_word(&self) -> Option<String> {
+        // The current word. That is, the word which comes NEXT in the sentence after all of
+        // the words the user has correctly entered (counting the green words from the start of the
+        // sentence, but stopping at the first non-green word).
+        let correct_count = self.words.iter()
+            .zip(self.sentence.iter())
+            .take_while(|(entered, target)| entered == target)
+            .count();
+        self.sentence.get(correct_count).cloned()
+    }
+
 }
 
 enum GameEvent {
-    Stroke(Stroke),
+    Keycode(Keycode),
     Quit,
 }
 
@@ -70,14 +99,6 @@ fn load_sentences() -> Vec<String> {
         .collect()
 }
 
-fn pick_sentence(sentences: &[String]) -> &str {
-    let seed = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .subsec_nanos() as usize;
-    &sentences[seed % sentences.len()]
-}
-
 pub fn run(mut device: Box<dyn Device>) {
     let sentences = load_sentences();
     if sentences.is_empty() {
@@ -85,10 +106,7 @@ pub fn run(mut device: Box<dyn Device>) {
         return;
     }
 
-    // let sentence = pick_sentence(&sentences).to_string();
-    let sentence = "I love you".to_string();
-    let words = tokenize(&sentence);
-    let mut state = State::new(words);
+    let mut state = State::new(sentences);
 
     let (tx, rx) = mpsc::channel::<GameEvent>();
 
@@ -96,8 +114,8 @@ pub fn run(mut device: Box<dyn Device>) {
     let tx_serial = tx.clone();
     thread::spawn(move || {
         loop {
-            let stroke = device.read_stroke();
-            if tx_serial.send(GameEvent::Stroke(stroke)).is_err() {
+            let keycode = device.read_stroke();
+            if tx_serial.send(GameEvent::Keycode(keycode)).is_err() {
                 break;
             }
         }
@@ -120,10 +138,10 @@ pub fn run(mut device: Box<dyn Device>) {
     state.render();
 
     // Main event loop
-    loop {
+    while state.is_running {
         match rx.recv() {
-            Ok(GameEvent::Stroke(stroke)) => {
-                state.apply(stroke);
+            Ok(GameEvent::Keycode(keycode)) => {
+                state.apply(keycode);
                 state.render();
             }
             Ok(GameEvent::Quit) | Err(_) => break,
@@ -143,36 +161,63 @@ fn capitalize(s: &str) -> String {
 }
 
 impl State {
-    fn apply(&mut self, stroke: Stroke) {
+    fn apply(&mut self, keycode: Keycode) {
+        let stroke = keycode.stroke();
+
+        if keycode.is_control() {
+            if stroke.extended() == "KWIT" {
+                self.is_running = false;
+            } else if stroke.extended() == "S" {
+                if let Some(word) = self.current_target_word() {
+                    self.words.push(word);
+                    let outline = Outline::from(self.strokes.as_slice());
+                    self.word_outlines.push(outline);
+                    self.strokes.clear();
+
+                    let correct = self.words == self.sentence;
+                    if correct {
+                        self.load_new_sentence();
+                    }
+                }
+            }
+            return;
+        }
+
         if stroke == Stroke::star() {
             if self.strokes.is_empty() {
                 self.words.pop();
+                self.word_outlines.pop();
             } else {
                 self.strokes.clear();
             }
             return;
-        } else {
-            if self.strokes.is_empty() {
-                if let Some(outline) = self.word_outlines.last() {
-                    let new_outline = outline.join(stroke);
-                    if let Some(word) = self.dictionary.lookup(new_outline.clone()) {
-                        self.words.pop();
-                        self.word_outlines.pop();
+        }
 
-                        self.words.push(word.to_string());
-                        self.word_outlines.push(new_outline);
-                        return;
-                    }
+        if self.strokes.is_empty() {
+            if let Some(outline) = self.word_outlines.last() {
+                let new_outline = outline.join(stroke);
+                if !outline.is_empty() && let Some(word) = self.dictionary.lookup(new_outline.clone()) {
+                    self.words.pop();
+                    self.word_outlines.pop();
+
+                    self.words.push(word.to_string());
+                    self.word_outlines.push(new_outline);
+                    return;
                 }
             }
+        }
 
-            self.strokes.push(stroke);
-            let outline = Outline::try_from(self.strokes.as_slice()).unwrap();
-            if let Some(word) = self.dictionary.lookup(outline.clone()) {
-                self.words.push(word.trim().to_lowercase());
-                self.word_outlines.push(outline);
-                self.strokes.clear();
-            }
+        self.strokes.push(stroke);
+        let outline = Outline::from(self.strokes.as_slice());
+        if let Some(word) = self.dictionary.lookup(outline.clone()) {
+            self.words.push(word.trim().to_lowercase());
+            self.word_outlines.push(outline);
+            self.strokes.clear();
+        }
+
+        let correct = self.words == self.sentence;
+        if correct {
+            self.load_new_sentence();
         }
     }
 

@@ -2,7 +2,7 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use crate::{Key, Stroke};
-use crate::device::Device;
+use crate::device::{Device, Keycode};
 
 pub struct VirtualDevice {
     rx: std::sync::mpsc::Receiver<Stroke>,
@@ -47,7 +47,11 @@ fn run(tx: std::sync::mpsc::Sender<Stroke>) {
 }
 
 impl Device for VirtualDevice {
-    fn read_stroke(&mut self) -> Stroke {
-        self.rx.recv().unwrap()
+    fn read_stroke(&mut self) -> Keycode {
+        let stroke = self.rx.recv().unwrap();
+        Keycode {
+            stroke,
+            is_control: false,
+        }
     }
 }

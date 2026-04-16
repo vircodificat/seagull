@@ -16,10 +16,10 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-//    let device = Box::new(SerialDevice::new(DEVICE)
-//        .expect(&format!("Failed to open {DEVICE}")));
+    let device = Box::new(SerialDevice::new(DEVICE)
+        .expect(&format!("Failed to open {DEVICE}")));
 
-    let device = Box::new(VirtualDevice::new());
+//    let device = Box::new(VirtualDevice::new());
 
     if args.test {
         keytest::run(device);

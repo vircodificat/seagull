@@ -190,33 +190,28 @@ impl Machine {
 pub struct Outline(Vec<Stroke>);
 
 impl Outline {
-    pub fn from(stroke: Stroke) -> Self {
-        Outline(vec![stroke])
-    }
-
     pub fn strokes(&self) -> &[Stroke] {
         let Outline(strokes) = self;
         strokes
-    }
-
-    pub fn try_from(strokes: &[Stroke]) -> Option<Self> {
-        if strokes.is_empty() {
-            None
-        } else {
-            Some(Outline(strokes.to_owned()))
-        }
     }
 
     pub fn len(&self) -> usize {
         self.strokes().len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.strokes().is_empty()
+    }
+
     pub fn try_from_extended(s: String) -> Option<Self> {
         let parts: Vec<&str> = s.split('/').collect();
-        let strokes: Option<Vec<Stroke>> = parts.iter()
+        if let Some(strokes) = parts.iter()
             .map(|part| Stroke::try_from_extended(part.to_string()))
-            .collect();
-        Outline::try_from(strokes?.as_slice())
+            .collect::<Option<Vec<_>>>() {
+            Some(Outline::from(strokes))
+        } else {
+            None
+        }
     }
 
     pub fn try_from_string(s: &str) -> Option<Outline> {
@@ -280,6 +275,18 @@ impl std::ops::Div<Stroke> for Outline {
 impl From<Stroke> for Outline {
     fn from(stroke: Stroke) -> Self {
         Outline(vec![stroke])
+    }
+}
+
+impl From<&[Stroke]> for Outline {
+    fn from(strokes: &[Stroke]) -> Self {
+        Outline(strokes.to_vec())
+    }
+}
+
+impl From<Vec<Stroke>> for Outline {
+    fn from(strokes: Vec<Stroke>) -> Self {
+        Outline(strokes)
     }
 }
 
@@ -571,12 +578,12 @@ const KEY_SIDES: &[(Key, KeySide)] = &[
 
 impl std::fmt::Debug for Stroke {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{self}")
     }
 }
 
 impl std::fmt::Debug for Outline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{self}")
     }
 }
