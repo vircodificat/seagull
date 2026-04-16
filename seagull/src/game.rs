@@ -17,6 +17,7 @@ struct State {
     words: Vec<String>,     // committed words so far
     word_outlines: Vec<Outline>,
     strokes: Vec<Stroke>,   // strokes building the current (uncommitted) word
+    hint: Option<String>,
     is_running: bool,
 }
 
@@ -32,6 +33,7 @@ impl State {
             words: vec![],
             word_outlines: vec![],
             strokes: vec![],
+            hint: None,
             is_running: true,
         };
         state.load_new_sentence();
@@ -48,6 +50,7 @@ impl State {
         self.words.clear();
         self.word_outlines.clear();
         self.strokes.clear();
+        self.hint = None;
     }
 
     fn current_target_word(&self) -> Option<String> {
@@ -167,6 +170,14 @@ impl State {
         if keycode.is_control() {
             if stroke.extended() == "KWIT" {
                 self.is_running = false;
+            } else if stroke.extended() == "H" {
+                if let Some(word) = self.current_target_word() {
+                    if let Some(outline) = self.dictionary.reverse_lookup(&word) {
+                        self.hint = Some(outline.extended());
+                    } else {
+                        self.hint = Some(format!("{word:?} is not in dictionary!"));
+                    }
+                }
             } else if stroke.extended() == "S" {
                 if let Some(word) = self.current_target_word() {
                     self.words.push(word);
@@ -202,6 +213,12 @@ impl State {
 
                     self.words.push(word.to_string());
                     self.word_outlines.push(new_outline);
+
+                    let correct = self.words == self.sentence;
+                    if correct {
+                        self.load_new_sentence();
+                    }
+
                     return;
                 }
             }
@@ -230,6 +247,11 @@ impl State {
             print!("words:         {:?}\r\n", self.words);
             print!("word_outlines: {:?}\r\n", self.word_outlines);
             print!("strokes:       {:?}\r\n", self.strokes);
+            if let Some(hint) = &self.hint {
+                print!("hint:          {:?}\r\n", hint);
+            } else {
+                print!("\r\n");
+            }
             print!("\r\n");
         }
 

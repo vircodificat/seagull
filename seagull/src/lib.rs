@@ -203,6 +203,14 @@ impl Outline {
         self.strokes().is_empty()
     }
 
+    pub fn extended(&self) -> String {
+        self.strokes()
+            .into_iter()
+            .map(|stroke| stroke.extended())
+            .collect::<Vec<_>>()
+            .join("/")
+    }
+
     pub fn try_from_extended(s: String) -> Option<Self> {
         let parts: Vec<&str> = s.split('/').collect();
         if let Some(strokes) = parts.iter()
@@ -306,6 +314,7 @@ impl Display for Outline {
 
 pub trait Dictionary {
     fn lookup(&self, outline: Outline) -> Option<&str>;
+    fn reverse_lookup(&self, word: &str) -> Option<Outline>;
 }
 
 pub struct JsonDictionary(HashMap<String, String>);
@@ -329,6 +338,18 @@ impl Dictionary for JsonDictionary {
         let JsonDictionary(dictionary) = self;
         let entry = dictionary.get(&outline.to_string());
         entry.map(|s| s.as_str())
+    }
+
+    fn reverse_lookup(&self, word: &str) -> Option<Outline> {
+        let JsonDictionary(dictionary) = self;
+        for (outline_str, entry_word) in dictionary {
+            if entry_word == word {
+                if let Some(outline) = Outline::try_from_string(outline_str) {
+                    return Some(outline);
+                }
+            }
+        }
+        None
     }
 }
 
