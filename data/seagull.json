@@ -205,6 +205,7 @@
   "HROF": "love",
   "HROFS": "loves",
   "HROFD": "loved",
+  "HROF/HREU": "lovely",
   "SO": "so",
   "PHUFP": "much",
   "WAPBT": "want",
@@ -9590,5 +9591,5 @@
   "-D": "{^ed}",
   "*S": "{^'s}",
   "*Z": "{^'s}",
-  "TKPWHR": "4c19fa63de408c047053fcc7735f2794"
+  "TKPWHR": "0aae915c29ee3866f96d08ed2d541324"
 }

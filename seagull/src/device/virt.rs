@@ -20,13 +20,26 @@ impl VirtualDevice {
 }
 
 fn run(tx: std::sync::mpsc::Sender<Stroke>) {
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    std::thread::sleep(std::time::Duration::from_millis(600));
     tx.send(Stroke::try_from_string("EU").unwrap()).unwrap();
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    std::thread::sleep(std::time::Duration::from_millis(600));
     tx.send(Stroke::try_from_string("HROF").unwrap()).unwrap();
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    std::thread::sleep(std::time::Duration::from_millis(600));
     tx.send(Stroke::try_from_string("U").unwrap()).unwrap();
-    std::thread::sleep(std::time::Duration::from_secs(1));
+
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    tx.send(Stroke::try_from_string("U").unwrap()).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(700));
+    tx.send(Stroke::try_from_string("R").unwrap()).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(400));
+    tx.send(Stroke::try_from_string("HROF").unwrap()).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(5000));
+    tx.send(Stroke::try_from_string("HREU").unwrap()).unwrap();
+
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    tx.send(Stroke::try_from_string("SKA").unwrap()).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    tx.send(Stroke::try_from_string("TA").unwrap()).unwrap();
 
     loop {
         std::thread::sleep(std::time::Duration::from_secs(u64::MAX));

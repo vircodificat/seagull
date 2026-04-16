@@ -49,10 +49,8 @@ const ALL_KEYS: &[Key] = &[
     Key::RightG, Key::RightT, Key::RightS, Key::RightD, Key::RightZ,
 ];
 
-#[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Stroke(u32);
-
-
 
 pub struct PrefixTree(RefCell<(Option<String>, HashMap<Stroke, Rc<PrefixTree>>)>);
 
@@ -188,7 +186,7 @@ impl Machine {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Outline(Vec<Stroke>);
 
 impl Outline {
@@ -231,6 +229,12 @@ impl Outline {
         }
 
         Some(outline)
+    }
+
+    pub fn join(&self, stroke: Stroke) -> Outline {
+        let mut strokes = self.strokes().to_vec();
+        strokes.push(stroke);
+        Outline(strokes)
     }
 }
 
@@ -332,6 +336,10 @@ impl Stroke {
     pub fn new(keys: &[Key]) -> Self {
         let bits = keys.iter().fold(0u32, |acc, k| acc | (*k as u32));
         Stroke(bits)
+    }
+
+    pub fn star() -> Self {
+        Stroke::new(&[Key::MiddleStar])
     }
 
     pub fn contains(self, key: Key) -> bool {
@@ -560,3 +568,15 @@ const KEY_SIDES: &[(Key, KeySide)] = &[
     (Key::RightD, KeySide::Right),
     (Key::RightZ, KeySide::Right),
 ];
+
+impl std::fmt::Debug for Stroke {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
+impl std::fmt::Debug for Outline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}

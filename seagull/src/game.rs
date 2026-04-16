@@ -5,19 +5,31 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crossterm::{cursor, execute, terminal};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::style::Stylize;
 use seagull::device::Device;
-use seagull::{Machine, Stroke};
+use seagull::{Dictionary, JsonDictionary, Outline, Stroke};
 
 struct State {
-    machine: Machine,
+    debug: bool,
+    dictionary: JsonDictionary,
+    sentence: Vec<String>,  // target words
+    words: Vec<String>,     // committed words so far
+    word_outlines: Vec<Outline>,
+    strokes: Vec<Stroke>,   // strokes building the current (uncommitted) word
 }
 
 impl State {
-    fn new() -> Self {
+    fn new(sentence: Vec<String>) -> Self {
         // CARGO_MANIFEST_DIR is the seagull/ package dir; data/ lives one level up.
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../data/seagull.json");
+        let dictionary = JsonDictionary::load_from_file(path).unwrap();
         State {
-            machine: Machine::from_file(path),
+            debug: true,
+            dictionary,
+            sentence,
+            words: vec![],
+            word_outlines: vec![],
+            strokes: vec![],
         }
     }
 }
@@ -67,16 +79,16 @@ fn pick_sentence(sentences: &[String]) -> &str {
 }
 
 pub fn run(mut device: Box<dyn Device>) {
-    let mut state = State::new();
     let sentences = load_sentences();
     if sentences.is_empty() {
         eprintln!("No sentences found");
         return;
     }
 
-    //let sentence = pick_sentence(&sentences).to_string();
-    let sentence = "I love you";
-    let _words = tokenize(&sentence); // available for future word-matching logic
+    // let sentence = pick_sentence(&sentences).to_string();
+    let sentence = "I love you".to_string();
+    let words = tokenize(&sentence);
+    let mut state = State::new(words);
 
     let (tx, rx) = mpsc::channel::<GameEvent>();
 
@@ -104,24 +116,15 @@ pub fn run(mut device: Box<dyn Device>) {
         }
     });
 
-    // Clear screen and show the practice sentence
     terminal::enable_raw_mode().expect("Failed to enable raw mode");
-    execute!(
-        stdout(),
-        terminal::Clear(terminal::ClearType::All),
-        cursor::MoveTo(0, 0)
-    )
-    .expect("Failed to clear screen");
-    print!("Practice: {}\r\n\r\nStrokes:\r\n", sentence);
-    stdout().flush().unwrap();
+    state.render();
 
     // Main event loop
     loop {
         match rx.recv() {
             Ok(GameEvent::Stroke(stroke)) => {
-                let command = state.machine.apply(stroke);
-                print!("{:?}\r\n", command);
-                stdout().flush().unwrap();
+                state.apply(stroke);
+                state.render();
             }
             Ok(GameEvent::Quit) | Err(_) => break,
         }
@@ -129,4 +132,98 @@ pub fn run(mut device: Box<dyn Device>) {
 
     terminal::disable_raw_mode().expect("Failed to disable raw mode");
     execute!(stdout(), cursor::MoveToNextLine(1)).ok();
+}
+
+fn capitalize(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(c) => c.to_uppercase().to_string() + chars.as_str(),
+    }
+}
+
+impl State {
+    fn apply(&mut self, stroke: Stroke) {
+        if stroke == Stroke::star() {
+            if self.strokes.is_empty() {
+                self.words.pop();
+            } else {
+                self.strokes.clear();
+            }
+            return;
+        } else {
+            if self.strokes.is_empty() {
+                if let Some(outline) = self.word_outlines.last() {
+                    let new_outline = outline.join(stroke);
+                    if let Some(word) = self.dictionary.lookup(new_outline.clone()) {
+                        self.words.pop();
+                        self.word_outlines.pop();
+
+                        self.words.push(word.to_string());
+                        self.word_outlines.push(new_outline);
+                        return;
+                    }
+                }
+            }
+
+            self.strokes.push(stroke);
+            let outline = Outline::try_from(self.strokes.as_slice()).unwrap();
+            if let Some(word) = self.dictionary.lookup(outline.clone()) {
+                self.words.push(word.trim().to_lowercase());
+                self.word_outlines.push(outline);
+                self.strokes.clear();
+            }
+        }
+    }
+
+    fn render(&self) {
+        let mut out = stdout();
+        execute!(out, terminal::Clear(terminal::ClearType::All), cursor::MoveTo(0, 0)).ok();
+
+        if self.debug {
+            print!("sentence:      {:?}\r\n", self.sentence);
+            print!("words:         {:?}\r\n", self.words);
+            print!("word_outlines: {:?}\r\n", self.word_outlines);
+            print!("strokes:       {:?}\r\n", self.strokes);
+            print!("\r\n");
+        }
+
+        // Target sentence (first word capitalised for display)
+        let sentence_display: String = self.sentence.iter().enumerate()
+            .map(|(i, w)| if i == 0 { capitalize(w) } else { w.clone() })
+            .collect::<Vec<_>>()
+            .join(" ");
+        print!("{}\r\n\r\n", sentence_display);
+
+        // Plain text: entered words, first letter of first word capitalised
+        let plain: String = self.words.iter().enumerate()
+            .map(|(i, w)| if i == 0 { capitalize(w) } else { w.clone() })
+            .collect::<Vec<_>>()
+            .join(" ");
+        print!("{}\r\n\r\n", plain);
+
+        // Colour-coded words: green = correct, red = incorrect
+        for (i, word) in self.words.iter().enumerate() {
+            if i > 0 { print!(" "); }
+            let display = if i == 0 { capitalize(word) } else { word.clone() };
+            if self.sentence.get(i).map(|s| s == word).unwrap_or(false) {
+                print!("{}", display.on_green());
+            } else {
+                print!("{}", display.on_red());
+            }
+        }
+
+        // Current partial strokes highlighted in yellow
+        if !self.strokes.is_empty() {
+            if !self.words.is_empty() { print!(" "); }
+            let partial = self.strokes.iter()
+                .map(|s| s.extended())
+                .collect::<Vec<_>>()
+                .join("/");
+            print!("{}", partial.on_yellow());
+        }
+
+        print!("\r\n");
+        out.flush().ok();
+    }
 }
