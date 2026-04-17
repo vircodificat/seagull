@@ -264,6 +264,8 @@ impl State {
         if keycode.is_control() {
             if stroke.extended() == "KWIT" {
                 self.is_running = false;
+            } else if stroke.extended() == "D" {
+                self.debug = !self.debug;
             } else if stroke.extended() == "H" {
                 if let Some(word) = self.current_target_word() {
                     if let Some(outline) = self.dictionary.reverse_lookup(&word) {
@@ -291,11 +293,16 @@ impl State {
         if stroke == Stroke::star() {
             if self.strokes.is_empty() {
                 self.words.pop();
-                self.word_outlines.pop();
-                // Restart word timer: user is now re-typing the undone word.
+                // Restore the committed word's strokes, minus the last one,
+                // so that further stars keep peeling back one stroke at a time.
+                if let Some(outline) = self.word_outlines.pop() {
+                    let mut restored = outline.strokes().to_vec();
+                    restored.pop();
+                    self.strokes = restored;
+                }
                 self.word_start = Some(Instant::now());
             } else {
-                self.strokes.clear();
+                self.strokes.pop();
             }
             return;
         }
