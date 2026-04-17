@@ -1,119 +1,119 @@
-The dog can run.
-I see a big blue ball.
-She is very happy today.
-We need to eat food.
-They live in a small house.
-The sun is bright and warm.
-He will go to the park.
-I want to drink water.
-The girl is happy and free.
-You can see a red car.
-The baby is very small.
-I love to read books.
-They play in the garden.
-The old man is wise.
-She feels good today.
-We must work hard.
-The house is near the beach.
-I am happy to see you.
-The boy likes to play.
-She is a beautiful woman.
-The food is good and fresh.
-The cat is black and small.
-The child likes to laugh.
-I need to find a key.
-He will help me today.
-The room is dark and cold.
-I want to learn more.
-She is very kind and nice.
-We have a big family.
-The father loves his son.
-I will come back soon.
-The train is fast and safe.
-The girl wants a doll.
-The boy likes to run fast.
-The dog is very friendly.
-She loves to eat cake.
-I need to find a place.
-The music is very loud.
-They will come here soon.
-The time is very late.
-I am very tired today.
-The wind is cold and strong.
-He will drive the car.
-The horse is big and fast.
-She will sing a song.
-I need to drink tea.
-The sun is bright today.
-The tree is tall and green.
-The bird is small and blue.
-The house is warm and safe.
-She will make a cake.
-I will write a letter.
-The man is tall and strong.
-The woman is kind and good.
-They will walk home now.
-We need to find a way.
-The book is good and new.
-I will take the train.
-She likes to eat fruit.
-He will go to bed now.
-I am happy to see you.
-We will play a game.
-The food is hot and good.
-The car is fast and red.
-I need to buy a gift.
-She likes to wear shoes.
-He will help me today.
-We can go to the beach.
-The house is big and nice.
-I love to see the sun.
-She is happy and free.
-He is a good man.
-We are all happy now.
-The child is very cute.
-I need to find a job.
-She will take the bus.
-He will come back soon.
-We will eat dinner now.
-I love to drink coffee.
-She is very smart and kind.
-He is a good friend to me.
-We will go home tonight.
-I need to find a way out.
-She will help me today.
-He is a very good man.
-We are all happy now.
-The child is very cute.
-I need to find a job.
-She will take the bus.
-He will come back soon.
-We will eat dinner now.
-I love to drink coffee.
-She is very smart and kind.
-He is a good friend to me.
-We will go home tonight.
-I need to find a way out.
-She will help me today.
-He is a very good man.
-We are all happy now.
-The girl is happy to see the big red ball and she wants to play with it now.
-I need to find a good book to read, and then I will sit in the chair and relax.
-The man is very tired after a long day at work, so he wants to go home and sleep.
-She loves to eat chocolate cake and drink a cup of coffee in the morning with her family.
-We will go to the park and play football with our friends if the weather is warm and sunny.
-The little boy wants to build a tall tower with his blocks, but he needs some help from his father.
-I think the old house is beautiful, even though it is a little bit dark and needs some repair work.
-She will wear a pretty blue dress to the party tonight and she hopes to have a lot of fun with her friends.
-The dog is very friendly and loves to run around the garden, chasing after the ball and barking happily.
-He needs to learn how to drive a car so he can travel to the city and visit his grandmother soon.
-We must always be careful when we cross the street, because the cars go by very fast and it can be dangerous.
-I want to find a quiet place to sit and read my book, away from all the noise and the busy streets.
-The farmer will plant corn in the field and hope for a good harvest so he can feed his family and sell the rest.
-She is very excited about her birthday party because she wants to invite all her friends and eat lots of cake.
-We need to remember to bring a warm coat because the weather is cold and windy, and we might feel very cold.
-The child loves to play with his toys, especially the little red car and the fluffy yellow teddy bear.
-I think the best way to spend a summer day is to go to the beach and swim in the cool, clear water.
-She will need to study hard for the exam if she wants to get a good grade and go to the university.
-The little girl is afraid of the dark, so she always wants to sleep with a night light in her bedroom.
-We can all work together to make the world a better place, by being kind and helpful to everyone around us.
+The dog can run
+I see a big blue ball
+She is very happy today
+We need to eat food
+They live in a small house
+The sun is bright and warm
+He will go to the park
+I want to drink water
+The girl is happy and free
+You can see a red car
+The baby is very small
+I love to read books
+They play in the garden
+The old man is wise
+She feels good today
+We must work hard
+The house is near the beach
+I am happy to see you
+The boy likes to play
+She is a beautiful woman
+The food is good and fresh
+The cat is black and small
+The child likes to laugh
+I need to find a key
+He will help me today
+The room is dark and cold
+I want to learn more
+She is very kind and nice
+We have a big family
+The father loves his son
+I will come back soon
+The train is fast and safe
+The girl wants a doll
+The boy likes to run fast
+The dog is very friendly
+She loves to eat cake
+I need to find a place
+The music is very loud
+They will come here soon
+The time is very late
+I am very tired today
+The wind is cold and strong
+He will drive the car
+The horse is big and fast
+She will sing a song
+I need to drink tea
+The sun is bright today
+The tree is tall and green
+The bird is small and blue
+The house is warm and safe
+She will make a cake
+I will write a letter
+The man is tall and strong
+The woman is kind and good
+They will walk home now
+We need to find a way
+The book is good and new
+I will take the train
+She likes to eat fruit
+He will go to bed now
+I am happy to see you
+We will play a game
+The food is hot and good
+The car is fast and red
+I need to buy a gift
+She likes to wear shoes
+He will help me today
+We can go to the beach
+The house is big and nice
+I love to see the sun
+She is happy and free
+He is a good man
+We are all happy now
+The child is very cute
+I need to find a job
+She will take the bus
+He will come back soon
+We will eat dinner now
+I love to drink coffee
+She is very smart and kind
+He is a good friend to me
+We will go home tonight
+I need to find a way out
+She will help me today
+He is a very good man
+We are all happy now
+The child is very cute
+I need to find a job
+She will take the bus
+He will come back soon
+We will eat dinner now
+I love to drink coffee
+She is very smart and kind
+He is a good friend to me
+We will go home tonight
+I need to find a way out
+She will help me today
+He is a very good man
+We are all happy now
+The girl is happy to see the big red ball and she wants to play with it now
+I need to find a good book to read, and then I will sit in the chair and relax
+The man is very tired after a long day at work, so he wants to go home and sleep
+She loves to eat chocolate cake and drink a cup of coffee in the morning with her family
+We will go to the park and play football with our friends if the weather is warm and sunny
+The little boy wants to build a tall tower with his blocks, but he needs some help from his father
+I think the old house is beautiful, even though it is a little bit dark and needs some repair work
+She will wear a pretty blue dress to the party tonight and she hopes to have a lot of fun with her friends
+The dog is very friendly and loves to run around the garden, chasing after the ball and barking happily
+He needs to learn how to drive a car so he can travel to the city and visit his grandmother soon
+We must always be careful when we cross the street, because the cars go by very fast and it can be dangerous
+I want to find a quiet place to sit and read my book, away from all the noise and the busy streets
+The farmer will plant corn in the field and hope for a good harvest so he can feed his family and sell the rest
+She is very excited about her birthday party because she wants to invite all her friends and eat lots of cake
+We need to remember to bring a warm coat because the weather is cold and windy, and we might feel very cold
+The child loves to play with his toys, especially the little red car and the fluffy yellow teddy bear
+I think the best way to spend a summer day is to go to the beach and swim in the cool, clear water
+She will need to study hard for the exam if she wants to get a good grade and go to the university
+The little girl is afraid of the dark, so she always wants to sleep with a night light in her bedroom
+We can all work together to make the world a better place, by being kind and helpful to everyone around us

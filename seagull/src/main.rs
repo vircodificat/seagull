@@ -11,6 +11,10 @@ struct Args {
     /// Run in key-test mode: print each stroke to stdout
     #[arg(short, long)]
     test: bool,
+
+    /// Load sentences from FILENAME (one sentence per line)
+    #[arg(long, value_name = "FILENAME", short, name="s")]
+    sentence: Option<String>,
 }
 
 fn main() {
@@ -24,6 +28,6 @@ fn main() {
     if args.test {
         keytest::run(device);
     } else {
-        game::run(device);
+        game::run(device, args.sentence.as_deref());
     }
 }

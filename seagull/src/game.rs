@@ -176,17 +176,22 @@ fn tokenize(sentence: &str) -> Vec<String> {
     tokens
 }
 
-fn load_sentences() -> Vec<String> {
-    // Embedded at compile time; path is relative to this source file.
-    include_str!("../../sentences.txt")
+fn load_sentences(sentences_file: Option<&str>) -> Vec<String> {
+    let contents: String = match sentences_file {
+        Some(path) => std::fs::read_to_string(path)
+            .unwrap_or_else(|e| panic!("Failed to read sentences file {path:?}: {e}")),
+        // Embedded at compile time; path is relative to this source file.
+        None => include_str!("../../sentences.txt").to_string(),
+    };
+    contents
         .lines()
         .filter(|l| !l.trim().is_empty())
         .map(|l| l.to_string())
         .collect()
 }
 
-pub fn run(mut device: Box<dyn Device>) {
-    let sentences = load_sentences();
+pub fn run(mut device: Box<dyn Device>, sentences_file: Option<&str>) {
+    let sentences = load_sentences(sentences_file);
     if sentences.is_empty() {
         eprintln!("No sentences found");
         return;
