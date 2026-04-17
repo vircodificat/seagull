@@ -55,7 +55,7 @@ impl State {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../data/seagull.json");
         let dictionary = JsonDictionary::load_from_file(path).unwrap();
         let mut state = State {
-            debug: true,
+            debug: false,
             dictionary,
             sentences,
             sentence: vec![],
@@ -150,6 +150,7 @@ impl State {
 
 enum GameEvent {
     Keycode(Keycode),
+    Tick,
     Quit,
 }
 
@@ -206,6 +207,15 @@ pub fn run(mut device: Box<dyn Device>) {
         }
     });
 
+    // Thread: periodic tick for live WPM updates
+    let tx_tick = tx.clone();
+    thread::spawn(move || loop {
+        thread::sleep(Duration::from_millis(500));
+        if tx_tick.send(GameEvent::Tick).is_err() {
+            break;
+        }
+    });
+
     // Thread: watch for ESC on the keyboard
     let tx_kb = tx;
     thread::spawn(move || loop {
@@ -229,6 +239,7 @@ pub fn run(mut device: Box<dyn Device>) {
                 state.apply(keycode);
                 state.render();
             }
+            Ok(GameEvent::Tick) => state.render(),
             Ok(GameEvent::Quit) | Err(_) => break,
         }
     }
