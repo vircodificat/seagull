@@ -139,7 +139,7 @@ pub static MIDDLES: [&'static str; 32] = [
     "O*",    // O*
     "Oo*",   // AO*
     "E",     // E
-    "Ay",    // AE
+    "Ea",    // AE
     "Oh",    // OE
     "Ee",    // AOE
     "E*",    // *E
@@ -225,9 +225,9 @@ pub static FINALS: [&'static str; 1024] = [
     "FBLG",        // FBLG
     "RBLG",        // RBLG
     "FRBLG",       // FRBLG
-    "PBLG",        // PBLG
+    "J",           // PBLG
     "FPBLG",       // FPBLG
-    "RPBLG",       // RPBLG
+    "RJ",          // RPBLG
     "FRPBLG",      // FRPBLG
     "T",           // T
     "FT",          // FT
@@ -333,7 +333,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FPGS",        // FPGS
     "RPGS",        // RPGS
     "FRPGS",       // FRPGS
-    "Ction",       // BGS
+    "CkS",         // BGS
     "FBGS",        // FBGS
     "RBGS",        // RBGS
     "FRBGS",       // FRBGS
@@ -353,7 +353,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FBLGS",       // FBLGS
     "RBLGS",       // RBLGS
     "FRBLGS",      // FRBLGS
-    "PBLGS",       // PBLGS
+    "JS",       // PBLGS
     "FPBLGS",      // FPBLGS
     "RPBLGS",      // RPBLGS
     "FRPBLGS",     // FRPBLGS
@@ -481,9 +481,9 @@ pub static FINALS: [&'static str; 1024] = [
     "FBLGD",       // FBLGD
     "RBLGD",       // RBLGD
     "FRBLGD",      // FRBLGD
-    "PBLGD",       // PBLGD
+    "JD",          // PBLGD
     "FPBLGD",      // FPBLGD
-    "RPBLGD",      // RPBLGD
+    "RJD",         // RPBLGD
     "FRPBLGD",     // FRPBLGD
     "TD",          // TD
     "FTD",         // FTD

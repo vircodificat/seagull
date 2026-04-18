@@ -452,7 +452,7 @@ impl Stroke {
         let finals_index = (self.0 & FINALS_MASK) >> 12;
 
         let initials = extended::INITIALS[initial_index as usize].to_string();
-        let middles = if middle_index == 0 {
+        let middles = if middle_index == 0 && finals_index != 0 {
             "-"
         } else {
             &extended::MIDDLES[middle_index as usize]
