@@ -30,7 +30,8 @@ impl Stats {
     }
 
     fn wpm(&self) -> f64 {
-        let minutes = self.total_time.as_secs_f64() / 60.0;
+        let total_time = self.total_time.as_secs_f64();
+        let minutes = total_time / 60.0;
         if minutes == 0.0 { 0.0 } else { self.total_correct_words as f64 / minutes }
     }
 }
@@ -47,6 +48,8 @@ struct State {
     is_running: bool,
     sentence_start: Option<Instant>, // when the first stroke of this sentence arrived
     word_start: Option<Instant>,     // when the current word's first stroke arrived
+    awaiting_next: bool,             // sentence completed; waiting for keypress to continue
+    current_wpm: f64,
     stats: Stats,
 }
 
@@ -66,7 +69,9 @@ impl State {
             is_running: true,
             sentence_start: None,
             word_start: None,
+            awaiting_next: false,
             stats: Stats::new(),
+            current_wpm: 0.0,
         };
         state.load_new_sentence();
         state
@@ -83,6 +88,7 @@ impl State {
         self.word_outlines.clear();
         self.strokes.clear();
         self.hint = None;
+        self.awaiting_next = false;
     }
 
     fn current_target_word(&self) -> Option<String> {
@@ -96,27 +102,50 @@ impl State {
         self.sentence.get(correct_count).cloned()
     }
 
-    /// Accumulate stats for the just-completed sentence, then load the next one.
+    /// Accumulate stats for the just-completed sentence and pause until the
+    /// user presses a key on the keyboard to advance.
     fn complete_sentence(&mut self) {
         if let Some(start) = self.sentence_start.take() {
             self.stats.total_time += start.elapsed();
             self.stats.total_correct_words += self.sentence.len();
         }
         self.word_start = None;
+        self.awaiting_next = true;
+    }
+
+    /// Load the next sentence and start its timer immediately.
+    fn start_next_sentence(&mut self) {
+        self.awaiting_next = false;
         self.load_new_sentence();
+        let now = Instant::now();
+        self.sentence_start = Some(now);
+        self.word_start = Some(now);
     }
 
     /// Running WPM including the current in-progress sentence.
-    fn current_wpm(&self) -> f64 {
-        let current_correct = self.words.iter()
-            .zip(&self.sentence)
-            .filter(|(a, b)| a == b)
-            .count();
-        let current_time = self.sentence_start.map(|s| s.elapsed()).unwrap_or(Duration::ZERO);
+    fn set_current_wpm(&mut self) {
+        // While paused between sentences, the just-completed sentence has
+        // already been folded into `self.stats`, so avoid counting `self.words`
+        // (which still equals `self.sentence`) a second time.
+        let (current_correct, current_time) = if self.awaiting_next {
+            (0, Duration::ZERO)
+        } else {
+            let correct = self.words.iter()
+                .zip(&self.sentence)
+                .filter(|(a, b)| a == b)
+                .count();
+            let t = self.sentence_start.map(|s| s.elapsed()).unwrap_or(Duration::ZERO);
+            (correct, t)
+        };
         let total_words = self.stats.total_correct_words + current_correct;
         let total_time  = self.stats.total_time + current_time;
-        let minutes = total_time.as_secs_f64() / 60.0;
-        if minutes == 0.0 { 0.0 } else { total_words as f64 / minutes }
+        if total_time.as_secs_f64() < 0.6 {
+            self.current_wpm = 0.0;
+        } else {
+            let minutes = total_time.as_secs_f64() / 60.0;
+            let wpm = if minutes == 0.0 { 0.0 } else { total_words as f64 / minutes };
+            self.current_wpm = wpm;
+        }
     }
 
     fn print_stats(&self) {
@@ -151,6 +180,7 @@ impl State {
 enum GameEvent {
     Keycode(Keycode),
     Tick,
+    Advance,
     Quit,
 }
 
@@ -221,7 +251,7 @@ pub fn run(mut device: Box<dyn Device>, sentences_file: Option<&str>) {
         }
     });
 
-    // Thread: watch for ESC on the keyboard
+    // Thread: watch the keyboard for ESC (quit) or any other key (advance)
     let tx_kb = tx;
     thread::spawn(move || loop {
         if let Ok(Event::Key(KeyEvent { code, modifiers, .. })) = event::read() {
@@ -229,6 +259,12 @@ pub fn run(mut device: Box<dyn Device>, sentences_file: Option<&str>) {
                 || (code == KeyCode::Char('c') && modifiers.contains(KeyModifiers::CONTROL));
             if quit {
                 let _ = tx_kb.send(GameEvent::Quit);
+                break;
+            }
+            if modifiers.contains(KeyModifiers::CONTROL) {
+                continue;
+            }
+            if tx_kb.send(GameEvent::Advance).is_err() {
                 break;
             }
         }
@@ -244,7 +280,16 @@ pub fn run(mut device: Box<dyn Device>, sentences_file: Option<&str>) {
                 state.apply(keycode);
                 state.render();
             }
-            Ok(GameEvent::Tick) => state.render(),
+            Ok(GameEvent::Tick) => {
+                state.set_current_wpm();
+                state.render();
+            }
+            Ok(GameEvent::Advance) => {
+                if state.awaiting_next {
+                    state.start_next_sentence();
+                    state.render();
+                }
+            }
             Ok(GameEvent::Quit) | Err(_) => break,
         }
     }
@@ -266,6 +311,17 @@ impl State {
     fn apply(&mut self, keycode: Keycode) {
         let stroke = keycode.stroke();
 
+        // While paused between sentences, only the KWIT control stroke is honoured;
+        // all other steno input is ignored until the user presses a keyboard key.
+        if self.awaiting_next {
+            if keycode.is_control() && stroke.extended() == "KWIT" {
+                self.is_running = false;
+            } else if !keycode.is_control() {
+                self.start_next_sentence();
+            }
+            return;
+        }
+
         if keycode.is_control() {
             if stroke.extended() == "KWIT" {
                 self.is_running = false;
@@ -274,7 +330,7 @@ impl State {
             } else if stroke.extended() == "H" {
                 if let Some(word) = self.current_target_word() {
                     if let Some(outline) = self.dictionary.reverse_lookup(&word) {
-                        self.hint = Some(outline.extended());
+                        self.hint = Some(format!("{}", outline.extended()));
                     } else {
                         self.hint = Some(format!("{word:?} is not in dictionary!"));
                     }
@@ -288,7 +344,8 @@ impl State {
 
                     let correct = self.words == self.sentence;
                     if correct {
-                        self.load_new_sentence();
+                        self.awaiting_next = true;
+                        self.word_start = None;
                     }
                 }
             }
@@ -384,20 +441,24 @@ impl State {
         let mut out = stdout();
         execute!(out, terminal::Clear(terminal::ClearType::All), cursor::MoveTo(0, 0)).ok();
 
-        print!("WPM: {:.1}\r\n\r\n", self.current_wpm());
+        print!("WPM: {:.1}", self.current_wpm);
+        if let Some(hint) = &self.hint {
+            print!("    HINT: {:?}", hint);
+        }
+        if self.awaiting_next {
+            print!("    (press any key for next sentence)");
+        }
+        print!("\r\n\r\n");
 
         if self.debug {
             print!("sentence:      {:?}\r\n", self.sentence);
             print!("words:         {:?}\r\n", self.words);
             print!("word_outlines: {:?}\r\n", self.word_outlines);
             print!("strokes:       {:?}\r\n", self.strokes);
-            if let Some(hint) = &self.hint {
-                print!("hint:          {:?}\r\n", hint);
-            } else {
-                print!("\r\n");
-            }
-            print!("\r\n");
         }
+
+
+        print!("\r\n");
 
         // Target sentence (first word capitalised for display)
         let sentence_display: String = self.sentence.iter().enumerate()
