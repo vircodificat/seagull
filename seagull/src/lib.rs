@@ -390,14 +390,18 @@ impl Stroke {
         let mut left_side = true;
         let mut keys: Vec<Key> = vec![];
         let mut last_bit: u32 = 0;
+        let mut has_explicit_dash = false;
+        let mut has_middle = false;
 
         for ch in s.chars() {
             if ch == '-' {
                 left_side = false;
+                has_explicit_dash = true;
                 continue;
             }
             if MIDDLE_CHARS.contains(&ch) {
                 left_side = false;
+                has_middle = true;
             }
             let key = char_to_key(ch, !left_side)?;
             let bit = key as u32;
@@ -407,6 +411,17 @@ impl Stroke {
             last_bit = bit;
             keys.push(key);
         }
+
+        // Check if we have finals (right-side keys) but no middles
+        let has_finals = keys.iter().any(|&key| {
+            matches!(key_side(key), KeySide::Right)
+        });
+
+        // If we have finals but no middles, we must have an explicit dash
+        if has_finals && !has_middle && !has_explicit_dash {
+            return None;
+        }
+
         Some(Stroke::new(&keys))
     }
 
@@ -436,15 +451,33 @@ impl Stroke {
         let middle_index = (self.0 & MIDDLES_MASK) >> 7;
         let finals_index = (self.0 & FINALS_MASK) >> 12;
 
-        extended::INITIALS[initial_index as usize].to_string() +
-            &extended::MIDDLES[middle_index as usize] +
-            &extended::FINALS[finals_index as usize]
+        let initials = extended::INITIALS[initial_index as usize].to_string();
+        let middles = if middle_index == 0 {
+            "-"
+        } else {
+            &extended::MIDDLES[middle_index as usize]
+        };
+        let finals = &extended::FINALS[finals_index as usize];
+
+        initials + middles + finals
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_extended() {
+        let stroke = Stroke::try_from_string("P-FL").unwrap();
+        assert_eq!(stroke.extended(), "P-FL");
+    }
+
+    #[test]
+    fn test_try_from_string() {
+        assert!(Stroke::try_from_string("P-FL").is_some());
+        assert!(Stroke::try_from_string("PFL").is_none());
+    }
 
     #[test]
     fn test() {
