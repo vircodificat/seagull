@@ -51,3 +51,6 @@ build:
 test:
 	cargo test
 	uv run python scripts/examples.py
+
+ime:
+	$(MAKE) -C ime build

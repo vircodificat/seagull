@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component>
+  <name>org.freedesktop.IBus.SeagullIME</name>
+  <description>Seagull Steno Input Method</description>
+  <exec>/usr/libexec/seagull-ime</exec>
+  <version>0.1.0</version>
+  <author>vircodificat</author>
+  <license>GPL</license>
+  <homepage></homepage>
+  <textdomain>seagull-ime</textdomain>
+  <engines>
+    <engine>
+      <name>seagull-ime</name>
+      <language>en</language>
+      <license>GPL</license>
+      <author>vircodificat</author>
+      <icon>ibus-keyboard</icon>
+      <longname>Seagull Steno</longname>
+      <description>Steno input method using Seagull dictionary</description>
+      <rank>100</rank>
+      <layout>us</layout>
+    </engine>
+  </engines>
+</component>

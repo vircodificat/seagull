@@ -2,5 +2,6 @@
 members = [
     "seagull",
     "seagull-py",
+    "ime",
 ]
 resolver = "2"
