@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use seagull::{Dictionary, JsonDictionary, Outline, Stroke};
+use seagull::{Dictionary, JsonDictionary, Key, Outline, Stroke};
 
 /// A word that has been translated and is waiting in the committed queue.
 #[derive(Debug, Clone)]
@@ -18,6 +18,8 @@ pub enum BufferAction {
     CommitAndPreedit,
     /// Flush the oldest committed word to the application, commit a new word, and update preedit.
     FlushAndCommitAndPreedit { flushed: String },
+    /// Flush all buffered content (committed words + pending strokes) to the application.
+    FlushAll { flushed: String },
     /// Nothing changed (e.g. undo on empty buffer).
     Noop,
 }
@@ -44,10 +46,44 @@ impl StrokeBuffer {
         }
     }
 
+    /// Check whether a stroke is *exactly* R-R with no other keys.
+    fn is_rr_only(stroke: Stroke) -> bool {
+        stroke == Stroke::new(&[Key::LeftR, Key::RightR])
+    }
+
+    /// Collect all buffered content into a single string and clear the buffer.
+    fn flush_all(&mut self) -> String {
+        let mut parts: Vec<String> = Vec::new();
+        for cw in self.committed.drain(..) {
+            parts.push(cw.word);
+        }
+        if !self.strokes.is_empty() {
+            let outline = Outline::from(self.strokes.as_slice());
+            parts.push(outline.extended());
+            self.strokes.clear();
+        }
+        parts.join(" ")
+    }
+
+    /// Clear the entire buffer (committed words and pending strokes).
+    pub fn clear(&mut self) {
+        self.strokes.clear();
+        self.committed.clear();
+    }
+
     /// Push a stroke into the buffer. Returns what the engine should do.
     pub fn push_stroke(&mut self, stroke: Stroke) -> BufferAction {
         if stroke == Stroke::star() {
             return self.undo();
+        }
+
+        // R-R alone: flush all buffered content.
+        if Self::is_rr_only(stroke) {
+            let flushed = self.flush_all();
+            if flushed.is_empty() {
+                return BufferAction::Noop;
+            }
+            return BufferAction::FlushAll { flushed };
         }
 
         self.strokes.push(stroke);
@@ -71,6 +107,11 @@ impl StrokeBuffer {
                 self.committed.push_back(committed_word);
                 BufferAction::CommitAndPreedit
             }
+        } else if self.committed.len() >= self.max_slots {
+            // Buffer full but no word found — flush the stroke as raw text.
+            let stroke = self.strokes.pop().unwrap();
+            let flushed = stroke.extended();
+            BufferAction::FlushAndCommitAndPreedit { flushed }
         } else {
             BufferAction::UpdatePreedit
         }
@@ -281,5 +322,96 @@ mod tests {
         let preedit = buf.preedit_string();
         // Should be "cat" + space + extended notation of SKWR
         assert!(preedit.starts_with("cat "), "preedit was: {preedit}");
+    }
+
+    #[test]
+    fn test_rr_flushes_all() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("TKOG", "dog")]);
+        let mut buf = StrokeBuffer::new(dict, 5);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TKOG").unwrap());
+        assert_eq!(buf.committed_len(), 2);
+
+        // R-R alone should flush everything
+        let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
+        let action = buf.push_stroke(rr);
+        match action {
+            BufferAction::FlushAll { ref flushed } => {
+                assert_eq!(flushed, "cat dog");
+            }
+            _ => panic!("Expected FlushAll, got {:?}", action),
+        }
+        assert_eq!(buf.committed_len(), 0);
+        assert_eq!(buf.pending_len(), 0);
+    }
+
+    #[test]
+    fn test_rr_flushes_pending_too() {
+        let dict = test_dictionary(&[("KAT", "cat")]);
+        let mut buf = StrokeBuffer::new(dict, 5);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("SKWR").unwrap()); // untranslated
+
+        let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
+        let action = buf.push_stroke(rr);
+        match action {
+            BufferAction::FlushAll { ref flushed } => {
+                // Should contain "cat" and the extended form of SKWR
+                assert!(flushed.starts_with("cat "), "flushed was: {flushed}");
+            }
+            _ => panic!("Expected FlushAll, got {:?}", action),
+        }
+        assert_eq!(buf.committed_len(), 0);
+        assert_eq!(buf.pending_len(), 0);
+    }
+
+    #[test]
+    fn test_rr_on_empty_is_noop() {
+        let dict = test_dictionary(&[]);
+        let mut buf = StrokeBuffer::new(dict, 5);
+
+        let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
+        let action = buf.push_stroke(rr);
+        assert_eq!(action, BufferAction::Noop);
+    }
+
+    #[test]
+    fn test_clear_buffer() {
+        let dict = test_dictionary(&[("KAT", "cat")]);
+        let mut buf = StrokeBuffer::new(dict, 5);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
+        assert_eq!(buf.committed_len(), 1);
+        assert_eq!(buf.pending_len(), 1);
+
+        // clear() wipes everything (called by main.rs on control+star)
+        buf.clear();
+        assert_eq!(buf.committed_len(), 0);
+        assert_eq!(buf.pending_len(), 0);
+        assert_eq!(buf.preedit_string(), "");
+    }
+
+    #[test]
+    fn test_buffer_full_no_word_flushes_stroke() {
+        let dict = test_dictionary(&[("KAT", "cat")]);
+        let mut buf = StrokeBuffer::new(dict, 1); // max 1 committed slot
+
+        // Fill the buffer with "cat"
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(buf.committed_len(), 1);
+
+        // Push an untranslated stroke — buffer is full, no word found
+        let action = buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
+        match action {
+            BufferAction::FlushAndCommitAndPreedit { ref flushed } => {
+                // The untranslated stroke's extended form should be flushed
+                let expected = Stroke::try_from_string("SKWR").unwrap().extended();
+                assert_eq!(flushed, &expected);
+            }
+            _ => panic!("Expected FlushAndCommitAndPreedit, got {:?}", action),
+        }
     }
 }

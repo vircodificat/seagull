@@ -5,7 +5,7 @@ use std::io::Write;
 use std::sync::Arc;
 
 use seagull::device::serial::SerialDevice;
-use seagull::device::Device;
+use seagull::device::{Device, Keycode};
 use seagull::{JsonDictionary, Stroke};
 use tokio::sync::Mutex;
 use zbus::connection::Builder;
@@ -127,7 +127,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let buffer = Arc::new(Mutex::new(StrokeBuffer::new(dictionary, buffer_size)));
 
     // --- Stroke channel (serial thread → async task) ---
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<Stroke>(64);
+    let (tx, mut rx) = tokio::sync::mpsc::channel::<Keycode>(64);
 
     // --- Serial reader thread (blocking) ---
     let serial_device_path = serial_device.clone();
@@ -147,12 +147,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         loop {
             let keycode = device.read_stroke();
-            if keycode.is_control() {
-                continue;
-            }
             let stroke = keycode.stroke();
-            log!(serial_logger, "Stroke received: {stroke}");
-            if tx.blocking_send(stroke).is_err() {
+            log!(serial_logger, "Stroke received: {stroke} (control={})", keycode.is_control());
+            if tx.blocking_send(keycode).is_err() {
                 log!(serial_logger, "Channel closed, serial reader exiting");
                 break;
             }
@@ -198,8 +195,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // --- Stroke processing loop ---
     log!(logger, "Ready, waiting for strokes...");
-    while let Some(stroke) = rx.recv().await {
-        log!(logger, "Processing stroke: {stroke}");
+    while let Some(keycode) = rx.recv().await {
+        let stroke = keycode.stroke();
+        log!(logger, "Processing stroke: {stroke} (control={})", keycode.is_control());
+
+        // Control + star: clear the buffer.
+        if keycode.is_control() && stroke == Stroke::star() {
+            let mut buf = buffer.lock().await;
+            buf.clear();
+            log!(logger, "  Buffer cleared (control+star)");
+            if let Err(e) = emit_for_action(
+                &buffer::BufferAction::UpdatePreedit, "", &connection,
+            ).await {
+                log!(logger, "  ERROR emitting signal: {e}");
+            }
+            continue;
+        }
+
+        // Skip all other control strokes.
+        if keycode.is_control() {
+            log!(logger, "  Skipping control stroke");
+            continue;
+        }
 
         let action = {
             let mut buf = buffer.lock().await;

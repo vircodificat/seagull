@@ -274,6 +274,11 @@ pub async fn emit_for_action(
             emit_commit_text(conn, commit).await?;
             emit_preedit(conn, preedit).await?;
         }
+        BufferAction::FlushAll { flushed } => {
+            let commit = ibus_text(&format!("{flushed} "));
+            emit_commit_text(conn, commit).await?;
+            emit_preedit(conn, "").await?;
+        }
     }
 
     Ok(())
