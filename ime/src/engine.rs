@@ -157,6 +157,7 @@ impl Engine {
         text: Value<'_>,
         cursor_pos: u32,
         visible: bool,
+        mode: u32,
     ) -> zbus::Result<()>;
 
     #[zbus(signal)]
@@ -166,30 +167,77 @@ impl Engine {
     async fn hide_preedit_text(emitter: &SignalEmitter<'_>) -> zbus::Result<()>;
 }
 
-/// Send a raw D-Bus signal on the IBus Engine interface.
-///
-/// This bypasses the zbus object-server interface machinery entirely,
-/// avoiding potential deadlocks with the interface ref / object-server lock.
-async fn send_engine_signal<B>(
-    conn: &zbus::Connection,
-    signal_name: &str,
-    body: &B,
-) -> zbus::Result<()>
-where
-    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
-{
-    let mut l = open_log();
-    log!(l, "  send_engine_signal: building {signal_name}...");
-    let msg = zbus::message::Message::signal(
+/// Build and send a D-Bus signal message on the IBus Engine interface.
+fn engine_signal_builder<'a>(
+    signal_name: &'a str,
+) -> zbus::Result<zbus::message::Builder<'a>> {
+    zbus::message::Message::signal(
         "/org/freedesktop/IBus/Engine/SeagullIME",
         "org.freedesktop.IBus.Engine",
         signal_name,
-    )?
-    .build(body)?;
-    log!(l, "  send_engine_signal: sending {signal_name}...");
-    conn.send(&msg).await?;
-    log!(l, "  send_engine_signal: {signal_name} sent OK");
-    Ok(())
+    )
+}
+
+/// Emit an empty signal (no body).
+async fn emit_signal_empty(conn: &zbus::Connection, name: &str) -> zbus::Result<()> {
+    let msg = engine_signal_builder(name)?.build(&())?;
+    conn.send(&msg).await
+}
+
+/// Emit CommitText signal: body = `v` (one variant arg).
+async fn emit_commit_text(conn: &zbus::Connection, text: Value<'_>) -> zbus::Result<()> {
+    // Single variant arg: signature is just `v`
+    let msg = engine_signal_builder("CommitText")?.build(&(text,))?;
+    conn.send(&msg).await
+}
+
+/// Emit UpdatePreeditText signal: body = `vubu` (four separate args).
+///
+/// IBus expects: text (variant), cursor_pos (u32), visible (bool), mode (u32).
+/// Mode: 0 = IBUS_ENGINE_PREEDIT_CLEAR, 1 = IBUS_ENGINE_PREEDIT_COMMIT.
+///
+/// We use `build_raw_body` because a Rust tuple serializes as a D-Bus struct
+/// `(vubu)` rather than flat args `vubu`.
+async fn emit_update_preedit(
+    conn: &zbus::Connection,
+    text: Value<'_>,
+    cursor_pos: u32,
+    visible: bool,
+) -> zbus::Result<()> {
+    use zbus::zvariant;
+
+    let mode: u32 = 0; // IBUS_ENGINE_PREEDIT_CLEAR
+
+    // Serialize each arg at the correct body offset so alignment/padding is right.
+    let ctxt0 = zvariant::serialized::Context::new_dbus(zvariant::LE, 0);
+    let text_bytes = zvariant::to_bytes(ctxt0, &text)?;
+
+    let off1 = text_bytes.bytes().len();
+    let ctxt1 = zvariant::serialized::Context::new_dbus(zvariant::LE, off1);
+    let pos_bytes = zvariant::to_bytes(ctxt1, &cursor_pos)?;
+
+    let off2 = off1 + pos_bytes.bytes().len();
+    let ctxt2 = zvariant::serialized::Context::new_dbus(zvariant::LE, off2);
+    let vis_bytes = zvariant::to_bytes(ctxt2, &visible)?;
+
+    let off3 = off2 + vis_bytes.bytes().len();
+    let ctxt3 = zvariant::serialized::Context::new_dbus(zvariant::LE, off3);
+    let mode_bytes = zvariant::to_bytes(ctxt3, &mode)?;
+
+    let mut body = Vec::new();
+    body.extend_from_slice(text_bytes.bytes());
+    body.extend_from_slice(pos_bytes.bytes());
+    body.extend_from_slice(vis_bytes.bytes());
+    body.extend_from_slice(mode_bytes.bytes());
+
+    let msg = unsafe {
+        engine_signal_builder("UpdatePreeditText")?
+            .build_raw_body(&body, "vubu", vec![])?
+    };
+
+    let mut l = open_log();
+    log!(l, "  UpdatePreeditText signature={:?} body_len={}", msg.header().signature(), body.len());
+    conn.send(&msg).await
 }
 
 /// Helper to emit preedit update signals via raw D-Bus messages.
@@ -198,14 +246,14 @@ async fn emit_preedit(
     preedit: &str,
 ) -> zbus::Result<()> {
     if preedit.is_empty() {
-        send_engine_signal(conn, "HidePreeditText", &()).await?;
+        emit_signal_empty(conn, "HidePreeditText").await?;
         let text = ibus_text("");
-        send_engine_signal(conn, "UpdatePreeditText", &(text, 0u32, false)).await?;
+        emit_update_preedit(conn, text, 0, false).await?;
     } else {
         let text = ibus_text(preedit);
         let cursor_pos = preedit.len() as u32;
-        send_engine_signal(conn, "UpdatePreeditText", &(text, cursor_pos, true)).await?;
-        send_engine_signal(conn, "ShowPreeditText", &()).await?;
+        emit_update_preedit(conn, text, cursor_pos, true).await?;
+        emit_signal_empty(conn, "ShowPreeditText").await?;
     }
     Ok(())
 }
@@ -216,8 +264,6 @@ pub async fn emit_for_action(
     preedit: &str,
     conn: &zbus::Connection,
 ) -> zbus::Result<()> {
-    let mut l = open_log();
-    log!(l, "  emit_for_action: entered with action={action:?}");
     match action {
         BufferAction::Noop => {}
         BufferAction::UpdatePreedit | BufferAction::CommitAndPreedit => {
@@ -225,7 +271,7 @@ pub async fn emit_for_action(
         }
         BufferAction::FlushAndCommitAndPreedit { flushed } => {
             let commit = ibus_text(&format!("{flushed} "));
-            send_engine_signal(conn, "CommitText", &(commit,)).await?;
+            emit_commit_text(conn, commit).await?;
             emit_preedit(conn, preedit).await?;
         }
     }
