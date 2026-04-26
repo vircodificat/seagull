@@ -14,7 +14,6 @@ use zbus::zvariant::ObjectPath;
 use buffer::StrokeBuffer;
 use engine::{emit_for_action, Engine, Factory};
 
-const DEFAULT_BUFFER_SIZE: usize = 5;
 const DEFAULT_SERIAL_DEVICE: &str =
     "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02";
 const ENGINE_PATH: &str = "/org/freedesktop/IBus/Engine/SeagullIME";
@@ -95,11 +94,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     log!(logger, "SeagullIME starting");
 
     // --- Configuration from environment ---
-    let buffer_size: usize = std::env::var("SEAGULL_BUFFER_SIZE")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(DEFAULT_BUFFER_SIZE);
-
     let dict_path = std::env::var("SEAGULL_DICTIONARY_PATH").unwrap_or_else(|_| {
         let home = std::env::var("HOME").expect("HOME not set");
         format!("{home}/.config/seagull/seagull.json")
@@ -108,7 +102,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let serial_device = std::env::var("SEAGULL_SERIAL_DEVICE")
         .unwrap_or_else(|_| DEFAULT_SERIAL_DEVICE.to_string());
 
-    log!(logger, "Config: buffer_size={buffer_size}, dict={dict_path}, serial={serial_device}");
+    log!(logger, "Config: dict={dict_path}, serial={serial_device}");
 
     // --- Load dictionary ---
     log!(logger, "Loading dictionary from {dict_path}");
@@ -124,7 +118,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // --- Create buffer ---
-    let buffer = Arc::new(Mutex::new(StrokeBuffer::new(dictionary, buffer_size)));
+    let buffer = Arc::new(Mutex::new(StrokeBuffer::new(dictionary)));
 
     // --- Stroke channel (serial thread → async task) ---
     let (tx, mut rx) = tokio::sync::mpsc::channel::<Keycode>(64);

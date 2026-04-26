@@ -16,10 +16,12 @@ pub enum BufferAction {
     UpdatePreedit,
     /// Commit a new word and update preedit.
     CommitAndPreedit,
-    /// Flush the oldest committed word to the application, commit a new word, and update preedit.
-    FlushAndCommitAndPreedit { flushed: String },
     /// Flush all buffered content (committed words + pending strokes) to the application.
     FlushAll { flushed: String },
+    /// Send an Enter keypress (R-R on empty buffer).
+    SendEnter,
+    /// Send a Backspace keypress (* on empty buffer).
+    SendBackspace,
     /// Nothing changed (e.g. undo on empty buffer).
     Noop,
 }
@@ -30,25 +32,39 @@ pub struct StrokeBuffer {
     strokes: Vec<Stroke>,
     /// Words that have been translated but not yet flushed to the application.
     committed: VecDeque<CommittedWord>,
-    /// Maximum number of committed word slots before flushing.
-    max_slots: usize,
     /// Dictionary for looking up outlines.
     dictionary: JsonDictionary,
+    /// Whether the next committed word should be capitalized.
+    capitalize_next: bool,
 }
 
 impl StrokeBuffer {
-    pub fn new(dictionary: JsonDictionary, max_slots: usize) -> Self {
+    pub fn new(dictionary: JsonDictionary) -> Self {
         Self {
             strokes: Vec::new(),
             committed: VecDeque::new(),
-            max_slots,
             dictionary,
+            capitalize_next: false,
         }
     }
 
     /// Check whether a stroke is *exactly* R-R with no other keys.
     fn is_rr_only(stroke: Stroke) -> bool {
         stroke == Stroke::new(&[Key::LeftR, Key::RightR])
+    }
+
+    /// Check whether a stroke is *exactly* H-F (capitalize next word).
+    fn is_hf_only(stroke: Stroke) -> bool {
+        stroke == Stroke::new(&[Key::LeftH, Key::RightF])
+    }
+
+    /// Capitalize the first character of a string.
+    fn capitalize(s: &str) -> String {
+        let mut chars = s.chars();
+        match chars.next() {
+            None => String::new(),
+            Some(c) => c.to_uppercase().to_string() + chars.as_str(),
+        }
     }
 
     /// Collect all buffered content into a single string and clear the buffer.
@@ -62,6 +78,7 @@ impl StrokeBuffer {
             parts.push(outline.extended());
             self.strokes.clear();
         }
+        self.capitalize_next = false;
         parts.join(" ")
     }
 
@@ -69,6 +86,7 @@ impl StrokeBuffer {
     pub fn clear(&mut self) {
         self.strokes.clear();
         self.committed.clear();
+        self.capitalize_next = false;
     }
 
     /// Push a stroke into the buffer. Returns what the engine should do.
@@ -77,11 +95,17 @@ impl StrokeBuffer {
             return self.undo();
         }
 
-        // R-R alone: flush all buffered content.
+        // H-F alone: capitalize the next word.
+        if Self::is_hf_only(stroke) {
+            self.capitalize_next = true;
+            return BufferAction::Noop;
+        }
+
+        // R-R alone: flush all buffered content, or send Enter if empty.
         if Self::is_rr_only(stroke) {
             let flushed = self.flush_all();
             if flushed.is_empty() {
-                return BufferAction::Noop;
+                return BufferAction::SendEnter;
             }
             return BufferAction::FlushAll { flushed };
         }
@@ -91,27 +115,20 @@ impl StrokeBuffer {
         // Try to look up the current pending strokes as an outline.
         let outline = Outline::from(self.strokes.as_slice());
         if let Some(word) = self.dictionary.lookup(outline.clone()) {
-            let word = word.to_owned();
+            let word = if self.capitalize_next {
+                self.capitalize_next = false;
+                Self::capitalize(&word)
+            } else {
+                word.to_owned()
+            };
             let committed_word = CommittedWord {
                 word,
                 outline: outline.clone(),
             };
             self.strokes.clear();
 
-            if self.committed.len() >= self.max_slots {
-                // Buffer full — flush oldest.
-                let flushed = self.flush_oldest();
-                self.committed.push_back(committed_word);
-                BufferAction::FlushAndCommitAndPreedit { flushed }
-            } else {
-                self.committed.push_back(committed_word);
-                BufferAction::CommitAndPreedit
-            }
-        } else if self.committed.len() >= self.max_slots {
-            // Buffer full but no word found — flush the stroke as raw text.
-            let stroke = self.strokes.pop().unwrap();
-            let flushed = stroke.extended();
-            BufferAction::FlushAndCommitAndPreedit { flushed }
+            self.committed.push_back(committed_word);
+            BufferAction::CommitAndPreedit
         } else {
             BufferAction::UpdatePreedit
         }
@@ -122,6 +139,8 @@ impl StrokeBuffer {
         if !self.strokes.is_empty() {
             self.strokes.pop();
             BufferAction::UpdatePreedit
+        } else if self.committed.is_empty() {
+            BufferAction::SendBackspace
         } else if let Some(last_committed) = self.committed.pop_back() {
             // Decompose: restore all strokes of the last word minus the final one.
             let outline_strokes = last_committed.outline.strokes().to_vec();
@@ -133,14 +152,6 @@ impl StrokeBuffer {
         } else {
             BufferAction::Noop
         }
-    }
-
-    /// Remove and return the oldest committed word.
-    fn flush_oldest(&mut self) -> String {
-        self.committed
-            .pop_front()
-            .expect("flush_oldest called with no committed words")
-            .word
     }
 
     /// Build the preedit string for display.
@@ -209,7 +220,7 @@ mod tests {
     #[test]
     fn test_push_single_stroke_word() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         let stroke = Stroke::try_from_string("KAT").unwrap();
         let action = buf.push_stroke(stroke);
@@ -221,7 +232,7 @@ mod tests {
     #[test]
     fn test_push_unknown_stroke() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         let stroke = Stroke::try_from_string("SKWR").unwrap();
         let action = buf.push_stroke(stroke);
@@ -233,13 +244,11 @@ mod tests {
     #[test]
     fn test_undo_pending_stroke() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
-        // Push an unknown stroke
         buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
         assert_eq!(buf.pending_len(), 1);
 
-        // Undo it with star
         let action = buf.push_stroke(Stroke::star());
         assert_eq!(action, BufferAction::UpdatePreedit);
         assert_eq!(buf.pending_len(), 0);
@@ -248,13 +257,11 @@ mod tests {
     #[test]
     fn test_undo_committed_word() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
-        // Commit "cat"
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
         assert_eq!(buf.committed_len(), 1);
 
-        // Undo — should decompose. KAT is single stroke, so strokes go empty.
         let action = buf.push_stroke(Stroke::star());
         assert_eq!(action, BufferAction::UpdatePreedit);
         assert_eq!(buf.committed_len(), 0);
@@ -264,76 +271,49 @@ mod tests {
     #[test]
     fn test_undo_multistroke_committed_word() {
         let dict = test_dictionary(&[("KAT/ER", "cater")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
-        // Two strokes to get "cater"
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
         let action = buf.push_stroke(Stroke::try_from_string("ER").unwrap());
         assert_eq!(action, BufferAction::CommitAndPreedit);
         assert_eq!(buf.committed_len(), 1);
 
-        // Undo — should restore all but last stroke
         let action = buf.push_stroke(Stroke::star());
         assert_eq!(action, BufferAction::UpdatePreedit);
         assert_eq!(buf.committed_len(), 0);
-        assert_eq!(buf.pending_len(), 1); // "KAT" restored as pending
+        assert_eq!(buf.pending_len(), 1);
     }
 
     #[test]
-    fn test_undo_empty_is_noop() {
+    fn test_undo_empty_sends_backspace() {
         let dict = test_dictionary(&[]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         let action = buf.push_stroke(Stroke::star());
-        assert_eq!(action, BufferAction::Noop);
-    }
-
-    #[test]
-    fn test_buffer_full_flushes_oldest() {
-        let dict = test_dictionary(&[("KAT", "cat"), ("TKOG", "dog")]);
-        let mut buf = StrokeBuffer::new(dict, 1); // max 1 committed slot
-
-        // Commit "cat"
-        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
-        assert_eq!(buf.committed_len(), 1);
-
-        // Commit "dog" — should flush "cat" first
-        let action = buf.push_stroke(Stroke::try_from_string("TKOG").unwrap());
-        match action {
-            BufferAction::FlushAndCommitAndPreedit { ref flushed } => {
-                assert_eq!(flushed, "cat");
-            }
-            _ => panic!("Expected FlushAndCommitAndPreedit, got {:?}", action),
-        }
-        assert_eq!(buf.committed_len(), 1);
-        assert_eq!(buf.preedit_string(), "dog");
+        assert_eq!(action, BufferAction::SendBackspace);
     }
 
     #[test]
     fn test_preedit_string_mixed() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
-        // Commit "cat"
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
-        // Add unknown stroke
         buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
 
         let preedit = buf.preedit_string();
-        // Should be "cat" + space + extended notation of SKWR
         assert!(preedit.starts_with("cat "), "preedit was: {preedit}");
     }
 
     #[test]
     fn test_rr_flushes_all() {
         let dict = test_dictionary(&[("KAT", "cat"), ("TKOG", "dog")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
         buf.push_stroke(Stroke::try_from_string("TKOG").unwrap());
         assert_eq!(buf.committed_len(), 2);
 
-        // R-R alone should flush everything
         let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
         let action = buf.push_stroke(rr);
         match action {
@@ -349,16 +329,15 @@ mod tests {
     #[test]
     fn test_rr_flushes_pending_too() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
-        buf.push_stroke(Stroke::try_from_string("SKWR").unwrap()); // untranslated
+        buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
 
         let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
         let action = buf.push_stroke(rr);
         match action {
             BufferAction::FlushAll { ref flushed } => {
-                // Should contain "cat" and the extended form of SKWR
                 assert!(flushed.starts_with("cat "), "flushed was: {flushed}");
             }
             _ => panic!("Expected FlushAll, got {:?}", action),
@@ -368,26 +347,25 @@ mod tests {
     }
 
     #[test]
-    fn test_rr_on_empty_is_noop() {
+    fn test_rr_on_empty_sends_enter() {
         let dict = test_dictionary(&[]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
         let action = buf.push_stroke(rr);
-        assert_eq!(action, BufferAction::Noop);
+        assert_eq!(action, BufferAction::SendEnter);
     }
 
     #[test]
     fn test_clear_buffer() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 5);
+        let mut buf = StrokeBuffer::new(dict);
 
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
         buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
         assert_eq!(buf.committed_len(), 1);
         assert_eq!(buf.pending_len(), 1);
 
-        // clear() wipes everything (called by main.rs on control+star)
         buf.clear();
         assert_eq!(buf.committed_len(), 0);
         assert_eq!(buf.pending_len(), 0);
@@ -395,23 +373,23 @@ mod tests {
     }
 
     #[test]
-    fn test_buffer_full_no_word_flushes_stroke() {
+    fn test_hf_capitalizes_next_word() {
         let dict = test_dictionary(&[("KAT", "cat")]);
-        let mut buf = StrokeBuffer::new(dict, 1); // max 1 committed slot
+        let mut buf = StrokeBuffer::new(dict);
 
-        // Fill the buffer with "cat"
-        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
-        assert_eq!(buf.committed_len(), 1);
+        // H-F sets capitalize_next
+        let hf = Stroke::new(&[Key::LeftH, Key::RightF]);
+        let action = buf.push_stroke(hf);
+        assert_eq!(action, BufferAction::Noop);
 
-        // Push an untranslated stroke — buffer is full, no word found
-        let action = buf.push_stroke(Stroke::try_from_string("SKWR").unwrap());
-        match action {
-            BufferAction::FlushAndCommitAndPreedit { ref flushed } => {
-                // The untranslated stroke's extended form should be flushed
-                let expected = Stroke::try_from_string("SKWR").unwrap().extended();
-                assert_eq!(flushed, &expected);
-            }
-            _ => panic!("Expected FlushAndCommitAndPreedit, got {:?}", action),
-        }
+        // Next word should be capitalized
+        let action = buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(action, BufferAction::CommitAndPreedit);
+        assert_eq!(buf.preedit_string(), "Cat");
+
+        // Subsequent words should NOT be capitalized
+        let action = buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(action, BufferAction::CommitAndPreedit);
+        assert_eq!(buf.preedit_string(), "Cat cat");
     }
 }

@@ -191,6 +191,38 @@ async fn emit_commit_text(conn: &zbus::Connection, text: Value<'_>) -> zbus::Res
     conn.send(&msg).await
 }
 
+/// Emit ForwardKeyEvent signal: body = `uuu` (keyval, keycode, state as flat args).
+async fn emit_forward_key(conn: &zbus::Connection, keyval: u32, keycode: u32, state: u32) -> zbus::Result<()> {
+    use zbus::zvariant;
+
+    let ctxt0 = zvariant::serialized::Context::new_dbus(zvariant::LE, 0);
+    let kv_bytes = zvariant::to_bytes(ctxt0, &keyval)?;
+
+    let off1 = kv_bytes.bytes().len();
+    let ctxt1 = zvariant::serialized::Context::new_dbus(zvariant::LE, off1);
+    let kc_bytes = zvariant::to_bytes(ctxt1, &keycode)?;
+
+    let off2 = off1 + kc_bytes.bytes().len();
+    let ctxt2 = zvariant::serialized::Context::new_dbus(zvariant::LE, off2);
+    let st_bytes = zvariant::to_bytes(ctxt2, &state)?;
+
+    let mut body = Vec::new();
+    body.extend_from_slice(kv_bytes.bytes());
+    body.extend_from_slice(kc_bytes.bytes());
+    body.extend_from_slice(st_bytes.bytes());
+
+    let mut l = open_log();
+    log!(l, "  ForwardKeyEvent: keyval=0x{:X} keycode={} state=0x{:X} body_hex={:02X?}",
+         keyval, keycode, state, &body);
+
+    let msg = unsafe {
+        engine_signal_builder("ForwardKeyEvent")?
+            .build_raw_body(&body, "uuu", vec![])?
+    };
+    log!(l, "  ForwardKeyEvent: msg signature={:?}", msg.header().signature());
+    conn.send(&msg).await
+}
+
 /// Emit UpdatePreeditText signal: body = `vubu` (four separate args).
 ///
 /// IBus expects: text (variant), cursor_pos (u32), visible (bool), mode (u32).
@@ -269,15 +301,19 @@ pub async fn emit_for_action(
         BufferAction::UpdatePreedit | BufferAction::CommitAndPreedit => {
             emit_preedit(conn, preedit).await?;
         }
-        BufferAction::FlushAndCommitAndPreedit { flushed } => {
-            let commit = ibus_text(&format!("{flushed} "));
-            emit_commit_text(conn, commit).await?;
-            emit_preedit(conn, preedit).await?;
-        }
         BufferAction::FlushAll { flushed } => {
             let commit = ibus_text(&format!("{flushed} "));
             emit_commit_text(conn, commit).await?;
             emit_preedit(conn, "").await?;
+        }
+        BufferAction::SendEnter => {
+            // Enter works via CommitText("\n"), keep this approach.
+            let commit = ibus_text("\n");
+            emit_commit_text(conn, commit).await?;
+        }
+        BufferAction::SendBackspace => {
+            let commit = ibus_text("\x08");
+            emit_commit_text(conn, commit).await?;
         }
     }
 
