@@ -33,14 +33,6 @@ pub struct BufferConfig {
     pub max_size: usize,
 }
 
-impl Default for DeviceConfig {
-    fn default() -> Self {
-        Self {
-            path: None,
-            auto_detect: true,
-        }
-    }
-}
 
 impl Default for DictionaryConfig {
     fn default() -> Self {
@@ -105,7 +97,7 @@ impl Config {
             let default_path = Self::default_config_path();
             if default_path.exists() {
                 log!(logger, "Loading config from: {:?}", default_path);
-                config.load_from_file(&default_path)?;
+                config.load_from_file(default_path.to_str().unwrap())?;
             } else {
                 log!(logger, "No config file found, using defaults");
             }

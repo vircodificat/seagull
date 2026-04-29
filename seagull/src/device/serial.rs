@@ -35,7 +35,11 @@ impl Device for SerialDevice {
 
         loop {
             let buf_slice = &mut buf[total_amount..6];
-            total_amount += self.port().read(buf_slice)?;
+            match self.port().read(buf_slice) {
+                Ok(amount) => total_amount += amount,
+                Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => continue,
+                Err(e) => return Err(e),
+            }
 
             if total_amount == 6 {
                 break;

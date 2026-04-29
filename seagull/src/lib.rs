@@ -2,6 +2,7 @@
 
 pub mod device;
 pub mod extended;
+#[cfg(test)] mod prefix_tree_test;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -100,6 +101,56 @@ impl PrefixTree {
             child.lookup_by_strokes(tail)
         }
 
+    }
+
+    pub fn contains(&self, outline: Outline) -> bool {
+        self.lookup_by_strokes(outline.strokes()).is_some()
+    }
+
+    pub fn following_strokes(&self, outline: Outline) -> Vec<Stroke> {
+        self.following_strokes_by_strokes(outline.strokes())
+    }
+
+    fn following_strokes_by_strokes(&self, strokes: &[Stroke]) -> Vec<Stroke> {
+        if strokes.is_empty() {
+            let PrefixTree(refcell) = self;
+            let children = &refcell.borrow().1;
+            return children.keys().cloned().collect();
+        }
+        let PrefixTree(refcell) = self;
+        let children = &refcell.borrow().1;
+        let head = strokes[0].clone();
+        let tail = &strokes[1..];
+        if let Some(child) = children.get(&head) {
+            child.following_strokes_by_strokes(tail)
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn prefix_strokes(&self, outline: Outline) -> Vec<Stroke> {
+        self.prefix_strokes_by_strokes(outline.strokes())
+    }
+
+    fn prefix_strokes_by_strokes(&self, strokes: &[Stroke]) -> Vec<Stroke> {
+        let mut prefix_strokes_rev = Vec::new();
+        self.prefix_strokes_helper(strokes, &mut prefix_strokes_rev);
+        let mut results = Vec::new();
+        results.extend(prefix_strokes_rev.into_iter().rev());
+        results
+    }
+
+    fn prefix_strokes_helper(&self, strokes: &[Stroke], prefix_strokes_rev: &mut Vec<Stroke>) {
+        if let Some((stroke, rest)) = strokes.split_first() {
+            let PrefixTree(refcell) = self;
+            let borrowed = refcell.borrow();
+            if borrowed.0.is_some() {
+                prefix_strokes_rev.push(*stroke);
+            }
+            if let Some(child) = borrowed.1.get(stroke) {
+                child.prefix_strokes_helper(rest, prefix_strokes_rev);
+            }
+        }
     }
 }
 

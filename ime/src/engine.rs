@@ -308,13 +308,19 @@ pub async fn emit_for_action(
         }
         BufferAction::SendEnter => {
             let enter_keyval: u32 = 0xFF0D;
-            let enter_keycode: u32 = 36;
+            let enter_keycode: u32 = 28; // EVDEV KEY_ENTER
             let enter_state: u32 = 0;
+            let release_state: u32 = 1 << 30; // IBUS_RELEASE_MASK
             emit_forward_key(conn, enter_keyval, enter_keycode, enter_state).await?;
+            emit_forward_key(conn, enter_keyval, enter_keycode, release_state).await?;
         }
         BufferAction::SendBackspace => {
-            let commit = ibus_text("\x08");
-            emit_commit_text(conn, commit).await?;
+            let bs_keyval: u32 = 0xFF08;
+            let bs_keycode: u32 = 14; // EVDEV KEY_BACKSPACE
+            let bs_state: u32 = 0;
+            let release_state: u32 = 1 << 30; // IBUS_RELEASE_MASK
+            emit_forward_key(conn, bs_keyval, bs_keycode, bs_state).await?;
+            emit_forward_key(conn, bs_keyval, bs_keycode, release_state).await?;
         }
     }
 
