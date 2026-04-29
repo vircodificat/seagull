@@ -15,7 +15,7 @@ use zbus::zvariant::ObjectPath;
 
 use buffer::StrokeBuffer;
 use config::Config;
-use engine::{emit_for_action, Engine, Factory};
+use engine::{emit_for_action, Engine, Factory, SharedConnection};
 
 const ENGINE_PATH: &str = "/org/freedesktop/IBus/Engine/SeagullIME";
 const FACTORY_PATH: &str = "/org/freedesktop/IBus/Factory";
@@ -143,7 +143,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let engine_obj_path: ObjectPath<'static> = ENGINE_PATH.try_into()?;
     let factory = Factory::new(engine_obj_path.clone());
-    let engine = Engine::new(buffer.clone());
+
+    // Create a shared connection reference that will be set after the connection is built
+    let shared_connection: SharedConnection = Arc::new(Mutex::new(None));
+    let engine = Engine::new(buffer.clone(), shared_connection.clone());
 
     let ibus_addr = std::env::var("IBUS_ADDRESS")
         .ok()
@@ -174,6 +177,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err(e.into());
         }
     };
+
+    // Store the connection in the shared reference
+    {
+        let mut conn_ref = shared_connection.lock().await;
+        *conn_ref = Some(connection.clone());
+    }
 
     // Spawn serial device reader thread
     let candidates_clone = candidates.clone();

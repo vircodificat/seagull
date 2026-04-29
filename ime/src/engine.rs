@@ -8,6 +8,8 @@ use zbus::interface;
 
 use crate::buffer::{BufferAction, StrokeBuffer};
 
+pub type SharedConnection = Arc<Mutex<Option<zbus::Connection>>>;
+
 macro_rules! log {
     ($logger:expr, $($arg:tt)*) => {{
         let now = std::time::SystemTime::now()
@@ -95,25 +97,94 @@ impl Factory {
 /// IBus Engine — handles input method lifecycle and emits text signals.
 pub struct Engine {
     pub buffer: Arc<Mutex<StrokeBuffer>>,
+    pub connection: SharedConnection,
 }
 
 impl Engine {
-    pub fn new(buffer: Arc<Mutex<StrokeBuffer>>) -> Self {
-        Self { buffer }
+    pub fn new(buffer: Arc<Mutex<StrokeBuffer>>, connection: SharedConnection) -> Self {
+        Self { buffer, connection }
     }
 }
 
 #[interface(name = "org.freedesktop.IBus.Engine")]
 impl Engine {
-    /// IBus calls this for each key event. We always return false (passthrough)
-    /// because steno input comes from the serial device, not the keyboard.
+    /// IBus calls this for each key event.
+    /// Steno input comes from the serial device, not the keyboard.
+    /// Non-steno keypresses should commit the current preedit and forward the key.
+    /// Exception: backspace clears the preedit without forwarding.
     async fn process_key_event(
         &self,
-        _keyval: u32,
-        _keycode: u32,
-        _state: u32,
+        keyval: u32,
+        keycode: u32,
+        state: u32,
     ) -> bool {
-        false
+        let mut l = open_log();
+        log!(l, "ProcessKeyEvent: keyval=0x{:X} keycode={} state=0x{:X}", keyval, keycode, state);
+
+        // Get the connection, if available
+        let conn = match self.connection.lock().await.as_ref() {
+            Some(conn) => conn.clone(),
+            None => {
+                log!(l, "  WARNING: No D-Bus connection available");
+                return false;
+            }
+        };
+
+        // Backspace key: keyval = 0xFF08 (XK_BackSpace)
+        let is_backspace = keyval == 0xFF08;
+
+        // Get the current preedit
+        let preedit = {
+            let buf = self.buffer.lock().await;
+            buf.preedit_string()
+        };
+
+        // If there's preedit text, handle it based on the key type
+        if !preedit.is_empty() {
+            if is_backspace {
+                // Backspace: clear the preedit without forwarding the key
+                log!(l, "  Backspace pressed: clearing preedit '{}'", preedit);
+                {
+                    let mut buf = self.buffer.lock().await;
+                    buf.clear();
+                }
+
+                // Update preedit to empty
+                if let Err(e) = emit_preedit(&conn, "").await {
+                    log!(l, "  ERROR emitting preedit update: {e}");
+                }
+
+                // Return true to indicate we consumed the backspace
+                return true;
+            } else {
+                // Other keys: commit the preedit before forwarding the key
+                log!(l, "  Committing preedit: '{}'", preedit);
+                let commit = ibus_text(&format!("{} ", preedit));
+                if let Err(e) = emit_commit_text(&conn, commit).await {
+                    log!(l, "  ERROR emitting commit text: {e}");
+                }
+
+                // Clear the buffer
+                {
+                    let mut buf = self.buffer.lock().await;
+                    buf.clear();
+                }
+
+                // Update preedit to empty
+                if let Err(e) = emit_preedit(&conn, "").await {
+                    log!(l, "  ERROR emitting preedit update: {e}");
+                }
+            }
+        }
+
+        // Forward the keypress to the application (unless it was backspace with preedit)
+        log!(l, "  Forwarding keypress to application");
+        if let Err(e) = emit_forward_key(&conn, keyval, keycode, state).await {
+            log!(l, "  ERROR forwarding key: {e}");
+        }
+
+        // Return true to indicate we handled the key (consumed it)
+        true
     }
 
     async fn focus_in(&self) {
