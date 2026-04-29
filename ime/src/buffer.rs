@@ -2,6 +2,22 @@ use std::collections::VecDeque;
 
 use seagull::{Dictionary, JsonDictionary, Key, Outline, Stroke};
 
+/// States for the search mode
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SearchStateEnum {
+    /// Not in search mode
+    Inactive,
+    /// Actively searching, accumulating typed text
+    Active(String),
+    /// Showing the result of a lookup
+    ShowingResult(String),
+}
+
+/// Check if a character is valid for search input (English keyboard characters)
+pub fn is_search_key(ch: char) -> bool {
+    ch.is_ascii_alphanumeric() || ch == ' ' || ".,!?;:'\"-".contains(ch)
+}
+
 /// A word that has been translated and is waiting in the committed queue.
 #[derive(Debug, Clone)]
 pub struct CommittedWord {
@@ -248,6 +264,12 @@ impl StrokeBuffer {
             len += cw.word.len();
         }
         len
+    }
+
+    /// Reverse lookup: find the outline for a given word.
+    /// Returns None if the word is not in the dictionary.
+    pub fn reverse_lookup_word(&self, word: &str) -> Option<Outline> {
+        self.dictionary.reverse_lookup(word)
     }
 }
 
@@ -538,5 +560,61 @@ mod tests {
         let action = buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
         assert_eq!(action, BufferAction::CommitAndPreedit);
         assert_eq!(buf.preedit_string(), "Cat cat");
+    }
+
+    #[test]
+    fn test_reverse_lookup_word_valid() {
+        let dict = test_dictionary(&[("KAT", "cat")]);
+        let buf = StrokeBuffer::new(dict);
+
+        let result = buf.reverse_lookup_word("cat");
+        assert!(result.is_some());
+        let outline = result.unwrap();
+        assert_eq!(outline.to_string(), "KAT");
+    }
+
+    #[test]
+    fn test_reverse_lookup_word_invalid() {
+        let dict = test_dictionary(&[("KAT", "cat")]);
+        let buf = StrokeBuffer::new(dict);
+
+        let result = buf.reverse_lookup_word("xyz");
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_is_search_key_alphanumeric() {
+        assert!(is_search_key('a'));
+        assert!(is_search_key('Z'));
+        assert!(is_search_key('0'));
+        assert!(is_search_key('9'));
+    }
+
+    #[test]
+    fn test_is_search_key_punctuation() {
+        assert!(is_search_key(' '));
+        assert!(is_search_key('.'));
+        assert!(is_search_key(','));
+        assert!(is_search_key('!'));
+        assert!(is_search_key('?'));
+    }
+
+    #[test]
+    fn test_is_search_key_invalid() {
+        assert!(!is_search_key('@'));
+        assert!(!is_search_key('#'));
+        assert!(!is_search_key('€'));
+    }
+
+    #[test]
+    fn test_search_state_enum_variations() {
+        let state1 = SearchStateEnum::Inactive;
+        assert!(matches!(state1, SearchStateEnum::Inactive));
+
+        let state2 = SearchStateEnum::Active("hello".to_string());
+        assert!(matches!(state2, SearchStateEnum::Active(ref s) if s == "hello"));
+
+        let state3 = SearchStateEnum::ShowingResult("world".to_string());
+        assert!(matches!(state3, SearchStateEnum::ShowingResult(ref s) if s == "world"));
     }
 }

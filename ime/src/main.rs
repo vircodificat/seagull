@@ -8,14 +8,14 @@ use std::sync::Arc;
 
 use seagull::device::serial::SerialDevice;
 use seagull::device::{Device, Keycode};
-use seagull::{JsonDictionary, Stroke};
+use seagull::{JsonDictionary, Key, Stroke};
 use tokio::sync::Mutex;
 use zbus::connection::Builder;
 use zbus::zvariant::ObjectPath;
 
-use buffer::StrokeBuffer;
+use buffer::{StrokeBuffer, SearchStateEnum};
 use config::Config;
-use engine::{emit_for_action, Engine, Factory, SharedConnection};
+use engine::{emit_auxiliary_text, emit_for_action, hide_auxiliary_text, Engine, Factory, SharedConnection, SharedHintState, SharedSearchState};
 
 const ENGINE_PATH: &str = "/org/freedesktop/IBus/Engine/SeagullIME";
 const FACTORY_PATH: &str = "/org/freedesktop/IBus/Factory";
@@ -146,7 +146,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a shared connection reference that will be set after the connection is built
     let shared_connection: SharedConnection = Arc::new(Mutex::new(None));
-    let engine = Engine::new(buffer.clone(), shared_connection.clone());
+    let hint_showing: SharedHintState = Arc::new(Mutex::new(false));
+    let search_state: SharedSearchState = Arc::new(Mutex::new(SearchStateEnum::Inactive));
+    let engine = Engine::new(buffer.clone(), shared_connection.clone(), hint_showing.clone(), search_state.clone());
 
     let ibus_addr = std::env::var("IBUS_ADDRESS")
         .ok()
@@ -164,7 +166,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let connection = match builder
         .name("org.freedesktop.IBus.SeagullIME")?
         .serve_at(FACTORY_PATH, factory)?
-        .serve_at(ENGINE_PATH, engine)?
+        .serve_at(ENGINE_PATH, engine.clone())?
         .build()
         .await
     {
@@ -271,6 +273,52 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let stroke = keycode.stroke();
                 log!(logger, "Processing stroke: {stroke} (control={})", keycode.is_control());
 
+                // Control + H: show "HINT" auxiliary text popup.
+                if keycode.is_control() && stroke == Stroke::new(&[Key::LeftH]) {
+                    log!(logger, "  Control+H: showing HINT");
+                    if let Err(e) = emit_auxiliary_text(&connection, "HINT").await {
+                        log!(logger, "  ERROR showing hint: {e}");
+                    } else {
+                        *hint_showing.lock().await = true;
+                    }
+                    continue;
+                }
+
+                // Any other stroke dismisses the hint popup. Emit the hide
+                // signal unconditionally (when not in search mode) so we are
+                // robust to `hint_showing` being out of sync with the actual
+                // popup state — a keyboard event arriving between the show
+                // signal and the flag assignment above, or a keyboard event
+                // calling `engine.hide_hint()` in a separate task, can leave
+                // the flag false even though the popup is still on screen.
+                {
+                    let in_search = matches!(
+                        *search_state.lock().await,
+                        SearchStateEnum::Active(_)
+                    );
+                    if !in_search {
+                        let mut showing = hint_showing.lock().await;
+                        let was_showing = *showing;
+                        *showing = false;
+                        drop(showing);
+                        if was_showing {
+                            log!(logger, "  Dismissing hint due to stroke");
+                        }
+                        if let Err(e) = hide_auxiliary_text(&connection).await {
+                            log!(logger, "  WARNING: Failed to hide hint: {e}");
+                        }
+                    }
+                }
+
+                // Control + S: activate search mode
+                if keycode.is_control() && stroke == Stroke::new(&[Key::LeftS]) {
+                    log!(logger, "  Control+S: activating search mode");
+                    if let Err(e) = engine.show_search().await {
+                        log!(logger, "  ERROR activating search: {e}");
+                    }
+                    continue;
+                }
+
                 if keycode.is_control() && stroke == Stroke::star() {
                     let mut buf = buffer.lock().await;
                     buf.clear();
@@ -286,6 +334,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if keycode.is_control() {
                     log!(logger, "  Skipping control stroke");
                     continue;
+                }
+
+                // Skip normal stroke processing if search is active (keyboard input will be handled separately)
+                {
+                    let search = search_state.lock().await;
+                    if matches!(*search, SearchStateEnum::Active(_)) {
+                        log!(logger, "  Skipping stroke while search is active");
+                        continue;
+                    }
                 }
 
                 let action = {

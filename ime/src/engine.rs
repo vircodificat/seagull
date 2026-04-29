@@ -6,7 +6,7 @@ use zbus::object_server::SignalEmitter;
 use zbus::zvariant::{ObjectPath, Value};
 use zbus::interface;
 
-use crate::buffer::{BufferAction, StrokeBuffer};
+use crate::buffer::{BufferAction, StrokeBuffer, SearchStateEnum};
 
 pub type SharedConnection = Arc<Mutex<Option<zbus::Connection>>>;
 
@@ -94,15 +94,180 @@ impl Factory {
     }
 }
 
+/// Shared hint state across Engine and main loop
+pub type SharedHintState = Arc<Mutex<bool>>;
+
+/// Shared search state across Engine and main loop
+pub type SharedSearchState = Arc<Mutex<SearchStateEnum>>;
+
 /// IBus Engine — handles input method lifecycle and emits text signals.
+#[derive(Clone)]
 pub struct Engine {
     pub buffer: Arc<Mutex<StrokeBuffer>>,
     pub connection: SharedConnection,
+    pub hint_showing: SharedHintState,
+    pub search_state: SharedSearchState,
 }
 
 impl Engine {
-    pub fn new(buffer: Arc<Mutex<StrokeBuffer>>, connection: SharedConnection) -> Self {
-        Self { buffer, connection }
+    pub fn new(
+        buffer: Arc<Mutex<StrokeBuffer>>,
+        connection: SharedConnection,
+        hint_showing: SharedHintState,
+        search_state: SharedSearchState,
+    ) -> Self {
+        Self {
+            buffer,
+            connection,
+            hint_showing,
+            search_state,
+        }
+    }
+
+    /// Show the "HINT" auxiliary text popup.
+    pub async fn show_hint(&self) -> zbus::Result<()> {
+        if let Some(conn) = self.connection.lock().await.as_ref() {
+            emit_auxiliary_text(conn, "HINT").await?;
+            *self.hint_showing.lock().await = true;
+        }
+        Ok(())
+    }
+
+    /// Hide the hint popup. Emits the hide signal unconditionally so the popup
+    /// is dismissed even if our internal `hint_showing` flag is out of sync
+    /// (e.g. when a keypress races with the show signal in `main.rs`). Callers
+    /// must not invoke this while search mode is active, since search uses the
+    /// same auxiliary popup.
+    pub async fn hide_hint(&self) -> zbus::Result<()> {
+        *self.hint_showing.lock().await = false;
+        if let Some(conn) = self.connection.lock().await.as_ref() {
+            hide_auxiliary_text(conn).await?;
+        }
+        Ok(())
+    }
+
+    /// Activate search mode
+    pub async fn show_search(&self) -> zbus::Result<()> {
+        let mut state = self.search_state.lock().await;
+        *state = SearchStateEnum::Active(String::new());
+        if let Some(conn) = self.connection.lock().await.as_ref() {
+            emit_auxiliary_text(conn, "SEARCH: ").await?;
+        }
+        Ok(())
+    }
+
+    /// Hide search mode
+    pub async fn hide_search(&self) -> zbus::Result<()> {
+        let mut state = self.search_state.lock().await;
+        *state = SearchStateEnum::Inactive;
+        if let Some(conn) = self.connection.lock().await.as_ref() {
+            hide_auxiliary_text(conn).await?;
+        }
+        Ok(())
+    }
+
+    /// Add a character to the search input
+    pub async fn add_search_char(&self, ch: char) -> zbus::Result<()> {
+        let mut state = self.search_state.lock().await;
+        if let SearchStateEnum::Active(ref mut text) = *state {
+            text.push(ch);
+            if let Some(conn) = self.connection.lock().await.as_ref() {
+                emit_auxiliary_text(conn, &format!("SEARCH: {}", text)).await?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Handle backspace in search mode (delete last character)
+    pub async fn search_backspace(&self) -> zbus::Result<()> {
+        let mut state = self.search_state.lock().await;
+        if let SearchStateEnum::Active(ref mut text) = *state {
+            text.pop();
+            if let Some(conn) = self.connection.lock().await.as_ref() {
+                emit_auxiliary_text(conn, &format!("SEARCH: {}", text)).await?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Perform dictionary lookup and show result
+    pub async fn perform_lookup(&self, word: &str) -> zbus::Result<()> {
+        let result = {
+            let buf = self.buffer.lock().await;
+            buf.reverse_lookup_word(word)
+        };
+
+        let display = if let Some(outline) = result {
+            format!("{} {}", outline.extended(), word)
+        } else {
+            format!("NOT FOUND {}", word)
+        };
+
+        let mut state = self.search_state.lock().await;
+        *state = SearchStateEnum::ShowingResult(word.to_string());
+
+        if let Some(conn) = self.connection.lock().await.as_ref() {
+            emit_auxiliary_text(conn, &display).await?;
+        }
+        Ok(())
+    }
+
+    /// Handle keyboard input when search mode is active
+    async fn handle_search_key_event(&self, keyval: u32) -> bool {
+        let mut l = open_log();
+
+        // Escape key: keyval = 0xFF1B (close search without lookup)
+        if keyval == 0xFF1B {
+            log!(l, "  Escape pressed: closing search");
+            if let Err(e) = self.hide_search().await {
+                log!(l, "  WARNING: Failed to hide search: {e}");
+            }
+            return true; // Consumed
+        }
+
+        // Backspace key: keyval = 0xFF08
+        if keyval == 0xFF08 {
+            log!(l, "  Backspace pressed in search");
+            if let Err(e) = self.search_backspace().await {
+                log!(l, "  WARNING: Failed to handle backspace: {e}");
+            }
+            return true; // Consumed
+        }
+
+        // Enter key: keyval = 0xFF0D (perform lookup)
+        if keyval == 0xFF0D {
+            log!(l, "  Enter pressed in search");
+            let word = {
+                let state = self.search_state.lock().await;
+                if let SearchStateEnum::Active(text) = &*state {
+                    text.clone()
+                } else {
+                    String::new()
+                }
+            };
+            if !word.is_empty() {
+                if let Err(e) = self.perform_lookup(&word).await {
+                    log!(l, "  WARNING: Failed to perform lookup: {e}");
+                }
+            }
+            return true; // Consumed
+        }
+
+        // Convert keyval to character (only ASCII characters)
+        if let Some(ch) = char::from_u32(keyval) {
+            // Check if it's a valid search character
+            if crate::buffer::is_search_key(ch) {
+                log!(l, "  Adding character to search: '{}'", ch);
+                if let Err(e) = self.add_search_char(ch).await {
+                    log!(l, "  WARNING: Failed to add character: {e}");
+                }
+                return true; // Consumed
+            }
+        }
+
+        // Unknown key in search mode - pass through
+        log!(l, "  Unknown key in search mode (keyval=0x{:X}): passing through", keyval);
+        false
     }
 }
 
@@ -130,6 +295,22 @@ impl Engine {
         if state & IBUS_RELEASE_MASK != 0 {
             log!(l, "  Key release — ignoring");
             return false;
+        }
+
+        // Check if search mode is active - handle keyboard input for search.
+        // Don't call hide_hint here: search uses the same auxiliary popup, and
+        // hint_showing is already false whenever search mode is active.
+        {
+            let search_state_lock = self.search_state.lock().await;
+            if let SearchStateEnum::Active(_) = *search_state_lock {
+                drop(search_state_lock); // Release lock before async calls
+                return self.handle_search_key_event(keyval).await;
+            }
+        }
+
+        // Any keyboard key dismisses the hint popup.
+        if let Err(e) = self.hide_hint().await {
+            log!(l, "  WARNING: Failed to hide hint: {e}");
         }
 
         // Get the connection, if available
@@ -296,6 +477,49 @@ async fn emit_forward_key(conn: &zbus::Connection, keyval: u32, keycode: u32, st
     };
     log!(l, "  ForwardKeyEvent: msg signature={:?}", msg.header().signature());
     conn.send(&msg).await
+}
+
+/// Emit UpdateAuxiliaryText signal: body = `vb` (IBusText variant + visible bool).
+async fn emit_update_auxiliary_text(
+    conn: &zbus::Connection,
+    text: Value<'_>,
+    visible: bool,
+) -> zbus::Result<()> {
+    use zbus::zvariant;
+
+    let ctxt0 = zvariant::serialized::Context::new_dbus(zvariant::LE, 0);
+    let text_bytes = zvariant::to_bytes(ctxt0, &text)?;
+
+    let off1 = text_bytes.bytes().len();
+    let ctxt1 = zvariant::serialized::Context::new_dbus(zvariant::LE, off1);
+    let vis_bytes = zvariant::to_bytes(ctxt1, &visible)?;
+
+    let mut body = Vec::new();
+    body.extend_from_slice(text_bytes.bytes());
+    body.extend_from_slice(vis_bytes.bytes());
+
+    let msg = unsafe {
+        engine_signal_builder("UpdateAuxiliaryText")?
+            .build_raw_body(&body, "vb", vec![])?
+    };
+
+    conn.send(&msg).await
+}
+
+/// Show an auxiliary text popup near the preedit with the given message.
+pub async fn emit_auxiliary_text(conn: &zbus::Connection, hint: &str) -> zbus::Result<()> {
+    let text = ibus_text(hint);
+    emit_update_auxiliary_text(conn, text, true).await?;
+    emit_signal_empty(conn, "ShowAuxiliaryText").await?;
+    Ok(())
+}
+
+/// Hide the auxiliary text popup.
+pub async fn hide_auxiliary_text(conn: &zbus::Connection) -> zbus::Result<()> {
+    emit_signal_empty(conn, "HideAuxiliaryText").await?;
+    let text = ibus_text("");
+    emit_update_auxiliary_text(conn, text, false).await?;
+    Ok(())
 }
 
 /// Emit UpdatePreeditText signal: body = `vubu` (four separate args).
