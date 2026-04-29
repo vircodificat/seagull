@@ -114,6 +114,46 @@ impl StrokeBuffer {
 
         // Try to look up the current pending strokes as an outline.
         let outline = Outline::from(self.strokes.as_slice());
+
+        // 1. Check if combining with previous committed words forms a longer match
+        if let Some((consume_count, word, combined_outline)) = self.find_longest_match(&outline) {
+            // Check if any of the consumed words were capitalized
+            let was_capitalized = (0..consume_count).any(|i| {
+                let idx = self.committed.len() - 1 - i;
+                let word_str = &self.committed[idx].word;
+                // A very simple heuristic: if the first character is uppercase, it was capitalized.
+                // Or we can just check if the very first consumed word is capitalized.
+                // Let's check if the first consumed word (the oldest one in this match) is capitalized.
+                if i == consume_count - 1 {
+                    word_str.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
+                } else {
+                    false
+                }
+            });
+
+            let final_word = if was_capitalized || self.capitalize_next {
+                self.capitalize_next = false;
+                Self::capitalize(&word)
+            } else {
+                word.to_owned()
+            };
+
+            // Remove the consumed words
+            for _ in 0..consume_count {
+                self.committed.pop_back();
+            }
+
+            let committed_word = CommittedWord {
+                word: final_word,
+                outline: combined_outline,
+            };
+
+            self.strokes.clear();
+            self.committed.push_back(committed_word);
+            return BufferAction::CommitAndPreedit;
+        }
+
+        // 2. If no longer match, check the current strokes alone
         if let Some(word) = self.dictionary.lookup(outline.clone()) {
             let word = if self.capitalize_next {
                 self.capitalize_next = false;
@@ -133,6 +173,28 @@ impl StrokeBuffer {
             BufferAction::UpdatePreedit
         }
     }
+    /// Check if combining previous committed words with the pending outline forms a longer word.
+    /// Returns the number of committed words to consume, the new word, and the combined outline.
+    fn find_longest_match(&self, pending_outline: &Outline) -> Option<(usize, String, Outline)> {
+        let mut longest_match = None;
+        let mut current_outline = pending_outline.clone();
+
+        // Iterate backwards through committed words
+        for (i, cw) in self.committed.iter().rev().enumerate() {
+            // Combine outline by prefixing the committed word's outline
+            let combined = cw.outline.clone() / current_outline;
+
+            // Check if this combined outline is in the dictionary
+            if let Some(word) = self.dictionary.lookup(combined.clone()) {
+                longest_match = Some((i + 1, word.to_owned(), combined.clone()));
+            }
+
+            current_outline = combined;
+        }
+
+        longest_match
+    }
+
 
     /// Undo the last stroke or decompose the last committed word.
     fn undo(&mut self) -> BufferAction {
@@ -370,6 +432,93 @@ mod tests {
         assert_eq!(buf.committed_len(), 0);
         assert_eq!(buf.pending_len(), 0);
         assert_eq!(buf.preedit_string(), "");
+    }
+
+
+    #[test]
+    fn test_longest_word_wins_simple() {
+        let dict = test_dictionary(&[
+            ("KAT", "cat"),
+            ("KAT/ER", "cater"),
+        ]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        // First stroke -> commits "cat"
+        let action = buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(action, BufferAction::CommitAndPreedit);
+        assert_eq!(buf.preedit_string(), "cat");
+        assert_eq!(buf.committed_len(), 1);
+
+        // Second stroke -> decomposes "cat", recombines into "cater"
+        let action = buf.push_stroke(Stroke::try_from_string("ER").unwrap());
+        assert_eq!(action, BufferAction::CommitAndPreedit);
+        assert_eq!(buf.preedit_string(), "cater");
+        assert_eq!(buf.committed_len(), 1);
+    }
+
+    #[test]
+    fn test_longest_word_wins_multi_word() {
+        let dict = test_dictionary(&[
+            ("S", "saw"),
+            ("KAT", "cat"),
+            ("S/KAT/ER", "scaterer"),
+        ]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("S").unwrap());
+        assert_eq!(buf.preedit_string(), "saw");
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(buf.preedit_string(), "saw cat");
+        assert_eq!(buf.committed_len(), 2);
+
+        // This stroke should trigger a decomposition of both previous words
+        let action = buf.push_stroke(Stroke::try_from_string("ER").unwrap());
+        assert_eq!(action, BufferAction::CommitAndPreedit);
+        assert_eq!(buf.preedit_string(), "scaterer");
+        assert_eq!(buf.committed_len(), 1);
+    }
+
+    #[test]
+    fn test_longest_word_wins_no_match() {
+        let dict = test_dictionary(&[
+            ("KAT", "cat"),
+            ("KAT/S", "cats"),
+        ]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+
+        // This makes "cats"
+        buf.push_stroke(Stroke::try_from_string("S").unwrap());
+        assert_eq!(buf.preedit_string(), "cats");
+        assert_eq!(buf.committed_len(), 1);
+
+        // Another 'S' -> not in dict. Should stay pending since "S" alone is not in dict here.
+        let action = buf.push_stroke(Stroke::try_from_string("S").unwrap());
+        assert_eq!(action, BufferAction::UpdatePreedit);
+        assert_eq!(buf.preedit_string(), "cats S");
+        assert_eq!(buf.committed_len(), 1);
+        assert_eq!(buf.pending_len(), 1);
+    }
+
+    #[test]
+    fn test_longest_word_wins_capitalization() {
+        let dict = test_dictionary(&[
+            ("KAT", "cat"),
+            ("KAT/ER", "cater"),
+        ]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        // H-F to capitalize next
+        buf.push_stroke(Stroke::new(&[Key::LeftH, Key::RightF]));
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(buf.preedit_string(), "Cat");
+
+        // The recombined word should also be capitalized
+        buf.push_stroke(Stroke::try_from_string("ER").unwrap());
+        assert_eq!(buf.preedit_string(), "Cater");
     }
 
     #[test]

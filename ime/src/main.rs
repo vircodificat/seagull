@@ -1,4 +1,5 @@
 mod buffer;
+mod config;
 mod engine;
 
 use std::io::Write;
@@ -12,15 +13,12 @@ use zbus::connection::Builder;
 use zbus::zvariant::ObjectPath;
 
 use buffer::StrokeBuffer;
+use config::Config;
 use engine::{emit_for_action, Engine, Factory};
 
-const DEFAULT_SERIAL_DEVICE: &str =
-    "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02";
 const ENGINE_PATH: &str = "/org/freedesktop/IBus/Engine/SeagullIME";
 const FACTORY_PATH: &str = "/org/freedesktop/IBus/Factory";
 
-/// Simple file logger. Writes to ~/.local/share/seagull-ime/seagull-ime.log.
-/// Falls back to stderr if the log file can't be opened.
 fn setup_log() -> Box<dyn Write + Send> {
     let log_dir = std::env::var("HOME")
         .map(|h| format!("{h}/.local/share/seagull-ime"))
@@ -48,10 +46,7 @@ macro_rules! log {
     }};
 }
 
-/// Discover the IBus D-Bus address from the filesystem or `ibus address` command.
 fn discover_ibus_address() -> Option<String> {
-    // Try reading from ~/.config/ibus/bus/ directory.
-    // IBus writes a file named like {machine-id}-{display} in there.
     if let Ok(home) = std::env::var("HOME") {
         let bus_dir = format!("{home}/.config/ibus/bus");
         if let Ok(entries) = std::fs::read_dir(&bus_dir) {
@@ -67,7 +62,6 @@ fn discover_ibus_address() -> Option<String> {
         }
     }
 
-    // Fall back to running `ibus address`.
     std::process::Command::new("ibus")
         .arg("address")
         .output()
@@ -83,7 +77,6 @@ fn discover_ibus_address() -> Option<String> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Install panic hook that logs to our log file
     std::panic::set_hook(Box::new(|info| {
         let mut l = setup_log();
         let _ = writeln!(l, "PANIC: {info}");
@@ -93,20 +86,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut logger = setup_log();
     log!(logger, "SeagullIME starting");
 
-    // --- Configuration from environment ---
-    let dict_path = std::env::var("SEAGULL_DICTIONARY_PATH").unwrap_or_else(|_| {
-        let home = std::env::var("HOME").expect("HOME not set");
-        format!("{home}/.config/seagull/seagull.json")
-    });
+    let config = Config::load()?;
 
-    let serial_device = std::env::var("SEAGULL_SERIAL_DEVICE")
-        .unwrap_or_else(|_| DEFAULT_SERIAL_DEVICE.to_string());
+    let candidates = config.device_candidates();
 
-    log!(logger, "Config: dict={dict_path}, serial={serial_device}");
+    let mut serial_device_path = match Config::try_connect_device(&candidates[0]) {
+        Some(path) => path,
+        None => {
+            log!(logger, "FATAL: Failed to connect to any serial device");
+            return Err("Failed to connect to any serial device".into());
+        }
+    };
 
-    // --- Load dictionary ---
-    log!(logger, "Loading dictionary from {dict_path}");
-    let dictionary = match JsonDictionary::load_from_file(&dict_path) {
+    log!(logger, "Config: dict={}, serial={}", config.dictionary.path, serial_device_path);
+
+    log!(logger, "Loading dictionary from {}", config.dictionary.path);
+    let dictionary = match JsonDictionary::load_from_file(&config.dictionary.path) {
         Ok(d) => {
             log!(logger, "Dictionary loaded successfully");
             d
@@ -117,14 +112,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // --- Create buffer ---
     let buffer = Arc::new(Mutex::new(StrokeBuffer::new(dictionary)));
 
-    // --- Stroke channel (serial thread → async task) ---
     let (tx, mut rx) = tokio::sync::mpsc::channel::<Keycode>(64);
 
-    // --- Serial reader thread (blocking) ---
-    let serial_device_path = serial_device.clone();
+    let candidates_clone = candidates.clone();
     let mut serial_logger = setup_log();
     std::thread::spawn(move || {
         log!(serial_logger, "Opening serial device {serial_device_path}");
@@ -140,23 +132,53 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
 
         loop {
-            let keycode = device.read_stroke();
-            let stroke = keycode.stroke();
-            log!(serial_logger, "Stroke received: {stroke} (control={})", keycode.is_control());
-            if tx.blocking_send(keycode).is_err() {
-                log!(serial_logger, "Channel closed, serial reader exiting");
-                break;
+            match device.read_stroke() {
+                Ok(keycode) => {
+                    let stroke = keycode.stroke();
+                    log!(serial_logger, "Stroke received: {stroke} (control={})", keycode.is_control());
+                    if tx.blocking_send(keycode).is_err() {
+                        log!(serial_logger, "Channel closed, serial reader exiting");
+                        break;
+                    }
+                }
+                Err(e) => {
+                    log!(serial_logger, "Serial read error: {e}, device disconnected");
+
+                    loop {
+                        std::thread::sleep(std::time::Duration::from_secs(1));
+
+                        let mut reconnected = false;
+                        for candidate in &candidates_clone {
+                            if let Some(path) = Config::try_connect_device(candidate) {
+                                log!(serial_logger, "Device reconnected as {}", path);
+                                serial_device_path = path;
+                                reconnected = true;
+                                break;
+                            }
+                        }
+
+                        if reconnected {
+                            device = match SerialDevice::new(&serial_device_path) {
+                                Ok(d) => d,
+                                Err(e) => {
+                                    log!(serial_logger, "Failed to reopen device: {e}");
+                                    continue;
+                                }
+                            };
+                            break;
+                        } else {
+                            log!(serial_logger, "Still disconnected, retrying...");
+                        }
+                    }
+                }
             }
         }
     });
 
-    // --- D-Bus connection ---
     let engine_obj_path: ObjectPath<'static> = ENGINE_PATH.try_into()?;
     let factory = Factory::new(engine_obj_path.clone());
     let engine = Engine::new(buffer.clone());
 
-    // Connect to the IBus bus. Try IBUS_ADDRESS env var first, then discover
-    // from the address file, then fall back to `ibus address` command.
     let ibus_addr = std::env::var("IBUS_ADDRESS")
         .ok()
         .or_else(|| discover_ibus_address());
@@ -187,13 +209,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    // --- Stroke processing loop ---
     log!(logger, "Ready, waiting for strokes...");
     while let Some(keycode) = rx.recv().await {
         let stroke = keycode.stroke();
         log!(logger, "Processing stroke: {stroke} (control={})", keycode.is_control());
 
-        // Control + star: clear the buffer.
         if keycode.is_control() && stroke == Stroke::star() {
             let mut buf = buffer.lock().await;
             buf.clear();
@@ -206,7 +226,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
 
-        // Skip all other control strokes.
         if keycode.is_control() {
             log!(logger, "  Skipping control stroke");
             continue;

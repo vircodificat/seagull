@@ -235,7 +235,7 @@ pub fn run(mut device: Box<dyn Device>, sentences_file: Option<&str>) {
     let tx_serial = tx.clone();
     thread::spawn(move || {
         loop {
-            let keycode = device.read_stroke();
+            let keycode = device.read_stroke().expect("read_stroke failed");
             if tx_serial.send(GameEvent::Keycode(keycode)).is_err() {
                 break;
             }
@@ -414,7 +414,43 @@ impl State {
 
         self.strokes.push(stroke);
         let outline = Outline::from(self.strokes.as_slice());
-        if let Some(word) = self.dictionary.lookup(outline.clone()) {
+
+        // Longest word wins: check if combining previous words makes a longer match
+        let mut longest_match = None;
+        let mut current_outline = outline.clone();
+        for (i, prev_outline) in self.word_outlines.iter().rev().enumerate() {
+            let combined = prev_outline.clone() / current_outline;
+            if let Some(word) = self.dictionary.lookup(combined.clone()) {
+                longest_match = Some((i + 1, word.to_owned(), combined.clone()));
+            }
+            current_outline = combined;
+        }
+
+        if let Some((consume_count, word, combined_outline)) = longest_match {
+            let committed = word.trim().to_lowercase();
+
+            // Pop the consumed words
+            for _ in 0..consume_count {
+                self.words.pop();
+                self.word_outlines.pop();
+            }
+
+            let position = self.words.len();
+            let target = self.sentence.get(position).cloned().unwrap_or_default();
+
+            if committed != target {
+                *self.stats.mistakes.entry(target.clone()).or_insert(0) += 1;
+            }
+            if let Some(ws) = self.word_start.replace(Instant::now()) {
+                if ws.elapsed() > SLOW_THRESHOLD {
+                    self.stats.slow_words.push(target);
+                }
+            }
+
+            self.words.push(committed);
+            self.word_outlines.push(combined_outline);
+            self.strokes.clear();
+        } else if let Some(word) = self.dictionary.lookup(outline.clone()) {
             let committed = word.trim().to_lowercase();
             let position  = self.words.len(); // before push
             let target    = self.sentence.get(position).cloned().unwrap_or_default();

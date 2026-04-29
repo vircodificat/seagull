@@ -4,7 +4,7 @@ pub mod virt;
 use crate::Stroke;
 
 pub trait Device: Send {
-    fn read_stroke(&mut self) -> Keycode;
+    fn read_stroke(&mut self) -> Result<Keycode, std::io::Error>;
 }
 
 pub struct Keycode {

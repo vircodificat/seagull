@@ -47,11 +47,11 @@ fn run(tx: std::sync::mpsc::Sender<Stroke>) {
 }
 
 impl Device for VirtualDevice {
-    fn read_stroke(&mut self) -> Keycode {
+    fn read_stroke(&mut self) -> Result<Keycode, std::io::Error> {
         let stroke = self.rx.recv().unwrap();
-        Keycode {
+        Ok(Keycode {
             stroke,
             is_control: false,
-        }
+        })
     }
 }

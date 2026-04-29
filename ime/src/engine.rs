@@ -307,9 +307,10 @@ pub async fn emit_for_action(
             emit_preedit(conn, "").await?;
         }
         BufferAction::SendEnter => {
-            // Enter works via CommitText("\n"), keep this approach.
-            let commit = ibus_text("\n");
-            emit_commit_text(conn, commit).await?;
+            let enter_keyval: u32 = 0xFF0D;
+            let enter_keycode: u32 = 36;
+            let enter_state: u32 = 0;
+            emit_forward_key(conn, enter_keyval, enter_keycode, enter_state).await?;
         }
         BufferAction::SendBackspace => {
             let commit = ibus_text("\x08");

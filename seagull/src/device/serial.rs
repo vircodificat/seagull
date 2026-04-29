@@ -15,25 +15,27 @@ impl SerialDevice {
         Ok(SerialDevice(port))
     }
 
+    pub fn try_reconnect(&mut self, device_path: &str) -> Result<bool, serialport::Error> {
+        let new_port = serialport::new(device_path, 9600)
+            .timeout(Duration::from_millis(10))
+            .open()?;
+        self.0 = new_port;
+        Ok(true)
+    }
+
     fn port(&mut self) -> &mut dyn SerialPort {
         self.0.as_mut()
     }
 }
 
 impl Device for SerialDevice {
-    fn read_stroke(&mut self) -> Keycode {
+    fn read_stroke(&mut self) -> Result<Keycode, std::io::Error> {
         let mut buf = [0; 6];
         let mut total_amount = 0;
 
         loop {
             let buf_slice = &mut buf[total_amount..6];
-            match self.port().read(buf_slice) {
-                Ok(amount) => {
-                    total_amount += amount;
-                },
-                Err(_e) => {
-                }
-            }
+            total_amount += self.port().read(buf_slice)?;
 
             if total_amount == 6 {
                 break;
@@ -63,10 +65,10 @@ impl Device for SerialDevice {
             || (value & RIGHT_CONTROL_KEY != 0);
 
         let stroke = Stroke::new(keys.as_slice());
-        Keycode {
+        Ok(Keycode {
             stroke,
             is_control,
-        }
+        })
     }
 }
 

@@ -53,13 +53,43 @@ Then switch to **Seagull Steno** from the input source indicator in the top bar.
 
 ## Configuration
 
-Environment variables read at runtime (set before launching the IME):
+The IME can be configured via a TOML config file at `~/.config/seagull/ime.toml`.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SEAGULL_BUFFER_SIZE` | `5` | Max committed words before flushing |
-| `SEAGULL_DICTIONARY_PATH` | `~/.config/seagull/seagull.json` | Path to the Seagull JSON dictionary |
-| `SEAGULL_SERIAL_DEVICE` | `/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02` | Serial device path |
+### Config File Format
+
+```toml
+[device]
+# List of serial device paths to try (in order). If empty and auto_detect is true,
+# the IME will scan for available devices.
+devices = [
+    "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02",
+    "/dev/ttyUSB0",
+]
+
+# Enable auto-detection of serial devices on startup and reconnection.
+# When true, scans /dev/serial/by-id, /dev/serial/by-path, and common tty devices.
+# Default: true
+auto_detect = true
+
+[dictionary]
+# Path to the Seagull JSON dictionary
+path = "~/.config/seagull/seagull.json"
+
+[buffer]
+# Maximum number of words to buffer before flushing to the application
+max_size = 5
+```
+
+### Environment Variables (Override Config File)
+
+Environment variables take precedence over the config file:
+
+| Variable | Description |
+|----------|-------------|
+| `SEAGULL_CONFIG_PATH` | Path to a custom config file |
+| `SEAGULL_SERIAL_DEVICE` | Serial device path (disables auto-detect when set) |
+| `SEAGULL_DICTIONARY_PATH` | Path to the Seagull JSON dictionary |
+| `SEAGULL_BUFFER_SIZE` | Max committed words before flushing |
 
 ## Uninstall
 
