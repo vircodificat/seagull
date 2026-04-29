@@ -108,10 +108,13 @@ impl Engine {
 
 #[interface(name = "org.freedesktop.IBus.Engine")]
 impl Engine {
-    /// IBus calls this for each key event.
-    /// Steno input comes from the serial device, not the keyboard.
-    /// Non-steno keypresses should commit the current preedit and forward the key.
-    /// Exception: backspace clears the preedit without forwarding.
+    /// IBus calls this for each key event (press and release).
+    /// Returns true only if the IME consumed the key (preventing it from reaching
+    /// the application or window manager). Returns false to pass the key through
+    /// normally — this is the correct mechanism for pass-through, not ForwardKeyEvent.
+    ///
+    /// Steno input arrives via the serial device, not the keyboard, so keyboard
+    /// events are only handled here to flush preedit when necessary.
     async fn process_key_event(
         &self,
         keyval: u32,
@@ -120,6 +123,14 @@ impl Engine {
     ) -> bool {
         let mut l = open_log();
         log!(l, "ProcessKeyEvent: keyval=0x{:X} keycode={} state=0x{:X}", keyval, keycode, state);
+
+        // Ignore key release events — only act on key presses.
+        // IBUS_RELEASE_MASK is bit 30.
+        const IBUS_RELEASE_MASK: u32 = 1 << 30;
+        if state & IBUS_RELEASE_MASK != 0 {
+            log!(l, "  Key release — ignoring");
+            return false;
+        }
 
         // Get the connection, if available
         let conn = match self.connection.lock().await.as_ref() {
@@ -142,49 +153,42 @@ impl Engine {
         // If there's preedit text, handle it based on the key type
         if !preedit.is_empty() {
             if is_backspace {
-                // Backspace: clear the preedit without forwarding the key
+                // Backspace with preedit: clear the preedit and consume the key.
                 log!(l, "  Backspace pressed: clearing preedit '{}'", preedit);
                 {
                     let mut buf = self.buffer.lock().await;
                     buf.clear();
                 }
-
-                // Update preedit to empty
                 if let Err(e) = emit_preedit(&conn, "").await {
                     log!(l, "  ERROR emitting preedit update: {e}");
                 }
-
-                // Return true to indicate we consumed the backspace
+                // Consumed — don't let backspace reach the application.
                 return true;
             } else {
-                // Other keys: commit the preedit before forwarding the key
-                log!(l, "  Committing preedit: '{}'", preedit);
+                // Any other key with preedit: commit the preedit first, then let
+                // the key pass through normally by returning false below.
+                log!(l, "  Committing preedit before passing key through: '{}'", preedit);
                 let commit = ibus_text(&format!("{} ", preedit));
                 if let Err(e) = emit_commit_text(&conn, commit).await {
                     log!(l, "  ERROR emitting commit text: {e}");
                 }
-
-                // Clear the buffer
                 {
                     let mut buf = self.buffer.lock().await;
                     buf.clear();
                 }
-
-                // Update preedit to empty
                 if let Err(e) = emit_preedit(&conn, "").await {
                     log!(l, "  ERROR emitting preedit update: {e}");
                 }
             }
         }
 
-        // Forward the keypress to the application (unless it was backspace with preedit)
-        log!(l, "  Forwarding keypress to application");
-        if let Err(e) = emit_forward_key(&conn, keyval, keycode, state).await {
-            log!(l, "  ERROR forwarding key: {e}");
-        }
-
-        // Return true to indicate we handled the key (consumed it)
-        true
+        // Return false: we did not consume this key. IBus will pass it through to
+        // the application and window manager via the normal system path. This is
+        // the correct way to forward keys (including modifier combos like Alt+Tab),
+        // as opposed to ForwardKeyEvent which routes through IBus and misses
+        // window-manager shortcuts.
+        log!(l, "  Passing key through (not consumed)");
+        false
     }
 
     async fn focus_in(&self) {

@@ -34,8 +34,6 @@ pub struct StrokeBuffer {
     committed: VecDeque<CommittedWord>,
     /// Dictionary for looking up outlines.
     dictionary: JsonDictionary,
-    /// Whether the next committed word should be capitalized.
-    capitalize_next: bool,
 }
 
 impl StrokeBuffer {
@@ -44,7 +42,6 @@ impl StrokeBuffer {
             strokes: Vec::new(),
             committed: VecDeque::new(),
             dictionary,
-            capitalize_next: false,
         }
     }
 
@@ -53,9 +50,9 @@ impl StrokeBuffer {
         stroke == Stroke::new(&[Key::LeftR, Key::RightR])
     }
 
-    /// Check whether a stroke is *exactly* H-F (capitalize next word).
-    fn is_hf_only(stroke: Stroke) -> bool {
-        stroke == Stroke::new(&[Key::LeftH, Key::RightF])
+    /// Check whether a stroke is *exactly* H*F (capitalize previous word).
+    fn is_hstarf_only(stroke: Stroke) -> bool {
+        stroke == Stroke::new(&[Key::LeftH, Key::MiddleStar, Key::RightF])
     }
 
     /// Capitalize the first character of a string.
@@ -78,7 +75,6 @@ impl StrokeBuffer {
             parts.push(outline.extended());
             self.strokes.clear();
         }
-        self.capitalize_next = false;
         parts.join(" ")
     }
 
@@ -86,7 +82,6 @@ impl StrokeBuffer {
     pub fn clear(&mut self) {
         self.strokes.clear();
         self.committed.clear();
-        self.capitalize_next = false;
     }
 
     /// Push a stroke into the buffer. Returns what the engine should do.
@@ -95,9 +90,15 @@ impl StrokeBuffer {
             return self.undo();
         }
 
-        // H-F alone: capitalize the next word.
-        if Self::is_hf_only(stroke) {
-            self.capitalize_next = true;
+        // H*F alone: capitalize the previous (most recently committed) word.
+        // Only works if there are no pending strokes.
+        if Self::is_hstarf_only(stroke) {
+            if self.strokes.is_empty() && !self.committed.is_empty() {
+                if let Some(cw) = self.committed.back_mut() {
+                    cw.word = Self::capitalize(&cw.word);
+                    return BufferAction::CommitAndPreedit;
+                }
+            }
             return BufferAction::Noop;
         }
 
@@ -131,8 +132,7 @@ impl StrokeBuffer {
                 }
             });
 
-            let final_word = if was_capitalized || self.capitalize_next {
-                self.capitalize_next = false;
+            let final_word = if was_capitalized {
                 Self::capitalize(&word)
             } else {
                 word.to_owned()
@@ -155,14 +155,8 @@ impl StrokeBuffer {
 
         // 2. If no longer match, check the current strokes alone
         if let Some(word) = self.dictionary.lookup(outline.clone()) {
-            let word = if self.capitalize_next {
-                self.capitalize_next = false;
-                Self::capitalize(&word)
-            } else {
-                word.to_owned()
-            };
             let committed_word = CommittedWord {
-                word,
+                word: word.to_owned(),
                 outline: outline.clone(),
             };
             self.strokes.clear();
@@ -510,33 +504,37 @@ mod tests {
         ]);
         let mut buf = StrokeBuffer::new(dict);
 
-        // H-F to capitalize next
-        buf.push_stroke(Stroke::new(&[Key::LeftH, Key::RightF]));
-
+        // Commit "cat"
         buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(buf.preedit_string(), "cat");
+
+        // H*F to capitalize the previous word (cat -> Cat)
+        buf.push_stroke(Stroke::new(&[Key::LeftH, Key::MiddleStar, Key::RightF]));
         assert_eq!(buf.preedit_string(), "Cat");
 
-        // The recombined word should also be capitalized
+        // Add "ER" to combine into "cater" - the capitalization of the original
+        // consumed word ("Cat") should be preserved in the recombination
         buf.push_stroke(Stroke::try_from_string("ER").unwrap());
         assert_eq!(buf.preedit_string(), "Cater");
     }
 
     #[test]
-    fn test_hf_capitalizes_next_word() {
+    fn test_hstarf_capitalizes_previous_word() {
         let dict = test_dictionary(&[("KAT", "cat")]);
         let mut buf = StrokeBuffer::new(dict);
 
-        // H-F sets capitalize_next
-        let hf = Stroke::new(&[Key::LeftH, Key::RightF]);
-        let action = buf.push_stroke(hf);
-        assert_eq!(action, BufferAction::Noop);
-
-        // Next word should be capitalized
+        // First word: "cat"
         let action = buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        assert_eq!(action, BufferAction::CommitAndPreedit);
+        assert_eq!(buf.preedit_string(), "cat");
+
+        // H*F alone: capitalize the previous word
+        let hstarf = Stroke::new(&[Key::LeftH, Key::MiddleStar, Key::RightF]);
+        let action = buf.push_stroke(hstarf);
         assert_eq!(action, BufferAction::CommitAndPreedit);
         assert_eq!(buf.preedit_string(), "Cat");
 
-        // Subsequent words should NOT be capitalized
+        // Next word: "cat" (not affected by H*F)
         let action = buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
         assert_eq!(action, BufferAction::CommitAndPreedit);
         assert_eq!(buf.preedit_string(), "Cat cat");
