@@ -1,5 +1,6 @@
-use std::io::Write;
 use std::path::PathBuf;
+
+use log::{info, warn};
 
 #[derive(Debug)]
 pub struct Config {
@@ -59,54 +60,27 @@ impl Default for Config {
     }
 }
 
-fn open_log() -> Box<dyn Write + Send> {
-    let log_dir = std::env::var("HOME")
-        .map(|h| format!("{h}/.local/share/seagull-ime"))
-        .unwrap_or_else(|_| "/tmp".to_string());
-    let log_path = format!("{log_dir}/seagull-ime.log");
-    match std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_path)
-    {
-        Ok(f) => Box::new(f),
-        Err(_) => Box::new(std::io::stderr()),
-    }
-}
-
-macro_rules! log {
-    ($logger:expr, $($arg:tt)*) => {{
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        let _ = writeln!($logger, "[{now}] CONFIG: {}", format!($($arg)*));
-        let _ = $logger.flush();
-    }};
-}
-
 impl Config {
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
         let mut config = Config::default();
-        let mut logger = open_log();
 
         if let Some(config_path) = std::env::var("SEAGULL_CONFIG_PATH").ok() {
-            log!(logger, "Loading config from SEAGULL_CONFIG_PATH: {}", config_path);
+            info!("Loading config from SEAGULL_CONFIG_PATH: {}", config_path);
             config.load_from_file(&config_path)?;
         } else {
             let default_path = Self::default_config_path();
             if default_path.exists() {
-                log!(logger, "Loading config from: {:?}", default_path);
+                info!("Loading config from: {:?}", default_path);
                 config.load_from_file(default_path.to_str().unwrap())?;
             } else {
-                log!(logger, "No config file found, using defaults");
+                info!("No config file found, using defaults");
             }
         }
 
         config.apply_env_overrides();
         config.validate()?;
 
-        log!(logger, "Final config: {:?}", config);
+        info!("Final config: {:?}", config);
         Ok(config)
     }
 
@@ -177,15 +151,14 @@ impl Config {
     }
 
     pub fn try_connect_device(path: &str) -> Option<String> {
-        let mut logger = open_log();
         match seagull::device::serial::SerialDevice::new(path) {
             Ok(d) => {
-                log!(logger, "Successfully connected to device: {}", path);
+                info!("Successfully connected to device: {}", path);
                 drop(d);
                 Some(path.to_string())
             }
             Err(e) => {
-                log!(logger, "Failed to connect to {}: {}", path, e);
+                warn!("Failed to connect to {}: {}", path, e);
                 None
             }
         }
@@ -193,7 +166,6 @@ impl Config {
 
     fn auto_detect_devices() -> Vec<String> {
         let mut devices = Vec::new();
-        let mut logger = open_log();
 
         let candidates = [
             "/dev/serial/by-id",
@@ -229,7 +201,7 @@ impl Config {
                                         .and_then(|n| n.to_str())
                                         .unwrap_or("");
                                     if name.contains("if02") || name.contains("-interface-02") {
-                                        log!(logger, "Auto-detected candidate: {:?}", subpath);
+                                        info!("Auto-detected candidate: {:?}", subpath);
                                         devices.push(subpath.to_string_lossy().to_string());
                                     }
                                 }
@@ -240,7 +212,7 @@ impl Config {
                             .and_then(|n| n.to_str())
                             .unwrap_or("");
                         if name.contains("USB") || name.contains("serial") || name.contains("ACM") {
-                            log!(logger, "Auto-detected candidate (by-path): {:?}", path);
+                            info!("Auto-detected candidate (by-path): {:?}", path);
                             devices.push(path.to_string_lossy().to_string());
                         }
                     }
@@ -257,7 +229,7 @@ impl Config {
         ];
         for device in fallback_devices {
             if std::path::Path::new(device).exists() && !devices.contains(&device.to_string()) {
-                log!(logger, "Auto-detected candidate (fallback): {}", device);
+                info!("Auto-detected candidate (fallback): {}", device);
                 devices.push(device.to_string());
             }
         }

@@ -1,6 +1,6 @@
-use std::io::Write;
 use std::sync::Arc;
 
+use log::{error, info, warn};
 use tokio::sync::Mutex;
 use zbus::object_server::SignalEmitter;
 use zbus::zvariant::{ObjectPath, Value};
@@ -9,32 +9,6 @@ use zbus::interface;
 use crate::buffer::{BufferAction, StrokeBuffer, SearchState};
 
 pub type SharedConnection = Arc<Mutex<Option<zbus::Connection>>>;
-
-macro_rules! log {
-    ($logger:expr, $($arg:tt)*) => {{
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        let _ = writeln!($logger, "[{now}] ENGINE: {}", format!($($arg)*));
-        let _ = $logger.flush();
-    }};
-}
-
-fn open_log() -> Box<dyn Write + Send> {
-    let log_dir = std::env::var("HOME")
-        .map(|h| format!("{h}/.local/share/seagull-ime"))
-        .unwrap_or_else(|_| "/tmp".to_string());
-    let log_path = format!("{log_dir}/seagull-ime.log");
-    match std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_path)
-    {
-        Ok(f) => Box::new(f),
-        Err(_) => Box::new(std::io::stderr()),
-    }
-}
 
 /// Serialize a string as an IBus text variant for D-Bus.
 ///
@@ -88,8 +62,7 @@ impl Factory {
 impl Factory {
     /// Called by IBus to create an engine instance.
     async fn create_engine(&self, name: &str) -> ObjectPath<'static> {
-        let mut l = open_log();
-        log!(l, "CreateEngine called with name={name}, returning {:?}", self.engine_path);
+        info!("CreateEngine called with name={name}, returning {:?}", self.engine_path);
         self.engine_path.clone()
     }
 }
@@ -214,29 +187,27 @@ impl Engine {
 
     /// Handle keyboard input when search mode is active
     async fn handle_search_key_event(&self, keyval: u32) -> bool {
-        let mut l = open_log();
-
         // Escape key: keyval = 0xFF1B (close search without lookup)
         if keyval == 0xFF1B {
-            log!(l, "  Escape pressed: closing search");
+            info!("  Escape pressed: closing search");
             if let Err(e) = self.hide_search().await {
-                log!(l, "  WARNING: Failed to hide search: {e}");
+                warn!("  Failed to hide search: {e}");
             }
             return true; // Consumed
         }
 
         // Backspace key: keyval = 0xFF08
         if keyval == 0xFF08 {
-            log!(l, "  Backspace pressed in search");
+            info!("  Backspace pressed in search");
             if let Err(e) = self.search_backspace().await {
-                log!(l, "  WARNING: Failed to handle backspace: {e}");
+                warn!("  Failed to handle backspace: {e}");
             }
             return true; // Consumed
         }
 
         // Enter key: keyval = 0xFF0D (perform lookup)
         if keyval == 0xFF0D {
-            log!(l, "  Enter pressed in search");
+            info!("  Enter pressed in search");
             let word = {
                 let state = self.search_state.lock().await;
                 if let SearchState::Active(text) = &*state {
@@ -247,7 +218,7 @@ impl Engine {
             };
             if !word.is_empty() {
                 if let Err(e) = self.perform_lookup(&word).await {
-                    log!(l, "  WARNING: Failed to perform lookup: {e}");
+                    warn!("  Failed to perform lookup: {e}");
                 }
             }
             return true; // Consumed
@@ -257,16 +228,16 @@ impl Engine {
         if let Some(ch) = char::from_u32(keyval) {
             // Check if it's a valid search character
             if crate::buffer::is_search_key(ch) {
-                log!(l, "  Adding character to search: '{}'", ch);
+                info!("  Adding character to search: '{}'", ch);
                 if let Err(e) = self.add_search_char(ch).await {
-                    log!(l, "  WARNING: Failed to add character: {e}");
+                    warn!("  Failed to add character: {e}");
                 }
                 return true; // Consumed
             }
         }
 
         // Unknown key in search mode - pass through
-        log!(l, "  Unknown key in search mode (keyval=0x{:X}): passing through", keyval);
+        info!("  Unknown key in search mode (keyval=0x{:X}): passing through", keyval);
         false
     }
 }
@@ -286,14 +257,13 @@ impl Engine {
         keycode: u32,
         state: u32,
     ) -> bool {
-        let mut l = open_log();
-        log!(l, "ProcessKeyEvent: keyval=0x{:X} keycode={} state=0x{:X}", keyval, keycode, state);
+        info!("ProcessKeyEvent: keyval=0x{:X} keycode={} state=0x{:X}", keyval, keycode, state);
 
         // Ignore key release events — only act on key presses.
         // IBUS_RELEASE_MASK is bit 30.
         const IBUS_RELEASE_MASK: u32 = 1 << 30;
         if state & IBUS_RELEASE_MASK != 0 {
-            log!(l, "  Key release — ignoring");
+            info!("  Key release — ignoring");
             return false;
         }
 
@@ -310,14 +280,14 @@ impl Engine {
 
         // Any keyboard key dismisses the hint popup.
         if let Err(e) = self.hide_hint().await {
-            log!(l, "  WARNING: Failed to hide hint: {e}");
+            warn!("  Failed to hide hint: {e}");
         }
 
         // Get the connection, if available
         let conn = match self.connection.lock().await.as_ref() {
             Some(conn) => conn.clone(),
             None => {
-                log!(l, "  WARNING: No D-Bus connection available");
+                warn!("  No D-Bus connection available");
                 return false;
             }
         };
@@ -335,30 +305,30 @@ impl Engine {
         if !preedit.is_empty() {
             if is_backspace {
                 // Backspace with preedit: clear the preedit and consume the key.
-                log!(l, "  Backspace pressed: clearing preedit '{}'", preedit);
+                info!("  Backspace pressed: clearing preedit '{}'", preedit);
                 {
                     let mut buf = self.buffer.lock().await;
                     buf.clear();
                 }
                 if let Err(e) = emit_preedit(&conn, "").await {
-                    log!(l, "  ERROR emitting preedit update: {e}");
+                    error!("  ERROR emitting preedit update: {e}");
                 }
                 // Consumed — don't let backspace reach the application.
                 return true;
             } else {
                 // Any other key with preedit: commit the preedit first, then let
                 // the key pass through normally by returning false below.
-                log!(l, "  Committing preedit before passing key through: '{}'", preedit);
+                info!("  Committing preedit before passing key through: '{}'", preedit);
                 let commit = ibus_text(&format!("{} ", preedit));
                 if let Err(e) = emit_commit_text(&conn, commit).await {
-                    log!(l, "  ERROR emitting commit text: {e}");
+                    error!("  ERROR emitting commit text: {e}");
                 }
                 {
                     let mut buf = self.buffer.lock().await;
                     buf.clear();
                 }
                 if let Err(e) = emit_preedit(&conn, "").await {
-                    log!(l, "  ERROR emitting preedit update: {e}");
+                    error!("  ERROR emitting preedit update: {e}");
                 }
             }
         }
@@ -368,38 +338,32 @@ impl Engine {
         // the correct way to forward keys (including modifier combos like Alt+Tab),
         // as opposed to ForwardKeyEvent which routes through IBus and misses
         // window-manager shortcuts.
-        log!(l, "  Passing key through (not consumed)");
+        info!("  Passing key through (not consumed)");
         false
     }
 
     async fn focus_in(&self) {
-        let mut l = open_log();
-        log!(l, "FocusIn");
+        info!("FocusIn");
     }
 
     async fn focus_out(&self) {
-        let mut l = open_log();
-        log!(l, "FocusOut");
+        info!("FocusOut");
     }
 
     async fn reset(&self) {
-        let mut l = open_log();
-        log!(l, "Reset");
+        info!("Reset");
     }
 
     async fn enable(&self) {
-        let mut l = open_log();
-        log!(l, "Enable");
+        info!("Enable");
     }
 
     async fn disable(&self) {
-        let mut l = open_log();
-        log!(l, "Disable");
+        info!("Disable");
     }
 
     async fn set_capabilities(&self, caps: u32) {
-        let mut l = open_log();
-        log!(l, "SetCapabilities caps={caps:#x}");
+        info!("SetCapabilities caps={caps:#x}");
     }
 
     // --- Signals ---
@@ -467,15 +431,14 @@ async fn emit_forward_key(conn: &zbus::Connection, keyval: u32, keycode: u32, st
     body.extend_from_slice(kc_bytes.bytes());
     body.extend_from_slice(st_bytes.bytes());
 
-    let mut l = open_log();
-    log!(l, "  ForwardKeyEvent: keyval=0x{:X} keycode={} state=0x{:X} body_hex={:02X?}",
+    info!("  ForwardKeyEvent: keyval=0x{:X} keycode={} state=0x{:X} body_hex={:02X?}",
          keyval, keycode, state, &body);
 
     let msg = unsafe {
         engine_signal_builder("ForwardKeyEvent")?
             .build_raw_body(&body, "uuu", vec![])?
     };
-    log!(l, "  ForwardKeyEvent: msg signature={:?}", msg.header().signature());
+    info!("  ForwardKeyEvent: msg signature={:?}", msg.header().signature());
     conn.send(&msg).await
 }
 
@@ -566,8 +529,7 @@ async fn emit_update_preedit(
             .build_raw_body(&body, "vubu", vec![])?
     };
 
-    let mut l = open_log();
-    log!(l, "  UpdatePreeditText signature={:?} body_len={}", msg.header().signature(), body.len());
+    info!("  UpdatePreeditText signature={:?} body_len={}", msg.header().signature(), body.len());
     conn.send(&msg).await
 }
 

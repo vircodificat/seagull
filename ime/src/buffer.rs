@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests;
 
+use log::info;
 use std::collections::VecDeque;
 
 use seagull::{Dictionary, JsonDictionary, Key, Outline, Stroke};
@@ -43,6 +44,7 @@ pub enum Element {
     Stroke(Stroke),
     CommittedWord(CommittedWord),
     Punctuation(Punctuation),
+    CapsNext,
 }
 
 /// Actions the engine should take after a stroke is pushed.
@@ -71,9 +73,6 @@ pub struct StrokeBuffer {
     buffer: VecDeque<Element>,
     /// Dictionary for looking up outlines.
     dictionary: JsonDictionary,
-    /// When true, the next committed word should be capitalized.
-    /// Set after sentence-ending punctuation ({.}, {!}, {?}).
-    capitalize_next: bool,
 }
 
 impl StrokeBuffer {
@@ -81,7 +80,6 @@ impl StrokeBuffer {
         Self {
             buffer: VecDeque::new(),
             dictionary,
-            capitalize_next: false,
         }
     }
 
@@ -98,6 +96,30 @@ impl StrokeBuffer {
     /// Check whether a stroke is *exactly* H*F (capitalize previous word).
     fn is_hstarf_only(stroke: Stroke) -> bool {
         stroke == Stroke::new(&[Key::LeftH, Key::MiddleStar, Key::RightF])
+    }
+
+    fn is_hf_only(stroke: Stroke) -> bool {
+        stroke == Stroke::new(&[Key::LeftH, Key::RightF])
+    }
+
+    /// Insert a `CapsNext` element before the trailing run of pending strokes,
+    /// or just before the most recently committed word/punctuation if none are pending.
+    fn insert_caps_previous(&mut self) -> BufferAction {
+        let mut insert_pos = self.buffer.len();
+        while insert_pos > 0 && matches!(self.buffer[insert_pos - 1], Element::Stroke(_)) {
+            insert_pos -= 1;
+        }
+        let had_pending_strokes = insert_pos < self.buffer.len();
+        if had_pending_strokes {
+            self.buffer.insert(insert_pos, Element::CapsNext);
+            self.reprocess();
+            BufferAction::CommitAndPreedit
+        } else if insert_pos > 0 {
+            self.buffer.insert(insert_pos - 1, Element::CapsNext);
+            BufferAction::CommitAndPreedit
+        } else {
+            BufferAction::Noop
+        }
     }
 
     /// If the outline is a sentence-ending punctuation marker, return a Punctuation struct.
@@ -172,7 +194,6 @@ impl StrokeBuffer {
     /// Clear the entire buffer (committed words, punctuation, and pending strokes).
     pub fn clear(&mut self) {
         self.buffer.clear();
-        self.capitalize_next = false;
     }
 
     /// Push a stroke into the buffer. Returns what the engine should do.
@@ -181,16 +202,12 @@ impl StrokeBuffer {
             return self.undo();
         }
 
-        // H*F alone: capitalize the previous (most recently committed) word.
-        // Only works if there are no pending strokes.
-        if Self::is_hstarf_only(stroke) {
-            if self.pending_len() == 0 {
-                if let Some(Element::CommittedWord(cw)) = self.buffer.back_mut() {
-                    cw.word = Self::capitalize(&cw.word);
-                    return BufferAction::CommitAndPreedit;
-                }
-            }
-            return BufferAction::Noop;
+        if Self::is_hf_only(stroke) {
+            self.buffer.push_back(Element::CapsNext);
+            return BufferAction::UpdatePreedit;
+        } else if Self::is_hstarf_only(stroke) {
+            // H*F: insert CapsNext before the pending strokes or the most recent committed word.
+            return self.insert_caps_previous();
         }
 
         if Self::is_sp_only(stroke) {
@@ -230,18 +247,12 @@ impl StrokeBuffer {
         // Find the position of the rightmost committed word or punctuation
         let rightmost_pos = self.buffer.iter().rposition(|el| {
             matches!(el, Element::CommittedWord(_) | Element::Punctuation(_))
-        });
-
-        let reprocess_from = match rightmost_pos {
-            Some(0) => 0,  // If the rightmost is at position 0, start from 0
-            Some(pos) => pos - 1,  // Otherwise, start from one position before
-            None => 0,  // If no committed words/punct, start from 0
-        };
+        }).unwrap_or(0);
 
         // Compute the capitalization state AT the reprocessing point
         // This is false unless there's a punctuation before this point that sets it
         let mut current_cap_state = false;
-        for i in (0..reprocess_from).rev() {
+        for i in (0..rightmost_pos).rev() {
             if let Element::Punctuation(p) = &self.buffer[i] {
                 current_cap_state = p.caps_after;
                 break;
@@ -249,7 +260,7 @@ impl StrokeBuffer {
         }
 
         // Extract elements from reprocess_from onwards
-        let elements_to_reprocess: Vec<Element> = self.buffer.split_off(reprocess_from).into();
+        let elements_to_reprocess: Vec<Element> = self.buffer.split_off(rightmost_pos).into();
 
         // Collect all strokes from elements to reprocess and track capitalized words
         let mut all_strokes = Vec::new();
@@ -261,14 +272,13 @@ impl StrokeBuffer {
                     all_strokes.push(*s);
                     stroke_index += 1;
                 }
+                Element::CapsNext => {
+                    capitalized_at.insert(stroke_index, true);
+                }
                 Element::CommittedWord(cw) => {
-                    let is_cap = cw.word.chars().next().map(|c| c.is_uppercase()).unwrap_or(false);
-                    let start_index = stroke_index;
+                    let _is_cap = cw.word.chars().next().map(|c| c.is_uppercase()).unwrap_or(false);
                     all_strokes.extend_from_slice(cw.outline.strokes());
                     stroke_index = all_strokes.len();
-                    if is_cap {
-                        capitalized_at.insert(start_index, true);
-                    }
                 }
                 Element::Punctuation(p) => {
                     all_strokes.extend_from_slice(p.outline.strokes());
@@ -319,7 +329,7 @@ impl StrokeBuffer {
                 }
             }
 
-            if let Some(mut el) = best_match_element {
+            if let Some(el) = best_match_element {
                 // Update capitalization state if this is punctuation
                 if let Element::Punctuation(ref p) = el {
                     should_capitalize = p.caps_after;
@@ -336,9 +346,6 @@ impl StrokeBuffer {
                 break;
             }
         }
-
-        // Update capitalize_next for next stroke - this carries over to the NEXT reprocess
-        self.capitalize_next = should_capitalize;
     }
 
 
@@ -346,7 +353,7 @@ impl StrokeBuffer {
     fn undo(&mut self) -> BufferAction {
         if let Some(el) = self.buffer.pop_back() {
             match el {
-                Element::Stroke(_) => {
+                Element::Stroke(_) | Element::CapsNext => {
                     // Just removed a stroke, done
                 }
                 Element::CommittedWord(cw) => {
@@ -379,63 +386,59 @@ impl StrokeBuffer {
     /// Punctuation is attached without preceding space based on its rules.
     pub fn preedit_string(&self) -> String {
         let mut result = String::new();
-        let mut pending_strokes = Vec::new();
 
-        for el in &self.buffer {
+        let mut caps_next = false;
+        let len = self.buffer.len();
+        log::error!("$$$$$$$$$$$$$$$$$$$$$$$  {len:?}");
+
+        let mut insert_wedge_space = false;
+        for (i, el) in self.buffer.iter().enumerate() {
+            let _is_last = i + 1 == self.buffer.len();
+            log::error!("======  {el:?}");
+
             match el {
                 Element::Stroke(s) => {
-                    pending_strokes.push(*s);
+                    caps_next = false;
+                    result.push_str(&s.extended());
+                }
+                Element::CapsNext => {
+                    info!("CapsNext");
+                    log::error!("CapsNext");
+                    caps_next = true;
                 }
                 Element::CommittedWord(cw) => {
-                    // Flush any pending strokes first
-                    if !pending_strokes.is_empty() {
-                        let outline = Outline::from(pending_strokes.as_slice());
-                        if !result.is_empty() {
-                            result.push(' ');
-                        }
-                        result.push_str(&outline.extended());
-                        pending_strokes.clear();
-                    }
-                    if !result.is_empty() {
+                    if insert_wedge_space {
+                        log::error!("!!!!!!!!     INSERT WEDGE SPACE");
                         result.push(' ');
                     }
-                    result.push_str(&cw.word);
+
+                    let word = if caps_next {
+                        log::error!("!!!!!!!!     Making next word caps");
+                        &Self::capitalize(&cw.word)
+                    } else {
+                        log::error!("!!!!!!!!     Just regular next word");
+                        &cw.word
+                    };
+                    result.push_str(&word);
+                    caps_next = false;
+                    insert_wedge_space = true;
                 }
                 Element::Punctuation(p) => {
-                    // Flush any pending strokes first
-                    if !pending_strokes.is_empty() {
-                        let outline = Outline::from(pending_strokes.as_slice());
-                        if !result.is_empty() {
-                            result.push(' ');
-                        }
-                        result.push_str(&outline.extended());
-                        pending_strokes.clear();
-                    }
-                    // Punctuation attaches without space
                     result.push_str(&p.punct);
                     // Add space after if needed
                     if p.space_after && !result.is_empty() {
                         // Mark that next element needs space
+                        insert_wedge_space = true;
+                    } else {
+                        insert_wedge_space = false;
                     }
+
+                    caps_next = false;
                 }
             }
         }
 
-        // Flush any remaining pending strokes
-        if !pending_strokes.is_empty() {
-            let outline = Outline::from(pending_strokes.as_slice());
-            if !result.is_empty() {
-                result.push(' ');
-            }
-            result.push_str(&outline.extended());
-        }
-
         result
-    }
-
-    /// Number of committed words and punctuation elements currently in the buffer.
-    pub fn committed_len(&self) -> usize {
-        self.buffer.iter().filter(|el| !matches!(el, Element::Stroke(_))).count()
     }
 
     /// Number of pending strokes.
@@ -451,7 +454,7 @@ impl StrokeBuffer {
 
         for el in &self.buffer {
             match el {
-                Element::Stroke(_) => break,
+                Element::Stroke(_) | Element::CapsNext => break,
                 Element::CommittedWord(cw) => {
                     if needs_space {
                         len += 1; // space separator

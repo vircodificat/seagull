@@ -3,8 +3,10 @@ mod config;
 mod engine;
 mod notifications;
 
-use std::io::Write;
 use std::sync::Arc;
+
+use log::{error, info, warn};
+use simplelog::{Config as LogConfig, LevelFilter, WriteLogger};
 
 use seagull::device::serial::SerialDevice;
 use seagull::device::{Device, Keycode};
@@ -20,31 +22,15 @@ use engine::{emit_auxiliary_text, emit_for_action, hide_auxiliary_text, Engine, 
 const ENGINE_PATH: &str = "/org/freedesktop/IBus/Engine/SeagullIME";
 const FACTORY_PATH: &str = "/org/freedesktop/IBus/Factory";
 
-fn setup_log() -> Box<dyn Write + Send> {
+fn init_log() {
     let log_dir = std::env::var("HOME")
         .map(|h| format!("{h}/.local/share/seagull-ime"))
         .unwrap_or_else(|_| "/tmp".to_string());
     let _ = std::fs::create_dir_all(&log_dir);
     let log_path = format!("{log_dir}/seagull-ime.log");
-    match std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_path)
-    {
-        Ok(f) => Box::new(f),
-        Err(_) => Box::new(std::io::stderr()),
+    if let Ok(f) = std::fs::OpenOptions::new().create(true).append(true).open(&log_path) {
+        WriteLogger::init(LevelFilter::Info, LogConfig::default(), f).ok();
     }
-}
-
-macro_rules! log {
-    ($logger:expr, $($arg:tt)*) => {{
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        let _ = writeln!($logger, "[{now}] {}", format!($($arg)*));
-        let _ = $logger.flush();
-    }};
 }
 
 fn discover_ibus_address() -> Option<String> {
@@ -78,14 +64,13 @@ fn discover_ibus_address() -> Option<String> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    init_log();
+
     std::panic::set_hook(Box::new(|info| {
-        let mut l = setup_log();
-        let _ = writeln!(l, "PANIC: {info}");
-        let _ = l.flush();
+        eprintln!("PANIC: {info}");
     }));
 
-    let mut logger = setup_log();
-    log!(logger, "SeagullIME starting");
+    info!("SeagullIME starting");
 
     let config = Config::load()?;
 
@@ -94,22 +79,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut serial_device_path = match Config::try_connect_device(&candidates[0]) {
         Some(path) => path,
         None => {
-            log!(logger, "FATAL: Failed to connect to any serial device");
+            error!("FATAL: Failed to connect to any serial device");
             return Err("Failed to connect to any serial device".into());
         }
     };
 
-    log!(logger, "Config: dict={}, serial={}", config.dictionary.path, serial_device_path);
+    info!("Config: dict={}, serial={}", config.dictionary.path, serial_device_path);
 
-    log!(logger, "Loading dictionary from {}", config.dictionary.path);
+    info!("Loading dictionary from {}", config.dictionary.path);
     let dict_path_for_error = config.dictionary.path.clone();
     let dictionary = match JsonDictionary::load_from_file(&config.dictionary.path) {
         Ok(d) => {
-            log!(logger, "Dictionary loaded successfully");
+            info!("Dictionary loaded successfully");
             d
         }
         Err(e) => {
-            log!(logger, "FATAL: Failed to load dictionary: {e}");
+            error!("FATAL: Failed to load dictionary: {e}");
             eprintln!("ERROR: Dictionary file not found at: {}", config.dictionary.path);
 
             // Try to send a notification via D-Bus before exiting
@@ -153,13 +138,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ibus_addr = std::env::var("IBUS_ADDRESS")
         .ok()
         .or_else(|| discover_ibus_address());
-    log!(logger, "IBus address: {:?}", ibus_addr);
+    info!("IBus address: {:?}", ibus_addr);
 
     let builder = if let Some(ref addr) = ibus_addr {
-        log!(logger, "Connecting to IBus bus at {addr}");
+        info!("Connecting to IBus bus at {addr}");
         Builder::address(addr.as_str())?
     } else {
-        log!(logger, "WARNING: Could not find IBus address, falling back to session bus");
+        warn!("Could not find IBus address, falling back to session bus");
         Builder::session()?
     };
 
@@ -171,11 +156,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
     {
         Ok(c) => {
-            log!(logger, "D-Bus connection established");
+            info!("D-Bus connection established");
             c
         }
         Err(e) => {
-            log!(logger, "FATAL: D-Bus connection failed: {e}");
+            error!("FATAL: D-Bus connection failed: {e}");
             return Err(e.into());
         }
     };
@@ -188,17 +173,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Spawn serial device reader thread
     let candidates_clone = candidates.clone();
-    let mut serial_logger = setup_log();
     let notif_tx_clone = notif_tx.clone();
     std::thread::spawn(move || {
-        log!(serial_logger, "Opening serial device {serial_device_path}");
+        info!("Opening serial device {serial_device_path}");
         let mut device = match SerialDevice::new(&serial_device_path) {
             Ok(d) => {
-                log!(serial_logger, "Serial device opened successfully");
+                info!("Serial device opened successfully");
                 d
             }
             Err(e) => {
-                log!(serial_logger, "FATAL: Failed to open serial device: {e}");
+                error!("FATAL: Failed to open serial device: {e}");
                 return;
             }
         };
@@ -207,14 +191,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             match device.read_stroke() {
                 Ok(keycode) => {
                     let stroke = keycode.stroke();
-                    log!(serial_logger, "Stroke received: {stroke} (control={})", keycode.is_control());
+                    info!("Stroke received: {stroke} (control={})", keycode.is_control());
                     if tx.blocking_send(keycode).is_err() {
-                        log!(serial_logger, "Channel closed, serial reader exiting");
+                        info!("Channel closed, serial reader exiting");
                         break;
                     }
                 }
                 Err(e) => {
-                    log!(serial_logger, "Serial read error: {e}, device disconnected");
+                    error!("Serial read error: {e}, device disconnected");
                     let _ = notif_tx_clone.blocking_send(NotificationEvent::DeviceDisconnected);
 
                     loop {
@@ -223,7 +207,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let mut reconnected = false;
                         for candidate in &candidates_clone {
                             if let Some(path) = Config::try_connect_device(candidate) {
-                                log!(serial_logger, "Device reconnected as {}", path);
+                                info!("Device reconnected as {}", path);
                                 serial_device_path = path;
                                 reconnected = true;
                                 break;
@@ -237,13 +221,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     d
                                 },
                                 Err(e) => {
-                                    log!(serial_logger, "Failed to reopen device: {e}");
+                                    error!("Failed to reopen device: {e}");
                                     continue;
                                 }
                             };
                             break;
                         } else {
-                            log!(serial_logger, "Still disconnected, retrying...");
+                            warn!("Still disconnected, retrying...");
                         }
                     }
                 }
@@ -254,30 +238,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a separate session bus connection for notifications
     let notif_connection = match zbus::Connection::session().await {
         Ok(c) => {
-            log!(logger, "Session bus connection for notifications established");
+            info!("Session bus connection for notifications established");
             eprintln!("✓ Session bus connection for notifications established");
             c
         }
         Err(e) => {
-            log!(logger, "WARNING: Failed to create session bus connection for notifications: {e}");
+            warn!("Failed to create session bus connection for notifications: {e}");
             eprintln!("✗ Failed to create session bus for notifications: {e}");
             // Create a dummy connection - we'll skip notifications if this fails
             connection.clone()
         }
     };
 
-    log!(logger, "Ready, waiting for strokes...");
+    info!("Ready, waiting for strokes...");
     loop {
         tokio::select! {
             Some(keycode) = rx.recv() => {
                 let stroke = keycode.stroke();
-                log!(logger, "Processing stroke: {stroke} (control={})", keycode.is_control());
+                info!("Processing stroke: {stroke} (control={})", keycode.is_control());
 
                 // Control + H: show "HINT" auxiliary text popup.
                 if keycode.is_control() && stroke == Stroke::new(&[Key::LeftH]) {
-                    log!(logger, "  Control+H: showing HINT");
+                    info!("  Control+H: showing HINT");
                     if let Err(e) = emit_auxiliary_text(&connection, "HINT").await {
-                        log!(logger, "  ERROR showing hint: {e}");
+                        error!("  ERROR showing hint: {e}");
                     } else {
                         *hint_showing.lock().await = true;
                     }
@@ -302,19 +286,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         *showing = false;
                         drop(showing);
                         if was_showing {
-                            log!(logger, "  Dismissing hint due to stroke");
+                            info!("  Dismissing hint due to stroke");
                         }
                         if let Err(e) = hide_auxiliary_text(&connection).await {
-                            log!(logger, "  WARNING: Failed to hide hint: {e}");
+                            warn!("  Failed to hide hint: {e}");
                         }
                     }
                 }
 
                 // Control + S: activate search mode
                 if keycode.is_control() && stroke == Stroke::new(&[Key::LeftS]) {
-                    log!(logger, "  Control+S: activating search mode");
+                    info!("  Control+S: activating search mode");
                     if let Err(e) = engine.show_search().await {
-                        log!(logger, "  ERROR activating search: {e}");
+                        error!("  ERROR activating search: {e}");
                     }
                     continue;
                 }
@@ -322,17 +306,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if keycode.is_control() && stroke == Stroke::star() {
                     let mut buf = buffer.lock().await;
                     buf.clear();
-                    log!(logger, "  Buffer cleared (control+star)");
+                    info!("  Buffer cleared (control+star)");
                     if let Err(e) = emit_for_action(
                         &buffer::BufferAction::UpdatePreedit, "", &connection,
                     ).await {
-                        log!(logger, "  ERROR emitting signal: {e}");
+                        error!("  ERROR emitting signal: {e}");
                     }
                     continue;
                 }
 
                 if keycode.is_control() {
-                    log!(logger, "  Skipping control stroke");
+                    info!("  Skipping control stroke");
                     continue;
                 }
 
@@ -340,7 +324,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 {
                     let search = search_state.lock().await;
                     if matches!(*search, SearchState::Active(_)) {
-                        log!(logger, "  Skipping stroke while search is active");
+                        info!("  Skipping stroke while search is active");
                         continue;
                     }
                 }
@@ -355,41 +339,41 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     buf.preedit_string()
                 };
 
-                log!(logger, "  Action: {action:?}, preedit: \"{preedit}\"");
-                log!(logger, "  Calling emit_for_action...");
+                info!("  Action: {action:?}, preedit: \"{preedit}\"");
+                info!("  Calling emit_for_action...");
 
                 if let Err(e) = emit_for_action(&action, &preedit, &connection).await {
-                    log!(logger, "  ERROR emitting signal: {e}");
+                    error!("  ERROR emitting signal: {e}");
                 } else {
-                    log!(logger, "  Signals emitted successfully");
+                    info!("  Signals emitted successfully");
                 }
             }
             Some(notif_event) = notif_rx.recv() => {
                 match notif_event {
                     NotificationEvent::DeviceDisconnected => {
-                        log!(logger, "Received disconnect notification event, calling device_disconnected()");
+                        info!("Received disconnect notification event, calling device_disconnected()");
                         eprintln!("→ Sending device disconnected notification...");
                         match notifications::device_disconnected(&notif_connection).await {
                             Ok(_) => {
-                                log!(logger, "Device disconnected notification sent successfully");
+                                info!("Device disconnected notification sent successfully");
                                 eprintln!("✓ Disconnect notification sent");
                             }
                             Err(e) => {
-                                log!(logger, "Failed to send disconnect notification: {e}");
+                                error!("Failed to send disconnect notification: {e}");
                                 eprintln!("✗ Failed to send disconnect notification: {e}");
                             }
                         }
                     }
                     NotificationEvent::DeviceReconnected => {
-                        log!(logger, "Received reconnect notification event, calling device_reconnected()");
+                        info!("Received reconnect notification event, calling device_reconnected()");
                         eprintln!("→ Sending device reconnected notification...");
                         match notifications::device_reconnected(&notif_connection).await {
                             Ok(_) => {
-                                log!(logger, "Device reconnected notification sent successfully");
+                                info!("Device reconnected notification sent successfully");
                                 eprintln!("✓ Reconnect notification sent");
                             }
                             Err(e) => {
-                                log!(logger, "Failed to send reconnect notification: {e}");
+                                error!("Failed to send reconnect notification: {e}");
                                 eprintln!("✗ Failed to send reconnect notification: {e}");
                             }
                         }
@@ -397,12 +381,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             else => {
-                log!(logger, "All channels closed, exiting");
+                info!("All channels closed, exiting");
                 break;
             }
         }
     }
 
-    log!(logger, "Stroke channel closed, exiting");
+    info!("Stroke channel closed, exiting");
     Ok(())
 }
