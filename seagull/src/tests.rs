@@ -59,4 +59,11 @@ fn test_corner_cases() {
 
     assert_eq!(Outline::try_from_extended("B-G".into()).unwrap().to_string(), "PW-G".to_string());
     assert_eq!(Outline::try_from_extended("B-G".into()).unwrap().extended(), "B-G".to_string());
+
+    // Test parsing of "TL" and "THR" - they should be equivalent
+    let tl_outline = Outline::try_from_extended("TL".into()).unwrap();
+    let thr_outline = Outline::try_from_extended("THR".into()).unwrap();
+    assert_eq!(tl_outline, thr_outline, "TL and THR should parse to the same outline");
+    assert_eq!(tl_outline.to_string(), "THR".to_string());
+    assert_eq!(tl_outline.extended(), "TL".to_string());
 }

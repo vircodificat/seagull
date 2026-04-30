@@ -504,6 +504,17 @@ impl Stroke {
             for (m_idx, &middle) in extended::MIDDLES.iter().enumerate().rev() {
                 let Some(final_str) = rest.strip_prefix(middle) else { continue };
                 if let Some(f_idx) = extended::FINALS.iter().position(|&f| f == final_str) {
+                    // Weak match: initial + no-middle + final has no vowel anchor.
+                    // E.g. "THR" greedy-matches "TH" + "R", but the user likely meant
+                    // all left-side keys (LeftT+LeftH+LeftR). Prefer standard notation
+                    // when it parses without using any finals.
+                    if m_idx == 0 && f_idx != 0 {
+                        if let Some(standard) = Self::try_from_string(&s) {
+                            if (standard.0 & FINALS_MASK) == 0 {
+                                return Some(standard);
+                            }
+                        }
+                    }
                     let bits = (i_idx as u32)
                         | ((m_idx as u32) << 7)
                         | ((f_idx as u32) << 12);

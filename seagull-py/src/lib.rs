@@ -1,5 +1,6 @@
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::types::PyType;
 
 // ---------------------------------------------------------------------------
 // Key
@@ -222,6 +223,51 @@ impl Outline {
 }
 
 // ---------------------------------------------------------------------------
+// Dictionary (abstract base) and JsonDictionary
+// ---------------------------------------------------------------------------
+
+#[pyclass(name = "Dictionary", module = "seagull", subclass)]
+pub struct Dictionary {
+    inner: Box<dyn seagull::Dictionary + Send + Sync>,
+}
+
+#[pymethods]
+impl Dictionary {
+    #[new]
+    fn new() -> PyResult<Self> {
+        Err(PyTypeError::new_err(
+            "Dictionary is abstract; instantiate a subclass such as JsonDictionary",
+        ))
+    }
+
+    fn lookup(&self, outline: &Outline) -> Option<String> {
+        self.inner.lookup(outline.0.clone()).map(|s| s.to_string())
+    }
+
+    fn reverse_lookup(&self, word: &str) -> Option<Outline> {
+        self.inner.reverse_lookup(word).map(Outline)
+    }
+}
+
+#[pyclass(name = "JsonDictionary", module = "seagull", extends = Dictionary)]
+pub struct JsonDictionary;
+
+#[pymethods]
+impl JsonDictionary {
+    #[new]
+    fn new(path: &str) -> PyResult<(Self, Dictionary)> {
+        let dict = seagull::JsonDictionary::load_from_file(path)
+            .map_err(|e| PyValueError::new_err(format!("Failed to load dictionary '{path}': {e}")))?;
+        Ok((JsonDictionary, Dictionary { inner: Box::new(dict) }))
+    }
+
+    #[classmethod]
+    fn load_from_file<'py>(cls: &Bound<'py, PyType>, path: &str) -> PyResult<Bound<'py, PyAny>> {
+        cls.call1((path,))
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Module
 // ---------------------------------------------------------------------------
 
@@ -232,5 +278,7 @@ fn module_init(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Outline>()?;
     m.add_class::<StrokeIter>()?;
     m.add_class::<KeyIter>()?;
+    m.add_class::<Dictionary>()?;
+    m.add_class::<JsonDictionary>()?;
     Ok(())
 }
