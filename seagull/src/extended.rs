@@ -143,7 +143,7 @@ pub static MIDDLES: [&'static str; 32] = [
     "Oh",    // OE
     "Ee",    // AOE
     "E*",    // *E
-    "Ay*",   // A*E
+    "Ea*",   // A*E
     "Oh*",   // O*E
     "Ee*",   // AO*E
     "U",     // U

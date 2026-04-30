@@ -26,7 +26,7 @@ PRE_INFLECTION_DICTS = [
     "data/punctuation.json",
 #    "data/commands.json",
 #    "build/obvious_outlines.json",
-#    "build/reasonable_outlines.json",
+    "build/reasonable_outlines.json",
 ]
 
 # Dictionaries merged after inflection rules are applied.
