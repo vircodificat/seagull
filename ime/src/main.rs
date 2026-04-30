@@ -13,7 +13,7 @@ use tokio::sync::Mutex;
 use zbus::connection::Builder;
 use zbus::zvariant::ObjectPath;
 
-use buffer::{StrokeBuffer, SearchStateEnum};
+use buffer::{StrokeBuffer, SearchState};
 use config::Config;
 use engine::{emit_auxiliary_text, emit_for_action, hide_auxiliary_text, Engine, Factory, SharedConnection, SharedHintState, SharedSearchState};
 
@@ -147,7 +147,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a shared connection reference that will be set after the connection is built
     let shared_connection: SharedConnection = Arc::new(Mutex::new(None));
     let hint_showing: SharedHintState = Arc::new(Mutex::new(false));
-    let search_state: SharedSearchState = Arc::new(Mutex::new(SearchStateEnum::Inactive));
+    let search_state: SharedSearchState = Arc::new(Mutex::new(SearchState::Inactive));
     let engine = Engine::new(buffer.clone(), shared_connection.clone(), hint_showing.clone(), search_state.clone());
 
     let ibus_addr = std::env::var("IBUS_ADDRESS")
@@ -294,7 +294,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 {
                     let in_search = matches!(
                         *search_state.lock().await,
-                        SearchStateEnum::Active(_)
+                        SearchState::Active(_)
                     );
                     if !in_search {
                         let mut showing = hint_showing.lock().await;
@@ -339,7 +339,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // Skip normal stroke processing if search is active (keyboard input will be handled separately)
                 {
                     let search = search_state.lock().await;
-                    if matches!(*search, SearchStateEnum::Active(_)) {
+                    if matches!(*search, SearchState::Active(_)) {
                         log!(logger, "  Skipping stroke while search is active");
                         continue;
                     }

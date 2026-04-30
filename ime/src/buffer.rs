@@ -4,7 +4,7 @@ use seagull::{Dictionary, JsonDictionary, Key, Outline, Stroke};
 
 /// States for the search mode
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SearchStateEnum {
+pub enum SearchState {
     /// Not in search mode
     Inactive,
     /// Actively searching, accumulating typed text
@@ -18,14 +18,28 @@ pub fn is_search_key(ch: char) -> bool {
     ch.is_ascii_alphanumeric() || ch == ' ' || ".,!?;:'\"-".contains(ch)
 }
 
-/// A word that has been translated and is waiting in the committed queue.
+/// A word that has been translated and is in the buffer.
 #[derive(Debug, Clone)]
 pub struct CommittedWord {
     pub word: String,
     pub outline: Outline,
-    /// When true, no space should be inserted before this word when outputting.
-    /// Used for sentence-ending punctuation ({.}, {!}, {?}).
-    pub no_space_before: bool,
+}
+
+/// Punctuation mark in the buffer.
+#[derive(Debug, Clone)]
+pub struct Punctuation {
+    pub punct: String,
+    pub outline: Outline,
+    pub space_after: bool,
+    pub caps_after: bool,
+}
+
+/// A single element in the buffer: either a stroke, committed word, or punctuation.
+#[derive(Debug, Clone)]
+pub enum Element {
+    Stroke(Stroke),
+    CommittedWord(CommittedWord),
+    Punctuation(Punctuation),
 }
 
 /// Actions the engine should take after a stroke is pushed.
@@ -47,12 +61,11 @@ pub enum BufferAction {
     Noop,
 }
 
-/// Buffers steno strokes, looks up translations, manages committed words.
+/// Buffers steno strokes, looks up translations, manages committed words and punctuation.
+/// The buffer contains Elements (Stroke, CommittedWord, or Punctuation) that can be freely intermingled.
 pub struct StrokeBuffer {
-    /// Pending strokes not yet translated.
-    strokes: Vec<Stroke>,
-    /// Words that have been translated but not yet flushed to the application.
-    committed: VecDeque<CommittedWord>,
+    /// Strokes, words, and punctuation that have not yet been flushed to the application.
+    buffer: VecDeque<Element>,
     /// Dictionary for looking up outlines.
     dictionary: JsonDictionary,
     /// When true, the next committed word should be capitalized.
@@ -63,8 +76,7 @@ pub struct StrokeBuffer {
 impl StrokeBuffer {
     pub fn new(dictionary: JsonDictionary) -> Self {
         Self {
-            strokes: Vec::new(),
-            committed: VecDeque::new(),
+            buffer: VecDeque::new(),
             dictionary,
             capitalize_next: false,
         }
@@ -85,26 +97,57 @@ impl StrokeBuffer {
         stroke == Stroke::new(&[Key::LeftH, Key::MiddleStar, Key::RightF])
     }
 
-    /// If `word` is a steno sentence-ending punctuation marker, return the punctuation char.
+    /// If the outline is a sentence-ending punctuation marker, return a Punctuation struct.
     /// These attach without a preceding space and capitalize the next word.
-    fn sentence_end_punct(outline: &Outline) -> Option<char> {
-        match outline.to_string().as_str() {
-            "TP-PL" => Some('.'),
-            "TP-BG" => Some('!'),
-            "KW-PL" => Some('?'),
-            _ => None,
-        }
+    fn sentence_end_punct(outline: &Outline) -> Option<Punctuation> {
+        let punct = match outline.to_string().as_str() {
+            "TP-PL" => ".",
+            "TP-BG" => "!",
+            "KW-PL" => "?",
+            _ => return None,
+        };
+        Some(Punctuation {
+            punct: punct.to_string(),
+            outline: outline.clone(),
+            space_after: false,
+            caps_after: true,
+        })
     }
 
-    /// If `word` is a steno inline punctuation marker, return the punctuation char.
+    /// If the outline is an inline punctuation marker, return a Punctuation struct.
     /// These attach without a preceding space but do NOT capitalize the next word.
-    fn inline_punct(outline: &Outline) -> Option<char> {
-        match outline.to_string().as_str() {
-            "KW-BG" => Some(','),
-//            "{;}" => Some(';'), TODO
-//            "{:}" => Some(':'), TODO
-            _ => None,
-        }
+    fn inline_punct(outline: &Outline) -> Option<Punctuation> {
+        let punct = match outline.to_string().as_str() {
+            "KW-BG" => ",",
+            "STPH-FPLT" => ";",
+            "KHR-PB" => ":",
+            _ => return None,
+        };
+        Some(Punctuation {
+            punct: punct.to_string(),
+            outline: outline.clone(),
+            space_after: true,
+            caps_after: false,
+        })
+    }
+
+    /// Convert a dictionary result to punctuation if it's a punctuation marker like "{.}".
+    fn dict_to_punct(word: &str, outline: &Outline) -> Option<Punctuation> {
+        let punct = match word {
+            "{.}" => Some((".".to_string(), false, true)),
+            "{!}" => Some(("!".to_string(), false, true)),
+            "{?}" => Some(("?".to_string(), false, true)),
+            "{,}" => Some((",".to_string(), true, false)),
+            "{;}" => Some((";".to_string(), true, false)),
+            "{:}" => Some((":".to_string(), true, false)),
+            _ => return None,
+        };
+        punct.map(|(p, space_after, caps_after)| Punctuation {
+            punct: p,
+            outline: outline.clone(),
+            space_after,
+            caps_after,
+        })
     }
 
     /// Capitalize the first character of a string.
@@ -118,28 +161,14 @@ impl StrokeBuffer {
 
     /// Collect all buffered content into a single string and clear the buffer.
     fn flush_all(&mut self) -> String {
-        let mut result = String::new();
-        for cw in self.committed.drain(..) {
-            if !result.is_empty() && !cw.no_space_before {
-                result.push(' ');
-            }
-            result.push_str(&cw.word);
-        }
-        if !self.strokes.is_empty() {
-            let outline = Outline::from(self.strokes.as_slice());
-            if !result.is_empty() {
-                result.push(' ');
-            }
-            result.push_str(&outline.extended());
-            self.strokes.clear();
-        }
+        let result = self.preedit_string();
+        self.buffer.clear();
         result
     }
 
-    /// Clear the entire buffer (committed words and pending strokes).
+    /// Clear the entire buffer (committed words, punctuation, and pending strokes).
     pub fn clear(&mut self) {
-        self.strokes.clear();
-        self.committed.clear();
+        self.buffer.clear();
         self.capitalize_next = false;
     }
 
@@ -152,8 +181,8 @@ impl StrokeBuffer {
         // H*F alone: capitalize the previous (most recently committed) word.
         // Only works if there are no pending strokes.
         if Self::is_hstarf_only(stroke) {
-            if self.strokes.is_empty() && !self.committed.is_empty() {
-                if let Some(cw) = self.committed.back_mut() {
+            if self.pending_len() == 0 {
+                if let Some(Element::CommittedWord(cw)) = self.buffer.back_mut() {
                     cw.word = Self::capitalize(&cw.word);
                     return BufferAction::CommitAndPreedit;
                 }
@@ -178,141 +207,220 @@ impl StrokeBuffer {
             return BufferAction::FlushAll { flushed };
         }
 
-        self.strokes.push(stroke);
+        // Add the new stroke to the buffer
+        self.buffer.push_back(Element::Stroke(stroke));
 
-        // Try to look up the current pending strokes as an outline.
-        let outline = Outline::from(self.strokes.as_slice());
+        // Re-process from the start or from just before the rightmost committed word
+        self.reprocess();
 
-        // 1. Check if combining with previous committed words forms a longer match
-        if let Some((consume_count, word, combined_outline)) = self.find_longest_match(&outline) {
-            let (final_word, no_space_before) = if let Some(ch) = Self::sentence_end_punct(&outline) {
-                self.capitalize_next = true;
-                (ch.to_string(), true)
-            } else if let Some(ch) = Self::inline_punct(&outline) {
-                (ch.to_string(), true)
-            } else {
-                // Check if any of the consumed words were capitalized
-                let was_capitalized = (0..consume_count).any(|i| {
-                    let idx = self.committed.len() - 1 - i;
-                    let word_str = &self.committed[idx].word;
-                    // Check if the first consumed word (the oldest one in this match) is capitalized.
-                    if i == consume_count - 1 {
-                        word_str.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
-                    } else {
-                        false
-                    }
-                });
-                let should_capitalize = was_capitalized || std::mem::replace(&mut self.capitalize_next, false);
-                let w = if should_capitalize {
-                    Self::capitalize(&word)
-                } else {
-                    word.to_owned()
-                };
-                (w, false)
-            };
-
-            // Remove the consumed words
-            for _ in 0..consume_count {
-                self.committed.pop_back();
-            }
-
-            let committed_word = CommittedWord {
-                word: final_word,
-                outline: combined_outline,
-                no_space_before,
-            };
-
-            self.strokes.clear();
-            self.committed.push_back(committed_word);
-            return BufferAction::CommitAndPreedit;
-        }
-
-        // 2. If no longer match, check the current strokes alone
-        if let Some(word) = self.dictionary.lookup(outline.clone()) {
-            let (final_word, no_space_before) = if let Some(ch) = Self::sentence_end_punct(&outline) {
-                self.capitalize_next = true;
-                (ch.to_string(), true)
-            } else if let Some(ch) = Self::inline_punct(&outline) {
-                (ch.to_string(), true)
-            } else {
-                let w = if std::mem::replace(&mut self.capitalize_next, false) {
-                    Self::capitalize(word)
-                } else {
-                    word.to_owned()
-                };
-                (w, false)
-            };
-            let committed_word = CommittedWord {
-                word: final_word,
-                outline: outline.clone(),
-                no_space_before,
-            };
-            self.strokes.clear();
-
-            self.committed.push_back(committed_word);
+        // Return action based on whether there are pending strokes left
+        if matches!(self.buffer.back(), Some(Element::Stroke(_))) {
+            BufferAction::UpdatePreedit
+        } else {
             BufferAction::CommitAndPreedit
-        } else {
-            BufferAction::UpdatePreedit
         }
     }
-    /// Check if combining previous committed words with the pending outline forms a longer word.
-    /// Returns the number of committed words to consume, the new word, and the combined outline.
-    fn find_longest_match(&self, pending_outline: &Outline) -> Option<(usize, String, Outline)> {
-        let mut longest_match = None;
-        let mut current_outline = pending_outline.clone();
 
-        // Iterate backwards through committed words
-        for (i, cw) in self.committed.iter().rev().enumerate() {
-            // Combine outline by prefixing the committed word's outline
-            let combined = cw.outline.clone() / current_outline;
+    /// Re-process all elements in the buffer to find longest matches.
+    /// Starts from just before the rightmost committed word (or from start if empty).
+    fn reprocess(&mut self) {
+        // Find the position of the rightmost committed word or punctuation
+        let rightmost_pos = self.buffer.iter().rposition(|el| {
+            matches!(el, Element::CommittedWord(_) | Element::Punctuation(_))
+        });
 
-            // Check if this combined outline is in the dictionary
-            if let Some(word) = self.dictionary.lookup(combined.clone()) {
-                longest_match = Some((i + 1, word.to_owned(), combined.clone()));
+        let reprocess_from = match rightmost_pos {
+            Some(0) => 0,  // If the rightmost is at position 0, start from 0
+            Some(pos) => pos - 1,  // Otherwise, start from one position before
+            None => 0,  // If no committed words/punct, start from 0
+        };
+
+        // Compute the capitalization state AT the reprocessing point
+        // This is false unless there's a punctuation before this point that sets it
+        let mut current_cap_state = false;
+        for i in (0..reprocess_from).rev() {
+            if let Element::Punctuation(p) = &self.buffer[i] {
+                current_cap_state = p.caps_after;
+                break;
+            }
+        }
+
+        // Extract elements from reprocess_from onwards
+        let elements_to_reprocess: Vec<Element> = self.buffer.split_off(reprocess_from).into();
+
+        // Collect all strokes from elements to reprocess and track capitalized words
+        let mut all_strokes = Vec::new();
+        let mut capitalized_at: std::collections::HashMap<usize, bool> = std::collections::HashMap::new();
+        let mut stroke_index = 0;
+        for el in &elements_to_reprocess {
+            match el {
+                Element::Stroke(s) => {
+                    all_strokes.push(*s);
+                    stroke_index += 1;
+                }
+                Element::CommittedWord(cw) => {
+                    let is_cap = cw.word.chars().next().map(|c| c.is_uppercase()).unwrap_or(false);
+                    let start_index = stroke_index;
+                    all_strokes.extend_from_slice(cw.outline.strokes());
+                    stroke_index = all_strokes.len();
+                    if is_cap {
+                        capitalized_at.insert(start_index, true);
+                    }
+                }
+                Element::Punctuation(p) => {
+                    all_strokes.extend_from_slice(p.outline.strokes());
+                    stroke_index = all_strokes.len();
+                }
+            }
+        }
+
+        // Reprocess strokes to find longest matches
+        let mut i = 0;
+        let mut should_capitalize = current_cap_state;
+        while i < all_strokes.len() {
+            let mut best_match_len = 0;
+            let mut best_match_element = None;
+
+            // Try all possible lengths from current position
+            for j in (i + 1)..=all_strokes.len() {
+                let outline = Outline::from(&all_strokes[i..j]);
+
+                // Check sentence-ending punctuation first
+                if let Some(punct) = Self::sentence_end_punct(&outline) {
+                    best_match_len = j - i;
+                    best_match_element = Some(Element::Punctuation(punct));
+                }
+                // Then check inline punctuation
+                else if let Some(punct) = Self::inline_punct(&outline) {
+                    best_match_len = j - i;
+                    best_match_element = Some(Element::Punctuation(punct));
+                }
+                // Then check dictionary for words
+                else if let Some(word) = self.dictionary.lookup(outline.clone()) {
+                    best_match_len = j - i;
+                    // Check if the dictionary result is a punctuation marker
+                    if let Some(punct) = Self::dict_to_punct(&word, &outline) {
+                        best_match_element = Some(Element::Punctuation(punct));
+                    } else {
+                        let mut w = word.to_string();
+                        // Capitalize if: should_capitalize is set OR any consumed word was capitalized
+                        let was_consumed_capitalized = capitalized_at.get(&i).copied().unwrap_or(false);
+                        if should_capitalize || was_consumed_capitalized {
+                            w = Self::capitalize(&w);
+                        }
+                        best_match_element = Some(Element::CommittedWord(CommittedWord {
+                            word: w,
+                            outline: outline.clone(),
+                        }));
+                    }
+                }
             }
 
-            current_outline = combined;
+            if let Some(mut el) = best_match_element {
+                // Update capitalization state if this is punctuation
+                if let Element::Punctuation(ref p) = el {
+                    should_capitalize = p.caps_after;
+                } else {
+                    should_capitalize = false;
+                }
+                self.buffer.push_back(el);
+                i += best_match_len;
+            } else {
+                // No match: add as stroke and stop
+                for j in i..all_strokes.len() {
+                    self.buffer.push_back(Element::Stroke(all_strokes[j]));
+                }
+                break;
+            }
         }
 
-        longest_match
+        // Update capitalize_next for next stroke - this carries over to the NEXT reprocess
+        self.capitalize_next = should_capitalize;
     }
 
 
-    /// Undo the last stroke or decompose the last committed word.
+    /// Undo the last element or decompose the last committed word/punctuation.
     fn undo(&mut self) -> BufferAction {
-        if !self.strokes.is_empty() {
-            self.strokes.pop();
-            BufferAction::UpdatePreedit
-        } else if self.committed.is_empty() {
-            BufferAction::SendBackspace
-        } else if let Some(last_committed) = self.committed.pop_back() {
-            // Decompose: restore all strokes of the last word minus the final one.
-            let outline_strokes = last_committed.outline.strokes().to_vec();
-            if outline_strokes.len() > 1 {
-                self.strokes = outline_strokes[..outline_strokes.len() - 1].to_vec();
+        if let Some(el) = self.buffer.pop_back() {
+            match el {
+                Element::Stroke(_) => {
+                    // Just removed a stroke, done
+                }
+                Element::CommittedWord(cw) => {
+                    // Decompose: restore all strokes of the word minus the final one
+                    let outline_strokes = cw.outline.strokes();
+                    if outline_strokes.len() > 1 {
+                        for s in &outline_strokes[..outline_strokes.len() - 1] {
+                            self.buffer.push_back(Element::Stroke(*s));
+                        }
+                    }
+                }
+                Element::Punctuation(p) => {
+                    // Decompose: restore all strokes of the punctuation minus the final one
+                    let outline_strokes = p.outline.strokes();
+                    if outline_strokes.len() > 1 {
+                        for s in &outline_strokes[..outline_strokes.len() - 1] {
+                            self.buffer.push_back(Element::Stroke(*s));
+                        }
+                    }
+                }
             }
-            // If it was a single-stroke word, strokes stays empty.
             BufferAction::UpdatePreedit
         } else {
-            BufferAction::Noop
+            BufferAction::SendBackspace
         }
     }
 
     /// Build the preedit string for display.
-    /// Format: `{committed1} {committed2} STROKE1/STROKE2`
-    /// Punctuation words (no_space_before=true) are not preceded by a space.
+    /// Format: `word1 word2 STROKE1/STROKE2`
+    /// Punctuation is attached without preceding space based on its rules.
     pub fn preedit_string(&self) -> String {
         let mut result = String::new();
+        let mut pending_strokes = Vec::new();
 
-        for cw in &self.committed {
-            if !result.is_empty() && !cw.no_space_before {
-                result.push(' ');
+        for el in &self.buffer {
+            match el {
+                Element::Stroke(s) => {
+                    pending_strokes.push(*s);
+                }
+                Element::CommittedWord(cw) => {
+                    // Flush any pending strokes first
+                    if !pending_strokes.is_empty() {
+                        let outline = Outline::from(pending_strokes.as_slice());
+                        if !result.is_empty() {
+                            result.push(' ');
+                        }
+                        result.push_str(&outline.extended());
+                        pending_strokes.clear();
+                    }
+                    if !result.is_empty() {
+                        result.push(' ');
+                    }
+                    result.push_str(&cw.word);
+                }
+                Element::Punctuation(p) => {
+                    // Flush any pending strokes first
+                    if !pending_strokes.is_empty() {
+                        let outline = Outline::from(pending_strokes.as_slice());
+                        if !result.is_empty() {
+                            result.push(' ');
+                        }
+                        result.push_str(&outline.extended());
+                        pending_strokes.clear();
+                    }
+                    // Punctuation attaches without space
+                    result.push_str(&p.punct);
+                    // Add space after if needed
+                    if p.space_after && !result.is_empty() {
+                        // Mark that next element needs space
+                    }
+                }
             }
-            result.push_str(&cw.word);
         }
 
-        if !self.strokes.is_empty() {
-            let outline = Outline::from(self.strokes.as_slice());
+        // Flush any remaining pending strokes
+        if !pending_strokes.is_empty() {
+            let outline = Outline::from(pending_strokes.as_slice());
             if !result.is_empty() {
                 result.push(' ');
             }
@@ -322,25 +430,37 @@ impl StrokeBuffer {
         result
     }
 
-    /// Number of committed words currently in the buffer.
+    /// Number of committed words and punctuation elements currently in the buffer.
     pub fn committed_len(&self) -> usize {
-        self.committed.len()
+        self.buffer.iter().filter(|el| !matches!(el, Element::Stroke(_))).count()
     }
 
     /// Number of pending strokes.
     pub fn pending_len(&self) -> usize {
-        self.strokes.len()
+        self.buffer.iter().filter(|el| matches!(el, Element::Stroke(_))).count()
     }
 
     /// The byte offset where pending strokes begin in the preedit string.
     /// Used for setting underline attributes.
     pub fn committed_preedit_len(&self) -> usize {
         let mut len = 0;
-        for cw in self.committed.iter() {
-            if len > 0 && !cw.no_space_before {
-                len += 1; // space separator
+        let mut needs_space = false;
+
+        for el in &self.buffer {
+            match el {
+                Element::Stroke(_) => break,
+                Element::CommittedWord(cw) => {
+                    if needs_space {
+                        len += 1; // space separator
+                    }
+                    len += cw.word.len();
+                    needs_space = true;
+                }
+                Element::Punctuation(p) => {
+                    len += p.punct.len();
+                    needs_space = p.space_after;
+                }
             }
-            len += cw.word.len();
         }
         len
     }
@@ -687,14 +807,14 @@ mod tests {
 
     #[test]
     fn test_search_state_enum_variations() {
-        let state1 = SearchStateEnum::Inactive;
-        assert!(matches!(state1, SearchStateEnum::Inactive));
+        let state1 = SearchState::Inactive;
+        assert!(matches!(state1, SearchState::Inactive));
 
-        let state2 = SearchStateEnum::Active("hello".to_string());
-        assert!(matches!(state2, SearchStateEnum::Active(ref s) if s == "hello"));
+        let state2 = SearchState::Active("hello".to_string());
+        assert!(matches!(state2, SearchState::Active(ref s) if s == "hello"));
 
-        let state3 = SearchStateEnum::ShowingResult("world".to_string());
-        assert!(matches!(state3, SearchStateEnum::ShowingResult(ref s) if s == "world"));
+        let state3 = SearchState::ShowingResult("world".to_string());
+        assert!(matches!(state3, SearchState::ShowingResult(ref s) if s == "world"));
     }
 
     #[test]

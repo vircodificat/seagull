@@ -6,7 +6,7 @@ use zbus::object_server::SignalEmitter;
 use zbus::zvariant::{ObjectPath, Value};
 use zbus::interface;
 
-use crate::buffer::{BufferAction, StrokeBuffer, SearchStateEnum};
+use crate::buffer::{BufferAction, StrokeBuffer, SearchState};
 
 pub type SharedConnection = Arc<Mutex<Option<zbus::Connection>>>;
 
@@ -98,7 +98,7 @@ impl Factory {
 pub type SharedHintState = Arc<Mutex<bool>>;
 
 /// Shared search state across Engine and main loop
-pub type SharedSearchState = Arc<Mutex<SearchStateEnum>>;
+pub type SharedSearchState = Arc<Mutex<SearchState>>;
 
 /// IBus Engine — handles input method lifecycle and emits text signals.
 #[derive(Clone)]
@@ -149,7 +149,7 @@ impl Engine {
     /// Activate search mode
     pub async fn show_search(&self) -> zbus::Result<()> {
         let mut state = self.search_state.lock().await;
-        *state = SearchStateEnum::Active(String::new());
+        *state = SearchState::Active(String::new());
         if let Some(conn) = self.connection.lock().await.as_ref() {
             emit_auxiliary_text(conn, "SEARCH: ").await?;
         }
@@ -159,7 +159,7 @@ impl Engine {
     /// Hide search mode
     pub async fn hide_search(&self) -> zbus::Result<()> {
         let mut state = self.search_state.lock().await;
-        *state = SearchStateEnum::Inactive;
+        *state = SearchState::Inactive;
         if let Some(conn) = self.connection.lock().await.as_ref() {
             hide_auxiliary_text(conn).await?;
         }
@@ -169,7 +169,7 @@ impl Engine {
     /// Add a character to the search input
     pub async fn add_search_char(&self, ch: char) -> zbus::Result<()> {
         let mut state = self.search_state.lock().await;
-        if let SearchStateEnum::Active(ref mut text) = *state {
+        if let SearchState::Active(ref mut text) = *state {
             text.push(ch);
             if let Some(conn) = self.connection.lock().await.as_ref() {
                 emit_auxiliary_text(conn, &format!("SEARCH: {}", text)).await?;
@@ -181,7 +181,7 @@ impl Engine {
     /// Handle backspace in search mode (delete last character)
     pub async fn search_backspace(&self) -> zbus::Result<()> {
         let mut state = self.search_state.lock().await;
-        if let SearchStateEnum::Active(ref mut text) = *state {
+        if let SearchState::Active(ref mut text) = *state {
             text.pop();
             if let Some(conn) = self.connection.lock().await.as_ref() {
                 emit_auxiliary_text(conn, &format!("SEARCH: {}", text)).await?;
@@ -204,7 +204,7 @@ impl Engine {
         };
 
         let mut state = self.search_state.lock().await;
-        *state = SearchStateEnum::ShowingResult(word.to_string());
+        *state = SearchState::ShowingResult(word.to_string());
 
         if let Some(conn) = self.connection.lock().await.as_ref() {
             emit_auxiliary_text(conn, &display).await?;
@@ -239,7 +239,7 @@ impl Engine {
             log!(l, "  Enter pressed in search");
             let word = {
                 let state = self.search_state.lock().await;
-                if let SearchStateEnum::Active(text) = &*state {
+                if let SearchState::Active(text) = &*state {
                     text.clone()
                 } else {
                     String::new()
@@ -302,7 +302,7 @@ impl Engine {
         // hint_showing is already false whenever search mode is active.
         {
             let search_state_lock = self.search_state.lock().await;
-            if let SearchStateEnum::Active(_) = *search_state_lock {
+            if let SearchState::Active(_) = *search_state_lock {
                 drop(search_state_lock); // Release lock before async calls
                 return self.handle_search_key_event(keyval).await;
             }
