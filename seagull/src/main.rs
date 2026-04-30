@@ -1,10 +1,15 @@
+#[cfg(test)]
+mod tests;
+
 use clap::Parser;
 use seagull::device::{serial::SerialDevice, virt::VirtualDevice};
 
 mod keytest;
 mod game;
 
-const DEVICE: &str = "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02";
+//const DEVICE: &str = "/dev/serial/by-id/usb-Wootpatoot_Lets_Split_v2-if02";
+const DEVICE: &str = "/dev/serial/by-id/usb-StenoKeyboards_Polyglot-if02";
+
 
 #[derive(Parser)]
 struct Args {

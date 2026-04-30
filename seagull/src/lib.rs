@@ -481,6 +481,18 @@ impl Stroke {
         if let Some(stroke) = Self::try_from_string(&s) {
             return Some(stroke);
         }
+
+        // FINALS_ONLY_MODE: if input starts with "-", search only FINALS array.
+        // This handles cases like "-N" or "-PB" which represent final phonetic sounds.
+        if let Some(final_str) = s.strip_prefix('-') {
+            if let Some(f_idx) = extended::FINALS.iter().position(|&f| f == final_str) {
+                let bits = (0 as u32)  // initial_index = 0
+                    | ((0 as u32) << 7)  // middle_index = 0
+                    | ((f_idx as u32) << 12);
+                return Some(Stroke(bits));
+            }
+        }
+
         // Extended phonetic lookup (e.g. "BRASh", "D" = TK cluster).
         for (i_idx, &initial) in extended::INITIALS.iter().enumerate() {
             let Some(rest) = s.strip_prefix(initial) else { continue };
