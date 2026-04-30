@@ -27,6 +27,8 @@ pub fn is_search_key(ch: char) -> bool {
 pub struct CommittedWord {
     pub word: String,
     pub outline: Outline,
+    pub join_left: bool,
+    pub join_right: bool,
 }
 
 /// Punctuation mark in the buffer.
@@ -278,6 +280,23 @@ impl StrokeBuffer {
         self.greedy_match_and_push(&pending, should_capitalize);
     }
 
+    /// Parse a steno dictionary word entry, stripping brace-join notation.
+    /// Words wrapped in `{...}` have their braces removed; a leading `^` sets
+    /// `join_left` and a trailing `^` sets `join_right`. Plain words are returned
+    /// unchanged with both flags `false`.
+    fn parse_word_entry(word: &str) -> (String, bool, bool) {
+        if word.starts_with('{') && word.ends_with('}') {
+            let join_left = word.starts_with("{^");
+            let join_right = word.ends_with("^}");
+            let inner = &word[1..word.len() - 1];
+            let inner = if join_left { &inner[1..] } else { inner };
+            let inner = if join_right { &inner[..inner.len() - 1] } else { inner };
+            (inner.to_string(), join_left, join_right)
+        } else {
+            (word.to_string(), false, false)
+        }
+    }
+
     /// Greedily match `strokes` against the dictionary and push the resulting elements
     /// onto `self.buffer`. Returns the capitalization state after the final element.
     fn greedy_match_and_push(&mut self, strokes: &[Stroke], mut should_capitalize: bool) -> bool {
@@ -300,9 +319,13 @@ impl StrokeBuffer {
                     if let Some(punct) = Self::dict_to_punct(&word, &outline) {
                         best_match_element = Some(Element::Punctuation(punct));
                     } else {
+                        let (cleaned_word, join_left, join_right) =
+                            Self::parse_word_entry(&word);
                         best_match_element = Some(Element::CommittedWord(CommittedWord {
-                            word: word.to_string(),
+                            word: cleaned_word,
                             outline: outline.clone(),
+                            join_left,
+                            join_right,
                         }));
                     }
                 }
@@ -376,7 +399,9 @@ impl StrokeBuffer {
                     if matches!(next_el, Some(Element::Stroke(_))) {
                         result.push('/');
                     }
-                    if matches!(next_el, Some(Element::CommittedWord(_)) | Some(Element::CapsNext)) {
+                    if let Some(Element::CommittedWord(w)) = next_el && !w.join_left {
+                        result.push(' ');
+                    } else if let Some(Element::CapsNext) = next_el {
                         result.push(' ');
                     }
                 }
@@ -398,7 +423,9 @@ impl StrokeBuffer {
                         | Some(Element::CapsNext)
                         | Some(Element::Stroke(_))
                     ) {
-                        result.push(' ');
+                        if !cw.join_right && let Some(Element::CommittedWord(ncw)) = next_el && !ncw.join_left {
+                            result.push(' ');
+                        }
                     }
                     caps_next = false;
                 }
