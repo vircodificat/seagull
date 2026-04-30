@@ -137,18 +137,7 @@ def validate_theory(theory_dir=THEORY_DIR):
 
 def output_results(all_links, missings, invalids, conflicts, build_dir=BUILD_DIR, theory_dir=THEORY_DIR):
     """Output results to console and file if no conflicts."""
-    if missings:
-        print("\n❌ MISSING OUTLINES FOUND:", file=sys.stderr)
-        print(f"Found {len(missings)} word(s) with missing outlines:\n", file=sys.stderr)
-        for word in sorted(missings.keys()):
-            missing_info = missings[word]
-            print(f"  Word: '{word}'", file=sys.stderr)
-            for source in missing_info['sources']:
-                print(f"    in {source}", file=sys.stderr)
-            print()
-        return False
-
-    elif invalids:
+    if invalids:
         print("\n❌ INVALIDS FOUND:", file=sys.stderr)
         print(f"Found {len(invalids)} word(s) with invalid outlines:\n", file=sys.stderr)
         for word in sorted(invalids.keys()):
@@ -179,6 +168,13 @@ def output_results(all_links, missings, invalids, conflicts, build_dir=BUILD_DIR
             print()
 
         return False
+    else:
+        print("\n⚠️ MISSING OUTLINES:", file=sys.stderr)
+        print(f"Found {len(missings)} word(s) with missing outlines:\n", file=sys.stderr)
+
+        for word in sorted(missings.keys()):
+            missing_info = missings[word]
+            print(f"  Word: '{word}'", file=sys.stderr)
 
     # No conflicts - create theory.json
     print("\n✓ No conflicts found!", file=sys.stderr)

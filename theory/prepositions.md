@@ -21,7 +21,7 @@ Prepositions
 * besides
 * between
 * beyond
-* [but](YUT)
+* [but](BUT)
 * [by](BI)
 * concerning
 * considering
