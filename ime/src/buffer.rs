@@ -23,6 +23,9 @@ pub fn is_search_key(ch: char) -> bool {
 pub struct CommittedWord {
     pub word: String,
     pub outline: Outline,
+    /// When true, no space should be inserted before this word when outputting.
+    /// Used for sentence-ending punctuation ({.}, {!}, {?}).
+    pub no_space_before: bool,
 }
 
 /// Actions the engine should take after a stroke is pushed.
@@ -52,6 +55,9 @@ pub struct StrokeBuffer {
     committed: VecDeque<CommittedWord>,
     /// Dictionary for looking up outlines.
     dictionary: JsonDictionary,
+    /// When true, the next committed word should be capitalized.
+    /// Set after sentence-ending punctuation ({.}, {!}, {?}).
+    capitalize_next: bool,
 }
 
 impl StrokeBuffer {
@@ -60,6 +66,7 @@ impl StrokeBuffer {
             strokes: Vec::new(),
             committed: VecDeque::new(),
             dictionary,
+            capitalize_next: false,
         }
     }
 
@@ -78,6 +85,28 @@ impl StrokeBuffer {
         stroke == Stroke::new(&[Key::LeftH, Key::MiddleStar, Key::RightF])
     }
 
+    /// If `word` is a steno sentence-ending punctuation marker, return the punctuation char.
+    /// These attach without a preceding space and capitalize the next word.
+    fn sentence_end_punct(outline: &Outline) -> Option<char> {
+        match outline.to_string().as_str() {
+            "TP-PL" => Some('.'),
+            "TP-BG" => Some('!'),
+            "KW-PL" => Some('?'),
+            _ => None,
+        }
+    }
+
+    /// If `word` is a steno inline punctuation marker, return the punctuation char.
+    /// These attach without a preceding space but do NOT capitalize the next word.
+    fn inline_punct(outline: &Outline) -> Option<char> {
+        match outline.to_string().as_str() {
+            "KW-BG" => Some(','),
+//            "{;}" => Some(';'), TODO
+//            "{:}" => Some(':'), TODO
+            _ => None,
+        }
+    }
+
     /// Capitalize the first character of a string.
     fn capitalize(s: &str) -> String {
         let mut chars = s.chars();
@@ -89,22 +118,29 @@ impl StrokeBuffer {
 
     /// Collect all buffered content into a single string and clear the buffer.
     fn flush_all(&mut self) -> String {
-        let mut parts: Vec<String> = Vec::new();
+        let mut result = String::new();
         for cw in self.committed.drain(..) {
-            parts.push(cw.word);
+            if !result.is_empty() && !cw.no_space_before {
+                result.push(' ');
+            }
+            result.push_str(&cw.word);
         }
         if !self.strokes.is_empty() {
             let outline = Outline::from(self.strokes.as_slice());
-            parts.push(outline.extended());
+            if !result.is_empty() {
+                result.push(' ');
+            }
+            result.push_str(&outline.extended());
             self.strokes.clear();
         }
-        parts.join(" ")
+        result
     }
 
     /// Clear the entire buffer (committed words and pending strokes).
     pub fn clear(&mut self) {
         self.strokes.clear();
         self.committed.clear();
+        self.capitalize_next = false;
     }
 
     /// Push a stroke into the buffer. Returns what the engine should do.
@@ -149,24 +185,30 @@ impl StrokeBuffer {
 
         // 1. Check if combining with previous committed words forms a longer match
         if let Some((consume_count, word, combined_outline)) = self.find_longest_match(&outline) {
-            // Check if any of the consumed words were capitalized
-            let was_capitalized = (0..consume_count).any(|i| {
-                let idx = self.committed.len() - 1 - i;
-                let word_str = &self.committed[idx].word;
-                // A very simple heuristic: if the first character is uppercase, it was capitalized.
-                // Or we can just check if the very first consumed word is capitalized.
-                // Let's check if the first consumed word (the oldest one in this match) is capitalized.
-                if i == consume_count - 1 {
-                    word_str.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
-                } else {
-                    false
-                }
-            });
-
-            let final_word = if was_capitalized {
-                Self::capitalize(&word)
+            let (final_word, no_space_before) = if let Some(ch) = Self::sentence_end_punct(&outline) {
+                self.capitalize_next = true;
+                (ch.to_string(), true)
+            } else if let Some(ch) = Self::inline_punct(&outline) {
+                (ch.to_string(), true)
             } else {
-                word.to_owned()
+                // Check if any of the consumed words were capitalized
+                let was_capitalized = (0..consume_count).any(|i| {
+                    let idx = self.committed.len() - 1 - i;
+                    let word_str = &self.committed[idx].word;
+                    // Check if the first consumed word (the oldest one in this match) is capitalized.
+                    if i == consume_count - 1 {
+                        word_str.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
+                    } else {
+                        false
+                    }
+                });
+                let should_capitalize = was_capitalized || std::mem::replace(&mut self.capitalize_next, false);
+                let w = if should_capitalize {
+                    Self::capitalize(&word)
+                } else {
+                    word.to_owned()
+                };
+                (w, false)
             };
 
             // Remove the consumed words
@@ -177,6 +219,7 @@ impl StrokeBuffer {
             let committed_word = CommittedWord {
                 word: final_word,
                 outline: combined_outline,
+                no_space_before,
             };
 
             self.strokes.clear();
@@ -186,9 +229,23 @@ impl StrokeBuffer {
 
         // 2. If no longer match, check the current strokes alone
         if let Some(word) = self.dictionary.lookup(outline.clone()) {
+            let (final_word, no_space_before) = if let Some(ch) = Self::sentence_end_punct(&outline) {
+                self.capitalize_next = true;
+                (ch.to_string(), true)
+            } else if let Some(ch) = Self::inline_punct(&outline) {
+                (ch.to_string(), true)
+            } else {
+                let w = if std::mem::replace(&mut self.capitalize_next, false) {
+                    Self::capitalize(word)
+                } else {
+                    word.to_owned()
+                };
+                (w, false)
+            };
             let committed_word = CommittedWord {
-                word: word.to_owned(),
+                word: final_word,
                 outline: outline.clone(),
+                no_space_before,
             };
             self.strokes.clear();
 
@@ -243,19 +300,26 @@ impl StrokeBuffer {
 
     /// Build the preedit string for display.
     /// Format: `{committed1} {committed2} STROKE1/STROKE2`
+    /// Punctuation words (no_space_before=true) are not preceded by a space.
     pub fn preedit_string(&self) -> String {
-        let mut parts: Vec<String> = Vec::new();
+        let mut result = String::new();
 
         for cw in &self.committed {
-            parts.push(cw.word.clone());
+            if !result.is_empty() && !cw.no_space_before {
+                result.push(' ');
+            }
+            result.push_str(&cw.word);
         }
 
         if !self.strokes.is_empty() {
             let outline = Outline::from(self.strokes.as_slice());
-            parts.push(outline.extended());
+            if !result.is_empty() {
+                result.push(' ');
+            }
+            result.push_str(&outline.extended());
         }
 
-        parts.join(" ")
+        result
     }
 
     /// Number of committed words currently in the buffer.
@@ -272,8 +336,8 @@ impl StrokeBuffer {
     /// Used for setting underline attributes.
     pub fn committed_preedit_len(&self) -> usize {
         let mut len = 0;
-        for (i, cw) in self.committed.iter().enumerate() {
-            if i > 0 {
+        for cw in self.committed.iter() {
+            if len > 0 && !cw.no_space_before {
                 len += 1; // space separator
             }
             len += cw.word.len();
@@ -631,5 +695,144 @@ mod tests {
 
         let state3 = SearchStateEnum::ShowingResult("world".to_string());
         assert!(matches!(state3, SearchStateEnum::ShowingResult(ref s) if s == "world"));
+    }
+
+    #[test]
+    fn test_period_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("TP-PL", "{.}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TP-PL").unwrap());
+
+        // preedit should be "cat." with no space before the period
+        assert_eq!(buf.preedit_string(), "cat.");
+        assert_eq!(buf.committed_len(), 2);
+    }
+
+    #[test]
+    fn test_exclamation_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("SKHRAPL", "{!}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("SKHRAPL").unwrap());
+
+        assert_eq!(buf.preedit_string(), "cat!");
+        assert_eq!(buf.committed_len(), 2);
+    }
+
+    #[test]
+    fn test_question_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("KW-PL", "{?}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("KW-PL").unwrap());
+
+        assert_eq!(buf.preedit_string(), "cat?");
+        assert_eq!(buf.committed_len(), 2);
+    }
+
+    #[test]
+    fn test_punct_capitalizes_next_word() {
+        let dict = test_dictionary(&[
+            ("KAT", "cat"),
+            ("TP-PL", "{.}"),
+            ("TKOG", "dog"),
+        ]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TP-PL").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TKOG").unwrap());
+
+        // "dog" should be capitalized because it follows a period
+        assert_eq!(buf.preedit_string(), "cat. Dog");
+        assert_eq!(buf.committed_len(), 3);
+    }
+
+    #[test]
+    fn test_punct_flush_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("TP-PL", "{.}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TP-PL").unwrap());
+
+        let rr = Stroke::new(&[Key::LeftR, Key::RightR]);
+        let action = buf.push_stroke(rr);
+        match action {
+            BufferAction::FlushAll { ref flushed } => {
+                assert_eq!(flushed, "cat.");
+            }
+            _ => panic!("Expected FlushAll, got {:?}", action),
+        }
+    }
+
+    #[test]
+    fn test_punct_committed_preedit_len() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("TP-PL", "{.}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TP-PL").unwrap());
+
+        // "cat" = 3 bytes, "." attaches with no space = 4 bytes total
+        assert_eq!(buf.committed_preedit_len(), 4);
+    }
+
+    #[test]
+    fn test_comma_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("KW-BG", "{,}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("KW-BG").unwrap());
+
+        assert_eq!(buf.preedit_string(), "cat,");
+        assert_eq!(buf.committed_len(), 2);
+    }
+
+    #[test]
+    fn test_semicolon_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("STPH-FPLT", "{;}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("STPH-FPLT").unwrap());
+
+        assert_eq!(buf.preedit_string(), "cat;");
+        assert_eq!(buf.committed_len(), 2);
+    }
+
+    #[test]
+    fn test_colon_no_space_before() {
+        let dict = test_dictionary(&[("KAT", "cat"), ("KHR-PB", "{:}")]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("KHR-PB").unwrap());
+
+        assert_eq!(buf.preedit_string(), "cat:");
+        assert_eq!(buf.committed_len(), 2);
+    }
+
+    #[test]
+    fn test_inline_punct_does_not_capitalize_next() {
+        let dict = test_dictionary(&[
+            ("KAT", "cat"),
+            ("KW-BG", "{,}"),
+            ("TKOG", "dog"),
+        ]);
+        let mut buf = StrokeBuffer::new(dict);
+
+        buf.push_stroke(Stroke::try_from_string("KAT").unwrap());
+        buf.push_stroke(Stroke::try_from_string("KW-BG").unwrap());
+        buf.push_stroke(Stroke::try_from_string("TKOG").unwrap());
+
+        // "dog" should NOT be capitalized after a comma
+        assert_eq!(buf.preedit_string(), "cat, dog");
+        assert_eq!(buf.committed_len(), 3);
     }
 }

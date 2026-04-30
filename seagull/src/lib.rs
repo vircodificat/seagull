@@ -477,11 +477,6 @@ impl Stroke {
     }
 
     pub fn try_from_extended(s: String) -> Option<Self> {
-        // Standard steno strings take priority (e.g. "S" = LeftS, "-F" = RightF).
-        if let Some(stroke) = Self::try_from_string(&s) {
-            return Some(stroke);
-        }
-
         // FINALS_ONLY_MODE: if input starts with "-", search only FINALS array.
         // This handles cases like "-N" or "-PB" which represent final phonetic sounds.
         if let Some(final_str) = s.strip_prefix('-') {
@@ -493,10 +488,20 @@ impl Stroke {
             }
         }
 
-        // Extended phonetic lookup (e.g. "BRASh", "D" = TK cluster).
-        for (i_idx, &initial) in extended::INITIALS.iter().enumerate() {
+        // Extended phonetic lookup (e.g. "BRASh", "D" = TK cluster, "B-N").
+        // Try longer initials first to avoid partial matches (e.g., "SL" before "S")
+        for (i_idx, &initial) in extended::INITIALS.iter().enumerate().rev() {
             let Some(rest) = s.strip_prefix(initial) else { continue };
-            for (m_idx, &middle) in extended::MIDDLES.iter().enumerate() {
+
+            // Handle optional dash separator (e.g., "B-N" or "BRASh")
+            let (rest, _has_dash) = if rest.starts_with('-') {
+                (&rest[1..], true)
+            } else {
+                (rest, false)
+            };
+
+            // Try longer middles first as well
+            for (m_idx, &middle) in extended::MIDDLES.iter().enumerate().rev() {
                 let Some(final_str) = rest.strip_prefix(middle) else { continue };
                 if let Some(f_idx) = extended::FINALS.iter().position(|&f| f == final_str) {
                     let bits = (i_idx as u32)
@@ -506,6 +511,13 @@ impl Stroke {
                 }
             }
         }
+
+        // Standard steno strings take priority (e.g. "S" = LeftS, "-F" = RightF).
+        // Try this last so extended notation doesn't get shadowed by standard notation.
+        if let Some(stroke) = Self::try_from_string(&s) {
+            return Some(stroke);
+        }
+
         None
     }
 

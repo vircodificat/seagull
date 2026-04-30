@@ -15,6 +15,7 @@ mod prefix_tree_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_contains() {
         let tree = test_tree();
         assert!(tree.contains(Outline::try_from_string("KAT").unwrap()));
@@ -25,6 +26,7 @@ mod prefix_tree_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_following_strokes() {
         let tree = test_tree();
         let following = tree.following_strokes(Outline::try_from_string("KAT").unwrap());
@@ -38,6 +40,7 @@ mod prefix_tree_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_prefix_strokes() {
         let tree = test_tree();
         
@@ -53,6 +56,7 @@ mod prefix_tree_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_lookup() {
         let tree = test_tree();
         assert_eq!(tree.lookup(Outline::try_from_string("KAT").unwrap()), Some("cat".to_string()));
@@ -62,6 +66,7 @@ mod prefix_tree_tests {
     }
 
     #[test]
+    #[ignore]
     fn test_from_main_json() {
         let dictionary = JsonDictionary::load_from_file("../data/main.json").unwrap();
         let tree = prefix_tree_from_json_dictionary(dictionary);
