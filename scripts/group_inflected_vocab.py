@@ -24,6 +24,12 @@ INPUT_PATH   = os.path.join("build", "base_vocab_analysis.json")
 REGULAR_PATH = os.path.join("build", "regular_vocab.json")
 IRREGULAR_PATH = os.path.join("build", "irregular_vocab.json")
 
+# Words to exclude from inflection processing
+# These are words that should not have inflected forms generated
+BLACKLIST = {
+    "a",  # "a" has no plural
+}
+
 
 def main():
     data: dict = json.load(open(INPUT_PATH, encoding="utf-8"))
@@ -61,21 +67,23 @@ def main():
     # Build regular_vocab: base words whose inflected forms are all regular.
     # Irregular=True words are excluded, so only lemmas that appear in
     # regular_forms (and whose base form is in the vocab) are included.
+    # Words in the blacklist are excluded.
     # ------------------------------------------------------------------
     regular_vocab = {
         lemma: regular_forms[lemma]
         for lemma in sorted(regular_forms)
-        if lemma in base_words and regular_forms[lemma]
+        if lemma in base_words and regular_forms[lemma] and lemma not in BLACKLIST
     }
 
     # ------------------------------------------------------------------
     # Build irregular_vocab: lemmas that have at least one irregular form.
     # Convert inner defaultdicts to plain dicts for JSON serialisation.
+    # Words in the blacklist are excluded.
     # ------------------------------------------------------------------
     irregular_vocab = {
         lemma: dict(irregular_forms[lemma])
         for lemma in sorted(irregular_forms)
-        if lemma in base_words and irregular_forms[lemma]
+        if lemma in base_words and irregular_forms[lemma] and lemma not in BLACKLIST
     }
 
     # ------------------------------------------------------------------

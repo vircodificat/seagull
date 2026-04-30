@@ -41,8 +41,8 @@ def parse_markdown_links(content, filename):
         outline = match.group(2)
 
         # Only include if outline looks like a steno outline
-        # (contains letters, numbers, hyphens, slashes)
-        if re.match(r'^[A-Za-z0-9\-/]*$', outline) and outline:
+        # (contains letters, numbers, hyphens, slashes, asterisks)
+        if re.match(r'^[A-Za-z0-9\-/*]*$', outline) and outline:
             links.append({
                 'word': word,
                 'outline': outline,

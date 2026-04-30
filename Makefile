@@ -17,6 +17,9 @@ all: \
 	build/reasonable_outlines.json \
 	build/seagull.json \
 
+build/theory.json: scripts/validate_theory.py theory/*.md
+	uv run scripts/validate_theory.py
+
 build/cmucrossref.json: scripts/cmucrossref.py
 	uv run python scripts/cmucrossref.py
 
@@ -36,6 +39,7 @@ build/obvious_outlines.json build/reasonable_outlines.json: scripts/obvious_outl
 	uv run scripts/obvious_outlines.py
 
 build/seagull.json: \
+	build/theory.json \
 	scripts/build_seagull.py \
 	data/seagull_base.json \
 	build/obvious_outlines.json \
@@ -54,3 +58,7 @@ test:
 
 ime:
 	$(MAKE) -C ime build
+
+clean:
+	rm -rf build
+	cargo clean

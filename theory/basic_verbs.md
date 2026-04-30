@@ -2,9 +2,9 @@
 
 to be
 
-* [be](PW)
-* [been](PW-PB)
-* [being](PW-G)
+* [be](B)
+* [been](B-N)
+* [being](B*G)
 * [am](AM)
 * [are](R)
 * [is](S)
@@ -18,9 +18,9 @@ to be
 
 to have
 
-* [have](SHR)
+* [have](V)
 * [had](H-D)
-* [having](SHR-G)
+* [having](V*G)
 * [has](H-S)
 
 .. note::
@@ -33,4 +33,4 @@ to do
 * [do](DO)
 * [did](DID)
 * [done](DOhN) - "done" has an infolded `E` to remind us that it has an "e" in it (unlike [don](DON)).
-* [doing](DO/G) (to disambiguate with "dog")
+* [doing](DO*G) (to disambiguate with "dog")

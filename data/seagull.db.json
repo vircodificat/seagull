@@ -1,0 +1,1973 @@
+{
+    "a": {
+        "outlines": [
+            "A"
+        ],
+        "pos": "article",
+        "rules": [],
+        "tags": []
+    },
+    "I'm": {
+        "outlines": [
+            "*EUPL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "I've": {
+        "outlines": [
+            "*EUF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "I'll": {
+        "outlines": [
+            "*EUL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "I'd": {
+        "outlines": [
+            "*EUD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "you're": {
+        "outlines": [
+            "*UR"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "you've": {
+        "outlines": [
+            "*UF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "you'll": {
+        "outlines": [
+            "*UL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "you'd": {
+        "outlines": [
+            "*UD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "he's": {
+        "outlines": [
+            "H*ES"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "he'll": {
+        "outlines": [
+            "H*EL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "he'd": {
+        "outlines": [
+            "H*ED"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "she's": {
+        "outlines": [
+            "SH*ES"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "she'll": {
+        "outlines": [
+            "SH*EL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "she'd": {
+        "outlines": [
+            "SH*ED"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "it's": {
+        "outlines": [
+            "*TS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "it'd": {
+        "outlines": [
+            "*TD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "it'll": {
+        "outlines": [
+            "*LT"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "we're": {
+        "outlines": [
+            "W*ER"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "we've": {
+        "outlines": [
+            "W*EF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "we'll": {
+        "outlines": [
+            "W*EL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "we'd": {
+        "outlines": [
+            "W*ED"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "they're": {
+        "outlines": [
+            "TH*ER"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "they've": {
+        "outlines": [
+            "TH*EF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "they'll": {
+        "outlines": [
+            "TH*EL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "they'd": {
+        "outlines": [
+            "TH*ED"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "aren't": {
+        "outlines": [
+            "R*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "can't": {
+        "outlines": [
+            "K*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "didn't": {
+        "outlines": [
+            ""
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "[Use YE for 'yes']": {
+        "outlines": [
+            "KWRES"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "able": {
+        "outlines": [
+            "A-BL"
+        ],
+        "pos": "adjective",
+        "rules": [],
+        "tags": []
+    },
+    "am": {
+        "outlines": [
+            "APL"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "an": {
+        "outlines": [
+            "APB"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "and": {
+        "outlines": [
+            "APBD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "I": {
+        "outlines": [
+            "EU"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "it": {
+        "outlines": [
+            "-T"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "its": {
+        "outlines": [
+            "-TS"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "the": {
+        "outlines": [
+            "T"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "to": {
+        "outlines": [
+            "TO"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "today": {
+        "outlines": [
+            "TOED"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "toe": {
+        "outlines": [
+            "TOE"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "too": {
+        "outlines": [
+            "TAO"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "tool": {
+        "outlines": [
+            "TAOL"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "about": {
+        "outlines": [
+            "ABT"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "after": {
+        "outlines": [
+            "AF"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "are": {
+        "outlines": [
+            "R"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "as": {
+        "outlines": [
+            "AS"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "be": {
+        "outlines": [
+            "PW"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "before": {
+        "outlines": [
+            "PW-F"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "by": {
+        "outlines": [
+            "PWEU"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "can": {
+        "outlines": [
+            "K"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "do": {
+        "outlines": [
+            "TKO"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "eight": {
+        "outlines": [
+            "AEUT/S*"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "five": {
+        "outlines": [
+            "TPAOEUF"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "for": {
+        "outlines": [
+            "TP-R"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "four": {
+        "outlines": [
+            "TPOUR"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "from": {
+        "outlines": [
+            "TPOPL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "have": {
+        "outlines": [
+            "SHR"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "having": {
+        "outlines": [
+            "SHR-G"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "he": {
+        "outlines": [
+            "HE"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "her": {
+        "outlines": [
+            "HER"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "here": {
+        "outlines": [
+            "HR"
+        ],
+        "pos": [
+            "noun",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "hers": {
+        "outlines": [
+            "HERS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "him": {
+        "outlines": [
+            "HEUPL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "his": {
+        "outlines": [
+            "HEUS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "how": {
+        "outlines": [
+            "HOU"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "in": {
+        "outlines": [
+            "-PB"
+        ],
+        "pos": [
+            "noun",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "inside": {
+        "outlines": [
+            "-PBS"
+        ],
+        "pos": [
+            "noun",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "into": {
+        "outlines": [
+            "-PBT"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "is": {
+        "outlines": [
+            "S"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "like": {
+        "outlines": [
+            "HRAOEUBG"
+        ],
+        "pos": [
+            "noun",
+            "verb",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "may": {
+        "outlines": [
+            "PHAEU"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "me": {
+        "outlines": [
+            "PHE"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "mine": {
+        "outlines": [
+            "TPHAOEPB"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "must": {
+        "outlines": [
+            "PHUFT"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "my": {
+        "outlines": [
+            "PHEU"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "need": {
+        "outlines": [
+            "TPHAOED"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "nine": {
+        "outlines": [
+            "TPHAOEUPB"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "of": {
+        "outlines": [
+            "-F"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "off": {
+        "outlines": [
+            "OF"
+        ],
+        "pos": [
+            "verb",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "on": {
+        "outlines": [
+            "OPB"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "one": {
+        "outlines": [
+            "WUPB"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "our": {
+        "outlines": [
+            "OUR"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "outside": {
+        "outlines": [
+            "OUTS"
+        ],
+        "pos": [
+            "noun",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "over": {
+        "outlines": [
+            "OEFR"
+        ],
+        "pos": [
+            "noun",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "past": {
+        "outlines": [
+            "PAFT"
+        ],
+        "pos": [
+            "noun",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "per": {
+        "outlines": [
+            "PER"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "seven": {
+        "outlines": [
+            "SE/SREPB"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "she": {
+        "outlines": [
+            "SHE"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "should": {
+        "outlines": [
+            "SH-D"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "six": {
+        "outlines": [
+            "SEUBGS"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "ten": {
+        "outlines": [
+            "TEPB"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "than": {
+        "outlines": [
+            "THAPB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "that": {
+        "outlines": [
+            "THA"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "their": {
+        "outlines": [
+            "THER"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "theirs": {
+        "outlines": [
+            "THERS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "there": {
+        "outlines": [
+            "THR"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "these": {
+        "outlines": [
+            "THES"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "this": {
+        "outlines": [
+            "TH"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "those": {
+        "outlines": [
+            "THOS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "three": {
+        "outlines": [
+            "THRAOE"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "up": {
+        "outlines": [
+            "UP"
+        ],
+        "pos": [
+            "verb",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "we": {
+        "outlines": [
+            "WE"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "what": {
+        "outlines": [
+            "WHA"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "when": {
+        "outlines": [
+            "WHEPB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "where": {
+        "outlines": [
+            "WHR"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "which": {
+        "outlines": [
+            "WH"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "who": {
+        "outlines": [
+            "WHO"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "why": {
+        "outlines": [
+            "WHAOEU"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "will": {
+        "outlines": [
+            "W-L"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "with": {
+        "outlines": [
+            "W"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "you": {
+        "outlines": [
+            "U"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "your": {
+        "outlines": [
+            "UR"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "yours": {
+        "outlines": [
+            "URS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "zero": {
+        "outlines": [
+            "S*ER/KWROE"
+        ],
+        "pos": [
+            "noun",
+            "verb",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "zoom": {
+        "outlines": [
+            "SAO*PL"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "did": {
+        "outlines": [
+            "TKEUD"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "done": {
+        "outlines": [
+            "TKOEPB",
+            "TKUPB"
+        ],
+        "pos": [
+            "verb",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "does": {
+        "outlines": [
+            "TKOES"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "had": {
+        "outlines": [
+            "H-D"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "hadn't": {
+        "outlines": [
+            "H*PBD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "has": {
+        "outlines": [
+            "H-S"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "hasn't": {
+        "outlines": [
+            "H*PBS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "isn't": {
+        "outlines": [
+            "S*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "wasn't": {
+        "outlines": [
+            "W*PBS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "{^n't}": {
+        "outlines": [
+            "*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "couldn't": {
+        "outlines": [
+            "K*PBD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "shouldn't": {
+        "outlines": [
+            "SH*PBD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "wouldn't": {
+        "outlines": [
+            "W*PBD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "don't": {
+        "outlines": [
+            "TKO*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "won't": {
+        "outlines": [
+            "W*PB",
+            "WO*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "were": {
+        "outlines": [
+            "WR"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "weren't": {
+        "outlines": [
+            "WR*PB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "way": {
+        "outlines": [
+            "WAEU"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "under": {
+        "outlines": [
+            "UPBD"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "us": {
+        "outlines": [
+            "US"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "get": {
+        "outlines": [
+            "TKPWET"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "gets": {
+        "outlines": [
+            "TKPWETS"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "got": {
+        "outlines": [
+            "TKPWOT"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "envelop": {
+        "outlines": [
+            "EPB/SREL/OP"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "luxury": {
+        "outlines": [
+            "HRUBGS/REU"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "would": {
+        "outlines": [
+            "W-D"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "could": {
+        "outlines": [
+            "K-D"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "most": {
+        "outlines": [
+            "PHOFT"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "was": {
+        "outlines": [
+            "W-S"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "went": {
+        "outlines": [
+            "W-PBT"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "family": {
+        "outlines": [
+            "TPAPL"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "simple": {
+        "outlines": [
+            "S*EUPL"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "thing": {
+        "outlines": [
+            "T-G"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "things": {
+        "outlines": [
+            "T-GS"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "let": {
+        "outlines": [
+            "HRET"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "lets": {
+        "outlines": [
+            "HRETS"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "let's": {
+        "outlines": [
+            "HR*ETS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "something": {
+        "outlines": [
+            "SPH/T-G"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "someone": {
+        "outlines": [
+            "SPH/WUPB"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "somewhere": {
+        "outlines": [
+            "SPH/WHR"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "anything": {
+        "outlines": [
+            "TPHE/T-G"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "anyone": {
+        "outlines": [
+            "TPHE/WUPB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "anywhere": {
+        "outlines": [
+            "TPHE/WHR"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "nothing": {
+        "outlines": [
+            "TPH/T-G"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "nowhere": {
+        "outlines": [
+            "TPH/WHR"
+        ],
+        "pos": [
+            "noun",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "many": {
+        "outlines": [
+            "PH"
+        ],
+        "pos": "adjective",
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "even": {
+        "outlines": [
+            "SR-PB"
+        ],
+        "pos": [
+            "noun",
+            "verb",
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "just": {
+        "outlines": [
+            "SKWRUFT"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "they": {
+        "outlines": [
+            "THE"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "but": {
+        "outlines": [
+            "PWUT"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "butt": {
+        "outlines": [
+            "PW*UT"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "very": {
+        "outlines": [
+            "SRE"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "bot": {
+        "outlines": [
+            "PWOT"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "remember": {
+        "outlines": [
+            "REPL"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "alright": {
+        "outlines": [
+            "HR*RT"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "mopped": {
+        "outlines": [
+            "PHOP/-D"
+        ],
+        "pos": "verb",
+        "rules": [],
+        "tags": []
+    },
+    "if": {
+        "outlines": [
+            "TP"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "myself": {
+        "outlines": [
+            "PHEU/SEF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "yourself": {
+        "outlines": [
+            "UR/SEF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "himself": {
+        "outlines": [
+            "HEUPL/SEF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "herself": {
+        "outlines": [
+            "HER/SEF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "itself": {
+        "outlines": [
+            "-T/SEF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "ourselves": {
+        "outlines": [
+            "OUR/SEFS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "yourselves": {
+        "outlines": [
+            "UR/SEFS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "themself": {
+        "outlines": [
+            "THEPL/SEF"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "themselves": {
+        "outlines": [
+            "THEPL/SEFS"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": [
+            "pronoun"
+        ]
+    },
+    "ain't": {
+        "outlines": [
+            "A*EUPB"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "should've": {
+        "outlines": [
+            "SH*FD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "would've": {
+        "outlines": [
+            "W*FD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "could've": {
+        "outlines": [
+            "K*FD"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "income": {
+        "outlines": [
+            "TPH/KUPL"
+        ],
+        "pos": "noun",
+        "rules": [],
+        "tags": []
+    },
+    "nor": {
+        "outlines": [
+            "TPHOR"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "other": {
+        "outlines": [
+            "O*ER"
+        ],
+        "pos": "adjective",
+        "rules": [],
+        "tags": []
+    },
+    "another": {
+        "outlines": [
+            "TPHO*ER"
+        ],
+        "pos": "adjective",
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "{any^}": {
+        "outlines": [
+            "TPHE"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "never": {
+        "outlines": [
+            "TPH-FR"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "ever": {
+        "outlines": [
+            "-FR"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "every": {
+        "outlines": [
+            "EUFR"
+        ],
+        "pos": "adjective",
+        "rules": [],
+        "tags": []
+    },
+    "few": {
+        "outlines": [
+            "TPAOU"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": [
+            "indefinite",
+            "pronoun"
+        ]
+    },
+    "father": {
+        "outlines": [
+            "TPAER"
+        ],
+        "pos": [
+            "noun",
+            "verb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "funny": {
+        "outlines": [
+            "TPUPB/TPHEU"
+        ],
+        "pos": [
+            "noun",
+            "adjective"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "forever": {
+        "outlines": [
+            "TP-FR"
+        ],
+        "pos": "adverb",
+        "rules": [],
+        "tags": []
+    },
+    "{.}": {
+        "outlines": [
+            "TP-PL"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    },
+    "backward": {
+        "outlines": [
+            "PWABG/WARD"
+        ],
+        "pos": [
+            "adjective",
+            "adverb"
+        ],
+        "rules": [],
+        "tags": []
+    },
+    "whether": {
+        "outlines": [
+            "WH-R"
+        ],
+        "pos": null,
+        "rules": [],
+        "tags": []
+    }
+}

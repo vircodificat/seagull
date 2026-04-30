@@ -16,21 +16,22 @@ import hashlib
 from collections import defaultdict
 
 BASE_PATH          = "data/seagull_base.json"
+THEORY_PATH        = "build/theory.json"
 OUTPUT_PATH        = "build/seagull.json"
 REGULAR_VOCAB_PATH = "build/regular_vocab.json"
 
 # Dictionaries merged before inflection rules are applied (highest priority first).
 # Outlines already present in an earlier entry are skipped.
 PRE_INFLECTION_DICTS = [
-    "data/commands.json",
     "data/punctuation.json",
-    "build/obvious_outlines.json",
-    "build/reasonable_outlines.json",
+#    "data/commands.json",
+#    "build/obvious_outlines.json",
+#    "build/reasonable_outlines.json",
 ]
 
 # Dictionaries merged after inflection rules are applied.
 POST_INFLECTION_DICTS = [
-    "data/seagull_misc.json",
+#    "data/seagull_misc.json",
 #    "data/stened.json",
 ]
 
@@ -122,8 +123,11 @@ def apply_inflection_rules(
 def main():
     result: dict[str, str] = {}
 
-    merge_dict(result, BASE_PATH)
-    print(f"{BASE_PATH}: {len(result)} entries")
+    merge_dict(result, THEORY_PATH)
+    print(f"{THEORY_PATH}: {len(result)} entries")
+
+#    merge_dict(result, BASE_PATH)
+#    print(f"{BASE_PATH}: {len(result)} entries")
 
     for path in PRE_INFLECTION_DICTS:
         merge_dict(result, path)
