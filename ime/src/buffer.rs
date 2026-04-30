@@ -34,6 +34,8 @@ pub enum BufferAction {
     CommitAndPreedit,
     /// Flush all buffered content (committed words + pending strokes) to the application.
     FlushAll { flushed: String },
+    /// Send a Space keypress (SP on empty buffer).
+    SendSpace,
     /// Send an Enter keypress (R-R on empty buffer).
     SendEnter,
     /// Send a Backspace keypress (* on empty buffer).
@@ -59,6 +61,11 @@ impl StrokeBuffer {
             committed: VecDeque::new(),
             dictionary,
         }
+    }
+
+    /// Check whether a stroke is *exactly* SP with no other keys.
+    fn is_sp_only(stroke: Stroke) -> bool {
+        stroke == Stroke::new(&[Key::LeftS, Key::LeftP])
     }
 
     /// Check whether a stroke is *exactly* R-R with no other keys.
@@ -116,6 +123,14 @@ impl StrokeBuffer {
                 }
             }
             return BufferAction::Noop;
+        }
+
+        if Self::is_sp_only(stroke) {
+            let flushed = self.flush_all();
+            if flushed.is_empty() {
+                return BufferAction::SendSpace;
+            }
+            return BufferAction::FlushAll { flushed };
         }
 
         // R-R alone: flush all buffered content, or send Enter if empty.

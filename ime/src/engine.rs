@@ -613,6 +613,14 @@ pub async fn emit_for_action(
             emit_forward_key(conn, enter_keyval, enter_keycode, enter_state).await?;
             emit_forward_key(conn, enter_keyval, enter_keycode, release_state).await?;
         }
+        BufferAction::SendSpace => {
+            let space_keyval: u32 = 0xFF80;
+            let space_keycode: u32 = 57; // EVDEV KEY_SPACE
+            let space_state: u32 = 0;
+            let release_state: u32 = 1 << 30; // IBUS_RELEASE_MASK
+            emit_forward_key(conn, space_keyval, space_keycode, space_state).await?;
+            emit_forward_key(conn, space_keyval, space_keycode, release_state).await?;
+        }
         BufferAction::SendBackspace => {
             let bs_keyval: u32 = 0xFF08;
             let bs_keycode: u32 = 14; // EVDEV KEY_BACKSPACE
