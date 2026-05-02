@@ -15,6 +15,7 @@ all: \
 	build/regular_vocab.json \
 	build/obvious_outlines.json \
 	build/reasonable_outlines.json \
+	build/cluster_usages.json \
 	build/seagull.json \
 
 build/theory.json: scripts/validate_theory.py theory/*.md
@@ -38,10 +39,14 @@ build/irregular_vocab.json build/regular_vocab.json: scripts/group_inflected_voc
 build/obvious_outlines.json build/reasonable_outlines.json: scripts/obvious_outlines.py build/regular_vocab.json
 	uv run scripts/obvious_outlines.py
 
+build/cluster_usages.json: scripts/cluster_usages.py
+	uv run scripts/cluster_usages.py
+
 build/seagull.json: \
 	build/theory.json \
 	scripts/build_seagull.py \
 	data/seagull_base.json \
+	data/seagull_misc.json \
 	build/obvious_outlines.json \
 	build/reasonable_outlines.json \
 	data/punctuation.json \
