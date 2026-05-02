@@ -178,7 +178,7 @@ pub static FINALS: [&'static str; 1024] = [
     "Sh",          // RB
     "FRB",         // FRB
     "N",           // PB
-    "FPB",         // FPB
+    "FN",          // FPB
     "RPB",         // RPB
     "FRPB",        // FRPB
     "L",           // L
@@ -207,7 +207,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FRPG",        // FRPG
     "Ck",          // BG
     "FCk",         // FBG
-    "Rk",          // RBG
+    "RCk",         // RBG
     "FRBG",        // FRBG
     "NG",          // PBG
     "FPBG",        // FPBG

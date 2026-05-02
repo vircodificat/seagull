@@ -2,7 +2,7 @@
 mod tests;
 
 use clap::Parser;
-use seagull::device::{serial::SerialDevice, virt::VirtualDevice};
+use seagull::{Outline, device::{serial::SerialDevice, virt::VirtualDevice}, outline};
 
 mod keytest;
 mod game;

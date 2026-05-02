@@ -10,6 +10,7 @@ to be
 * [is](S)
 * [were](WR)
 * [was](W-S)
+* [will](W-L)
 
 .. note::
 

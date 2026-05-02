@@ -7,10 +7,21 @@ pub mod extended;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Display;
-use std::io::Write;
 use std::rc::Rc;
-use std::time::Duration;
-use serialport::SerialPort;
+
+#[macro_export]
+macro_rules! outline {
+    ($outline:literal) => {
+        Outline::try_from_string($outline).unwrap()
+    }
+}
+
+#[macro_export]
+macro_rules! stroke {
+    ($stroke:literal) => {
+        $crate::Stroke::try_from_string($stroke).unwrap()
+    }
+}
 
 // Keyboard order: S T K P W H R | A O * E U | F R P B L G T S D Z
 // Each variant occupies its own bit; Stroke is the bitwise OR of its keys.
@@ -53,22 +64,31 @@ const ALL_KEYS: &[Key] = &[
 #[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Stroke(u32);
 
+#[derive(Clone, Debug)]
 pub struct PrefixTree(RefCell<(Option<String>, HashMap<Stroke, Rc<PrefixTree>>)>);
 
 impl PrefixTree {
-    pub fn new(map: HashMap<Outline, String>) -> Self {
-        let tree = PrefixTree(RefCell::new((None, HashMap::new())));
+    pub fn new() -> Self {
+        PrefixTree(RefCell::new((None, HashMap::new())))
+    }
+
+    pub fn new_from_dict(map: HashMap<Outline, String>) -> Self {
+        let mut tree = PrefixTree(RefCell::new((None, HashMap::new())));
         for (outline, word) in map.into_iter() {
-            tree.add(outline.strokes(), word);
+            tree.add(outline, word);
         }
         tree
     }
 
-    fn add(&self, strokes: &[Stroke], word: String) {
+    pub fn add(&mut self, outline: Outline, word: String) -> Option<String> {
+        self.add_with_strokes(outline.strokes(), word)
+    }
+
+    fn add_with_strokes(&self, strokes: &[Stroke], word: String) -> Option<String> {
         let PrefixTree(refcell) = self;
         if strokes.is_empty() {
             let curr_word = &mut refcell.borrow_mut().0;
-            curr_word.replace(word);
+            curr_word.replace(word)
         } else {
             let children = &mut refcell.borrow_mut().1;
             let head = strokes[0].clone();
@@ -76,10 +96,10 @@ impl PrefixTree {
 
             if children.contains_key(&head) {
                 let child = children[&head].clone();
-                child.add(tail, word);
+                child.add_with_strokes(tail, word)
             } else {
                 children.insert(head.clone(), Rc::new(PrefixTree(RefCell::new((None, HashMap::new())))));
-                children[&head].add(tail, word);
+                children[&head].add_with_strokes(tail, word)
             }
         }
     }
@@ -97,18 +117,45 @@ impl PrefixTree {
             let children = &refcell.borrow().1;
             let head = strokes[0].clone();
             let tail = &strokes[1..];
-            let child = children[&head].clone();
+            let child = children.get(&head)?.clone();
             child.lookup_by_strokes(tail)
         }
-
     }
 
-    pub fn contains(&self, outline: Outline) -> bool {
+    pub fn contains(&self, outline: &Outline) -> bool {
         self.lookup_by_strokes(outline.strokes()).is_some()
     }
 
     pub fn following_strokes(&self, outline: Outline) -> Vec<Stroke> {
         self.following_strokes_by_strokes(outline.strokes())
+    }
+
+    pub fn descendants(&self, outline: Outline) -> Vec<Outline> {
+        let mut results = vec![];
+        let mut queue = vec![outline];
+
+        while let Some(lookup_outline) = queue.pop() {
+            if self.contains(&lookup_outline) {
+                results.push(lookup_outline.clone());
+            }
+            for stroke in self.following_strokes(lookup_outline.clone()) {
+                queue.push(lookup_outline.join(stroke));
+            }
+        }
+        results
+    }
+
+    pub fn ancestors(&self, outline: Outline) -> Vec<Outline> {
+        let mut strokes = outline.strokes().to_vec();
+        let mut results = vec![];
+        while !strokes.is_empty() {
+            let ancestor_outline = Outline(strokes.to_vec());
+            if self.contains(&ancestor_outline) {
+                results.push(ancestor_outline);
+            }
+            strokes.pop();
+        }
+        results
     }
 
     fn following_strokes_by_strokes(&self, strokes: &[Stroke]) -> Vec<Stroke> {
@@ -167,7 +214,7 @@ pub fn prefix_tree_from_json_dictionary(dictionary: JsonDictionary) -> PrefixTre
             eprintln!("COULD NOT PARSE OUTLINE: {k}");
         }
     }
-    PrefixTree::new(map)
+    PrefixTree::new_from_dict(map)
 }
 
 
