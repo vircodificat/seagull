@@ -79,21 +79,12 @@ impl Config {
     }
 
     pub fn device_candidates(&self) -> Vec<String> {
-        let mut candidates = self.device.devices.clone();
-        if self.device.auto_detect {
-            candidates.extend(auto_detect_devices());
-        }
-        candidates
+        self.device.devices.clone()
     }
 
-    pub fn log_path() -> PathBuf {
+    pub fn log_dir_path() -> PathBuf {
         let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
-        PathBuf::from(home).join(".local/share/seagull-tray/seagull-tray.log")
-    }
-
-    pub fn ime_log_path() -> PathBuf {
-        let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
-        PathBuf::from(home).join(".local/share/seagull-ime/seagull-ime.log")
+        PathBuf::from(home).join(".local/share/seagull-tray/")
     }
 }
 
@@ -107,6 +98,7 @@ fn default_dictionary_path() -> PathBuf {
     PathBuf::from(home).join(".config/seagull/seagull.json")
 }
 
+#[allow(dead_code)]
 fn auto_detect_devices() -> Vec<String> {
     let mut devices = Vec::new();
     let bases = ["/dev/serial/by-id", "/dev/serial/by-path", "/dev"];

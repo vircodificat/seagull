@@ -243,9 +243,12 @@ impl StrokeBuffer {
     /// Starts from just before the rightmost committed word (or from start if empty).
     fn reprocess(&mut self) {
         // Find the position of the rightmost committed word or punctuation
-        let rightmost_pos = self.buffer.iter().rposition(|el| {
-            matches!(el, Element::CommittedWord(_) | Element::Punctuation(_))
-        }).unwrap_or(0);
+        let rightmost_pos = 0;
+        /*
+            self.buffer.iter().rposition(|el| {
+                matches!(el, Element::CommittedWord(_) | Element::Punctuation(_))
+            }).unwrap_or(0);
+        */
 
         // Compute the capitalization state AT the reprocessing point
         // This is false unless there's a punctuation before this point that sets it

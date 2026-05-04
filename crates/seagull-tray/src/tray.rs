@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use ksni::menu::{MenuItem, StandardItem};
+use ksni::menu::{MenuItem, StandardItem, SubMenu};
 use ksni::{Category, Icon, Status, Tray};
 use tokio::sync::mpsc;
 
@@ -14,7 +14,6 @@ use crate::platform::Opener;
 pub enum TrayCommand {
     Connect,
     Disconnect,
-    Quit,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -25,7 +24,7 @@ pub enum ConnectionState {
 
 pub struct SeagullTray {
     state: ConnectionState,
-    device_path: Option<String>,
+    device_path: String,
     config: Config,
     opener: Arc<dyn Opener>,
     cmd_tx: mpsc::UnboundedSender<TrayCommand>,
@@ -37,9 +36,10 @@ impl SeagullTray {
         opener: Arc<dyn Opener>,
         cmd_tx: mpsc::UnboundedSender<TrayCommand>,
     ) -> Self {
+        let device_path = config.device_candidates().first().cloned().unwrap_or_else(|| "/dev/null".to_string());
         Self {
             state: ConnectionState::Disconnected,
-            device_path: None,
+            device_path,
             config,
             opener,
             cmd_tx,
@@ -48,12 +48,12 @@ impl SeagullTray {
 
     pub fn set_connected(&mut self, device_path: String) {
         self.state = ConnectionState::Connected;
-        self.device_path = Some(device_path);
+        self.device_path = device_path;
     }
 
     pub fn set_disconnected(&mut self) {
         self.state = ConnectionState::Disconnected;
-        self.device_path = None;
+        self.device_path = "/dev/null".to_string();
     }
 }
 
@@ -70,7 +70,7 @@ impl Tray for SeagullTray {
         match self.state {
             ConnectionState::Connected => format!(
                 "Seagull (connected: {})",
-                self.device_path.as_deref().unwrap_or("?")
+                self.device_path
             ),
             ConnectionState::Disconnected => "Seagull (disconnected)".into(),
         }
@@ -106,11 +106,28 @@ impl Tray for SeagullTray {
             ConnectionState::Disconnected => "Connect",
         };
 
-        let device_path = if let Some(device_path) = &self.device_path {
-            device_path
-        } else {
-            "(none)"
-        };
+        let device_path = self.device_path.as_str();
+
+        let mut devices = vec![];
+        for device in &self.config.device.devices {
+            devices.push(device.clone());
+        }
+
+        let device_submenu =
+            SubMenu {
+                label: device_path.into(),
+                submenu: devices.into_iter().map(|device_path| {
+                    StandardItem {
+                        label: device_path.clone().into(),
+                        enabled: true,
+                        activate: Box::new(move |tray: &mut SeagullTray| {
+                            tray.device_path = device_path.clone();
+                        }),
+                        ..Default::default()
+                    }.into()
+                }).collect::<Vec<_>>(),
+                ..Default::default()
+            };
 
         vec![
             StandardItem {
@@ -119,11 +136,7 @@ impl Tray for SeagullTray {
                 ..Default::default()
             }.into(),
             MenuItem::Separator,
-            StandardItem {
-                label: device_path.into(),
-                enabled: false,
-                ..Default::default()
-            }.into(),
+            device_submenu.into(),
             StandardItem {
                 label: connect_label.into(),
                 activate: Box::new(|tray: &mut SeagullTray| {
@@ -169,19 +182,10 @@ impl Tray for SeagullTray {
             }
             .into(),
             StandardItem {
-                label: "Open Log".into(),
+                label: "Open Log Folder".into(),
                 activate: Box::new(|tray: &mut SeagullTray| {
                     let opener = tray.opener.clone();
                     actions::spawn_open(opener, |o| actions::open_log(o));
-                }),
-                ..Default::default()
-            }
-            .into(),
-            MenuItem::Separator,
-            StandardItem {
-                label: "Quit".into(),
-                activate: Box::new(|tray: &mut SeagullTray| {
-                    let _ = tray.cmd_tx.send(TrayCommand::Quit);
                 }),
                 ..Default::default()
             }

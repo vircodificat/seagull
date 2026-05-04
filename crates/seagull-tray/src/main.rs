@@ -21,7 +21,7 @@ use crate::tray::{SeagullTray, TrayCommand};
 const STROKE_CHANNEL_CAPACITY: usize = 64;
 
 fn init_log() {
-    let log_path = Config::log_path();
+    let log_path = Config::log_dir_path();
     if let Some(parent) = log_path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
@@ -102,14 +102,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     info!("Already disconnected; ignoring Disconnect");
                 }
-            }
-            TrayCommand::Quit => {
-                info!("Quit requested");
-                if let Some(s) = session.take() {
-                    s.stop();
-                }
-                tray_handle.shutdown().await;
-                break;
             }
         }
     }

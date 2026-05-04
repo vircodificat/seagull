@@ -48,7 +48,7 @@ pub fn open_settings(opener: &dyn Opener, config: &Config) {
 }
 
 pub fn open_log(opener: &dyn Opener) {
-    let path = Config::ime_log_path();
+    let path = Config::log_dir_path();
     if !path.exists() {
         warn!("IME log not found at {:?}; opening anyway", path);
     }
