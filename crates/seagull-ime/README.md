@@ -15,7 +15,7 @@ and outputs text via IBus preedit/commit over D-Bus.
 ```sh
 make ime
 # or directly:
-make -C ime build
+make -C crates/seagull-ime build
 ```
 
 ## Install
@@ -23,8 +23,8 @@ make -C ime build
 Build first as your normal user, then install with sudo:
 
 ```sh
-make -C ime build
-sudo make -C ime install
+make -C crates/seagull-ime build
+sudo make -C crates/seagull-ime install
 ```
 
 This copies the binary to `/usr/libexec/seagull-ime`, the IBus component XML to
@@ -94,5 +94,5 @@ Environment variables take precedence over the config file:
 ## Uninstall
 
 ```sh
-sudo make -C ime uninstall
+sudo make -C crates/seagull-ime uninstall
 ```

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Seagull Tray
+Comment=Tray icon and serial-port owner for the Seagull steno IME
+Exec=/usr/bin/seagull-tray
+Icon=network-wired-symbolic
+X-GNOME-Autostart-enabled=true
+NoDisplay=false
+Categories=Utility;

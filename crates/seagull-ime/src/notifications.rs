@@ -67,30 +67,6 @@ pub async fn notify(
     }
 }
 
-/// Notify that the serial device has been disconnected.
-pub async fn device_disconnected(connection: &Connection) -> zbus::Result<()> {
-    notify(
-        connection,
-        "Steno Device Disconnected",
-        "The serial device has been disconnected. Attempting to reconnect...",
-        "dialog-warning",
-        2, // critical
-    )
-    .await
-}
-
-/// Notify that the serial device has been reconnected.
-pub async fn device_reconnected(connection: &Connection) -> zbus::Result<()> {
-    notify(
-        connection,
-        "Steno Device Reconnected",
-        "The serial device is now connected.",
-        "dialog-information",
-        1, // normal
-    )
-    .await
-}
-
 /// Notify that the dictionary file could not be found.
 pub async fn dictionary_not_found(connection: &Connection, path: &str) -> zbus::Result<()> {
     notify(

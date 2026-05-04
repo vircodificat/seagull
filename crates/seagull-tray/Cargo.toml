@@ -1,0 +1,20 @@
+[package]
+name = "seagull-tray"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "seagull-tray"
+path = "src/main.rs"
+
+[dependencies]
+futures-util = "0.3.32"
+ksni = "0.3.4"
+log = "0.4"
+seagull = { version = "0.1.0", path = "../seagull" }
+seagull-ipc = { version = "0.1.0", path = "../seagull-ipc" }
+serde = { version = "1.0.228", features = ["derive"] }
+simplelog = "0.12"
+tokio = { version = "1.52.1", features = ["full"] }
+toml = "0.8"
+zbus = "5"

@@ -63,7 +63,7 @@ fn test_lookup() {
 #[test]
 #[ignore]
 fn test_from_main_json() {
-    let dictionary = JsonDictionary::load_from_file("../data/main.json").unwrap();
+    let dictionary = JsonDictionary::load_from_file("../../data/main.json").unwrap();
     let tree = prefix_tree_from_json_dictionary(dictionary);
 
     assert!(tree.contains(&outline!("KAT")));

@@ -1,5 +1,6 @@
 mod buffer;
 mod config;
+mod control;
 mod engine;
 mod notifications;
 
@@ -8,8 +9,6 @@ use std::sync::Arc;
 use log::{error, info, warn};
 use simplelog::{Config as LogConfig, LevelFilter, WriteLogger};
 
-use seagull::device::serial::SerialDevice;
-use seagull::device::{Device, Keycode};
 use seagull::{JsonDictionary, Key, Stroke};
 use tokio::sync::Mutex;
 use zbus::connection::Builder;
@@ -17,10 +16,13 @@ use zbus::zvariant::ObjectPath;
 
 use buffer::{StrokeBuffer, SearchState};
 use config::Config;
+use control::Control;
 use engine::{emit_auxiliary_text, emit_for_action, hide_auxiliary_text, Engine, Factory, SharedConnection, SharedHintState, SharedSearchState};
 
 const ENGINE_PATH: &str = "/org/freedesktop/IBus/Engine/SeagullIME";
 const FACTORY_PATH: &str = "/org/freedesktop/IBus/Factory";
+const CONTROL_PATH: &str = "/at/vircodific/seagull/IME";
+const CONTROL_BUS_NAME: &str = "at.vircodific.seagull.IME";
 
 fn init_log() {
     let log_dir = std::env::var("HOME")
@@ -74,17 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = Config::load()?;
 
-    let candidates = config.device_candidates();
-
-    let mut serial_device_path = match Config::try_connect_device(&candidates[0]) {
-        Some(path) => path,
-        None => {
-            error!("FATAL: Failed to connect to any serial device");
-            return Err("Failed to connect to any serial device".into());
-        }
-    };
-
-    info!("Config: dict={}, serial={}", config.dictionary.path, serial_device_path);
+    info!("Config: dict={}", config.dictionary.path);
 
     info!("Loading dictionary from {}", config.dictionary.path);
     let dict_path_for_error = config.dictionary.path.clone();
@@ -116,15 +108,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let buffer = Arc::new(Mutex::new(StrokeBuffer::new(dictionary)));
 
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<Keycode>(64);
-
-    // Channel for notifications from the serial thread
-    #[derive(Clone)]
-    enum NotificationEvent {
-        DeviceDisconnected,
-        DeviceReconnected,
-    }
-    let (notif_tx, mut notif_rx) = tokio::sync::mpsc::channel::<NotificationEvent>(16);
+    // Strokes arrive over D-Bus from `seagull-tray` via the Control interface;
+    // they're forwarded onto this channel and consumed by the main select! loop.
+    let (stroke_tx, mut stroke_rx) = tokio::sync::mpsc::channel::<(Stroke, bool)>(64);
 
     let engine_obj_path: ObjectPath<'static> = ENGINE_PATH.try_into()?;
     let factory = Factory::new(engine_obj_path.clone());
@@ -149,7 +135,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let connection = match builder
-        .name("org.freedesktop.IBus.SeagullIME")?
+        .name("at.vircodific.seagull.IBus")?
         .serve_at(FACTORY_PATH, factory)?
         .serve_at(ENGINE_PATH, engine.clone())?
         .build()
@@ -171,94 +157,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         *conn_ref = Some(connection.clone());
     }
 
-    // Spawn serial device reader thread
-    let candidates_clone = candidates.clone();
-    let notif_tx_clone = notif_tx.clone();
-    std::thread::spawn(move || {
-        info!("Opening serial device {serial_device_path}");
-        let mut device = match SerialDevice::new(&serial_device_path) {
-            Ok(d) => {
-                info!("Serial device opened successfully");
-                d
-            }
-            Err(e) => {
-                error!("FATAL: Failed to open serial device: {e}");
-                return;
-            }
-        };
-
-        loop {
-            match device.read_stroke() {
-                Ok(keycode) => {
-                    let stroke = keycode.stroke();
-                    info!("Stroke received: {stroke} (control={})", keycode.is_control());
-                    if tx.blocking_send(keycode).is_err() {
-                        info!("Channel closed, serial reader exiting");
-                        break;
-                    }
-                }
-                Err(e) => {
-                    error!("Serial read error: {e}, device disconnected");
-                    let _ = notif_tx_clone.blocking_send(NotificationEvent::DeviceDisconnected);
-
-                    loop {
-                        std::thread::sleep(std::time::Duration::from_secs(1));
-
-                        let mut reconnected = false;
-                        for candidate in &candidates_clone {
-                            if let Some(path) = Config::try_connect_device(candidate) {
-                                info!("Device reconnected as {}", path);
-                                serial_device_path = path;
-                                reconnected = true;
-                                break;
-                            }
-                        }
-
-                        if reconnected {
-                            device = match SerialDevice::new(&serial_device_path) {
-                                Ok(d) => {
-                                    let _ = notif_tx_clone.blocking_send(NotificationEvent::DeviceReconnected);
-                                    d
-                                },
-                                Err(e) => {
-                                    error!("Failed to reopen device: {e}");
-                                    continue;
-                                }
-                            };
-                            break;
-                        } else {
-                            warn!("Still disconnected, retrying...");
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Create a separate session bus connection for notifications
-    let notif_connection = match zbus::Connection::session().await {
+    // Build a separate session bus connection that owns the Control interface
+    // and claims `at.vircodific.seagull.IME`. The IBus connection above is on its own
+    // bus and isn't reachable from `seagull-tray`. The session connection is
+    // also reused for desktop notifications.
+    let _control_connection = match Builder::session()?
+        .name(CONTROL_BUS_NAME)?
+        .serve_at(CONTROL_PATH, Control::new(stroke_tx.clone()))?
+        .build()
+        .await
+    {
         Ok(c) => {
-            info!("Session bus connection for notifications established");
-            eprintln!("✓ Session bus connection for notifications established");
+            info!("Control D-Bus interface registered at {CONTROL_PATH} on {CONTROL_BUS_NAME}");
             c
         }
         Err(e) => {
-            warn!("Failed to create session bus connection for notifications: {e}");
-            eprintln!("✗ Failed to create session bus for notifications: {e}");
-            // Create a dummy connection - we'll skip notifications if this fails
-            connection.clone()
+            error!("FATAL: failed to register Control D-Bus interface: {e}");
+            return Err(e.into());
         }
     };
+
+    // Drop the spare sender so the channel closes if the Control object goes
+    // away (e.g. the connection drops); the main loop will then exit cleanly.
+    drop(stroke_tx);
 
     info!("Ready, waiting for strokes...");
     loop {
         tokio::select! {
-            Some(keycode) = rx.recv() => {
-                let stroke = keycode.stroke();
-                info!("Processing stroke: {stroke} (control={})", keycode.is_control());
+            Some((stroke, is_control)) = stroke_rx.recv() => {
+                info!("Processing stroke: {stroke} (control={is_control})");
 
                 // Control + H: show "HINT" auxiliary text popup.
-                if keycode.is_control() && stroke == Stroke::new(&[Key::LeftH]) {
+                if is_control && stroke == Stroke::new(&[Key::LeftH]) {
                     info!("  Control+H: showing HINT");
                     if let Err(e) = emit_auxiliary_text(&connection, "HINT").await {
                         error!("  ERROR showing hint: {e}");
@@ -295,7 +225,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
 
                 // Control + S: activate search mode
-                if keycode.is_control() && stroke == Stroke::new(&[Key::LeftS]) {
+                if is_control && stroke == Stroke::new(&[Key::LeftS]) {
                     info!("  Control+S: activating search mode");
                     if let Err(e) = engine.show_search().await {
                         error!("  ERROR activating search: {e}");
@@ -303,7 +233,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     continue;
                 }
 
-                if keycode.is_control() && stroke == Stroke::star() {
+                if is_control && stroke == Stroke::star() {
                     let mut buf = buffer.lock().await;
                     buf.clear();
                     info!("  Buffer cleared (control+star)");
@@ -315,7 +245,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     continue;
                 }
 
-                if keycode.is_control() {
+                if is_control {
                     info!("  Skipping control stroke");
                     continue;
                 }
@@ -348,40 +278,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     info!("  Signals emitted successfully");
                 }
             }
-            Some(notif_event) = notif_rx.recv() => {
-                match notif_event {
-                    NotificationEvent::DeviceDisconnected => {
-                        info!("Received disconnect notification event, calling device_disconnected()");
-                        eprintln!("→ Sending device disconnected notification...");
-                        match notifications::device_disconnected(&notif_connection).await {
-                            Ok(_) => {
-                                info!("Device disconnected notification sent successfully");
-                                eprintln!("✓ Disconnect notification sent");
-                            }
-                            Err(e) => {
-                                error!("Failed to send disconnect notification: {e}");
-                                eprintln!("✗ Failed to send disconnect notification: {e}");
-                            }
-                        }
-                    }
-                    NotificationEvent::DeviceReconnected => {
-                        info!("Received reconnect notification event, calling device_reconnected()");
-                        eprintln!("→ Sending device reconnected notification...");
-                        match notifications::device_reconnected(&notif_connection).await {
-                            Ok(_) => {
-                                info!("Device reconnected notification sent successfully");
-                                eprintln!("✓ Reconnect notification sent");
-                            }
-                            Err(e) => {
-                                error!("Failed to send reconnect notification: {e}");
-                                eprintln!("✗ Failed to send reconnect notification: {e}");
-                            }
-                        }
-                    }
-                }
-            }
             else => {
-                info!("All channels closed, exiting");
+                info!("Stroke channel closed, exiting");
                 break;
             }
         }

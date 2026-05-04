@@ -464,6 +464,14 @@ impl Stroke {
         Stroke(bits)
     }
 
+    pub fn from_bits(bits: u32) -> Self {
+        Stroke(bits)
+    }
+
+    pub fn bits(self) -> u32 {
+        self.0
+    }
+
     pub fn star() -> Self {
         Stroke::new(&[Key::MiddleStar])
     }
@@ -642,7 +650,7 @@ mod test {
 
     #[test]
     fn test2() {
-        let filename: &str = "../data/main.json";
+        let filename: &str = "../../data/main.json";
         let dictionary = JsonDictionary::load_from_file(filename).unwrap();
         let prefix_tree = prefix_tree_from_json_dictionary(dictionary);
 //        let outline = Outline::try_from_string("KAT").unwrap();

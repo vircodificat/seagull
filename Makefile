@@ -1,4 +1,4 @@
-.PHONY: build test
+.PHONY: build test ime install uninstall clean
 
 data/seagull.json: build/seagull.json
 	cp build/seagull.json data/seagull.json
@@ -63,6 +63,15 @@ test:
 
 ime:
 	$(MAKE) -C crates/seagull-ime build
+	$(MAKE) -C crates/seagull-tray build
+
+install:
+	$(MAKE) -C crates/seagull-ime install
+	$(MAKE) -C crates/seagull-tray install
+
+uninstall:
+	$(MAKE) -C crates/seagull-ime uninstall
+	$(MAKE) -C crates/seagull-tray uninstall
 
 clean:
 	rm -rf build

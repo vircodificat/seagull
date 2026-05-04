@@ -3,5 +3,7 @@ members = [
     "crates/seagull",
     "crates/seagull-py",
     "crates/seagull-ime",
+    "crates/seagull-ipc",
+    "crates/seagull-tray",
 ]
 resolver = "2"

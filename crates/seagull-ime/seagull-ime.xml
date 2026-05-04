@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component>
-  <name>org.freedesktop.IBus.SeagullIME</name>
+  <name>at.vircodific.seagull.IBus</name>
   <description>Seagull Steno Input Method</description>
   <exec>/usr/libexec/seagull-ime</exec>
   <version>0.1.0</version>

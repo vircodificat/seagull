@@ -10,3 +10,4 @@ tokio = { version = "1", features = ["full"] }
 toml = "0.8"
 log = "0.4.29"
 simplelog = "0.12.2"
+seagull-ipc = { version = "0.1.0", path = "../seagull-ipc" }

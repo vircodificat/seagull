@@ -32,7 +32,7 @@ PRE_INFLECTION_DICTS = [
 # Dictionaries merged after inflection rules are applied.
 POST_INFLECTION_DICTS = [
 #    "data/seagull_misc.json",
-#    "data/stened.json",
+    "data/stened.json",
 ]
 
 # ---------------------------------------------------------------------------
