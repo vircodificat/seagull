@@ -211,7 +211,7 @@ fn load_sentences(sentences_file: Option<&str>) -> Vec<String> {
         Some(path) => std::fs::read_to_string(path)
             .unwrap_or_else(|e| panic!("Failed to read sentences file {path:?}: {e}")),
         // Embedded at compile time; path is relative to this source file.
-        None => include_str!("../../sentences.txt").to_string(),
+        None => include_str!("../../../sentences.txt").to_string(),
     };
     contents
         .lines()

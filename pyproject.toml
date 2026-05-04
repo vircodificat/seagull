@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [tool.maturin]
-manifest-path = "seagull-py/Cargo.toml"
+manifest-path = "crates/seagull-py/Cargo.toml"
 python-source = "python"
 
 [dependency-groups]

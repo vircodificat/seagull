@@ -62,7 +62,7 @@ test:
 	uv run python scripts/examples.py
 
 ime:
-	$(MAKE) -C ime build
+	$(MAKE) -C crates/seagull-ime build
 
 clean:
 	rm -rf build

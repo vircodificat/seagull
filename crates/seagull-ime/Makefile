@@ -7,7 +7,7 @@ build:
 	cargo build --release -p seagull-ime
 
 install:
-	install -Dm755 ../target/release/seagull-ime $(DESTDIR)$(INSTALL_DIR)/seagull-ime
+	install -Dm755 ../../target/release/seagull-ime $(DESTDIR)$(INSTALL_DIR)/seagull-ime
 	install -Dm644 seagull-ime.xml $(DESTDIR)$(COMPONENT_DIR)/seagull-ime.xml
 	-ibus write-cache
 

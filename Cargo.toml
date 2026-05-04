@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "seagull",
-    "seagull-py",
-    "ime",
+    "crates/seagull",
+    "crates/seagull-py",
+    "crates/seagull-ime",
 ]
 resolver = "2"
