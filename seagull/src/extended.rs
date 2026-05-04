@@ -193,7 +193,7 @@ pub static FINALS: [&'static str; 1024] = [
     "FBL",         // FBL
     "RBL",         // RBL
     "FRBL",        // FRBL
-    "PBL",         // PBL
+    "NL",          // PBL
     "FPBL",        // FPBL
     "RPBL",        // RPBL
     "FRPBL",       // FRPBL
